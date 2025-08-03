@@ -421,12 +421,16 @@
             }
 
             // Check admin login
-            if (username === 'admin' && password === 'admin123') {
-                document.getElementById('loginScreen').classList.add('hidden');
-                document.getElementById('dashboard').classList.remove('hidden');
-                await loadAllData(); await loadEmployees();
-                return;
-            }
+            
+if (username === 'admin' && password === 'admin123') {
+    document.getElementById('loginScreen').classList.add('hidden');
+    document.getElementById('employeePortal').classList.add('hidden');
+    document.getElementById('dashboard').classList.remove('hidden');
+    await loadAllData();
+    await loadEmployees();
+    return;
+}
+
 
             // Check employee login
             const employee = employees.find(emp => emp.username === username && emp.password === password);
