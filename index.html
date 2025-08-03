@@ -3,8 +3,80 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Employee Management System</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Eden Perfume - Employee Management System</title>
+    <script src="https://cdn.tailwindcss.com">
+async function checkFirebaseConnection() {
+    const indicator = document.getElementById('firebaseStatus');
+    try {
+        const testSnapshot = await window.firestore.getDocs(window.firestore.collection(window.db, 'employees'));
+        if (testSnapshot) {
+            indicator.classList.remove('bg-gray-400', 'bg-red-500');
+            indicator.classList.add('bg-green-500');
+            indicator.title = "Firebase Connected ✅";
+        }
+    } catch (err) {
+        console.error("❌ Firebase offline or error:", err);
+        indicator.classList.remove('bg-gray-400', 'bg-green-500');
+        indicator.classList.add('bg-red-500');
+        indicator.title = "Firebase Offline ❌";
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(checkFirebaseConnection, 2000);
+    setInterval(checkFirebaseConnection, 60000);
+});
+</script>
+
+    
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, where, orderBy, onSnapshot } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+        // 🔥 YOUR FIREBASE CONFIG - COMPLETE CONFIGURATION
+        const firebaseConfig = {
+            apiKey: "AIzaSyAzUuzfU7AlTPAJK1nQwolpTkAJbGBfXXc",
+            authDomain: "eden-perfume-sales.firebaseapp.com",
+            projectId: "eden-perfume-sales",
+            storageBucket: "eden-perfume-sales.appspot.com",
+            messagingSenderId: "1012424244702",
+            appId: "1:1012424244702:web:825d00ba25fc1d6116f14f"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Make Firebase available globally
+        window.db = db;
+        window.firestore = { collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, where, orderBy, onSnapshot };
+        
+        console.log("🔥 Firebase connected successfully!");
+    
+async function checkFirebaseConnection() {
+    const indicator = document.getElementById('firebaseStatus');
+    try {
+        const testSnapshot = await window.firestore.getDocs(window.firestore.collection(window.db, 'employees'));
+        if (testSnapshot) {
+            indicator.classList.remove('bg-gray-400', 'bg-red-500');
+            indicator.classList.add('bg-green-500');
+            indicator.title = "Firebase Connected ✅";
+        }
+    } catch (err) {
+        console.error("❌ Firebase offline or error:", err);
+        indicator.classList.remove('bg-gray-400', 'bg-green-500');
+        indicator.classList.add('bg-red-500');
+        indicator.title = "Firebase Offline ❌";
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(checkFirebaseConnection, 2000);
+    setInterval(checkFirebaseConnection, 60000);
+});
+</script>
+
 </head>
 <body class="bg-gray-100 min-h-screen">
     <!-- Login Screen -->
@@ -253,56 +325,8 @@
             </div>
         </nav>
 
-        <!-- Tab Navigation -->
-        <div class="bg-white/60 backdrop-blur-sm border-b border-purple-100 sticky top-0 z-10">
-            <div class="px-2 sm:px-6">
-                <div class="flex space-x-0 sm:space-x-1 overflow-x-auto">
-                    <button onclick="showTab('employees')" id="employeesTab" class="py-3 sm:py-4 px-3 sm:px-6 border-b-3 border-purple-500 text-purple-600 font-semibold bg-purple-50/50 rounded-t-xl whitespace-nowrap">
-                        <div class="flex items-center space-x-1 sm:space-x-2">
-                            <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"/>
-                            </svg>
-                            <span class="text-xs sm:text-base">Employees</span>
-                        </div>
-                    </button>
-                    <button onclick="showTab('stores')" id="storesTab" class="py-3 sm:py-4 px-3 sm:px-6 text-gray-600 hover:text-purple-600 hover:bg-purple-50/30 rounded-t-xl transition-all duration-200 whitespace-nowrap">
-                        <div class="flex items-center space-x-1 sm:space-x-2">
-                            <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
-                            </svg>
-                            <span class="text-xs sm:text-base">Stores</span>
-                        </div>
-                    </button>
-                    <button onclick="showTab('products')" id="productsTab" class="py-3 sm:py-4 px-3 sm:px-6 text-gray-600 hover:text-purple-600 hover:bg-purple-50/30 rounded-t-xl transition-all duration-200 whitespace-nowrap">
-                        <div class="flex items-center space-x-1 sm:space-x-2">
-                            <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M12 2C11.5 2 11 2.2 10.6 2.6L8.4 4.8C8.1 5.1 7.6 5.1 7.3 4.8L5.1 2.6C4.7 2.2 4.2 2 3.7 2C2.8 2 2 2.8 2 3.7V20.3C2 21.2 2.8 22 3.7 22H20.3C21.2 22 22 21.2 22 20.3V3.7C22 2.8 21.2 2 20.3 2H12ZM12 6C13.1 6 14 6.9 14 8S13.1 10 12 10 10 9.1 10 8 10.9 6 12 6ZM12 18C10.3 18 8.8 17.2 8 16V14C8 13.4 8.4 13 9 13H15C15.6 13 16 13.4 16 14V16C15.2 17.2 13.7 18 12 18Z"/>
-                            </svg>
-                            <span class="text-xs sm:text-base">Perfumes</span>
-                        </div>
-                    </button>
-                    <button onclick="showTab('sales')" id="salesTab" class="py-3 sm:py-4 px-3 sm:px-6 text-gray-600 hover:text-purple-600 hover:bg-purple-50/30 rounded-t-xl transition-all duration-200 whitespace-nowrap">
-                        <div class="flex items-center space-x-1 sm:space-x-2">
-                            <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
-                            </svg>
-                            <span class="text-xs sm:text-base">Sales</span>
-                        </div>
-                    </button>
-                    <button onclick="showTab('salary')" id="salaryTab" class="py-3 sm:py-4 px-3 sm:px-6 text-gray-600 hover:text-purple-600 hover:bg-purple-50/30 rounded-t-xl transition-all duration-200 whitespace-nowrap">
-                        <div class="flex items-center space-x-1 sm:space-x-2">
-                            <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"/>
-                            </svg>
-                            <span class="text-xs sm:text-base">Salary</span>
-                        </div>
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Employees Tab -->
-        <div id="employeesContent" class="p-3 sm:p-6">
+        <!-- Admin Content -->
+        <div class="p-3 sm:p-6">
             <div class="bg-white rounded-lg shadow p-4 sm:p-6">
                 <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 space-y-2 sm:space-y-0">
                     <h2 class="text-base sm:text-lg font-bold">Employee Management</h2>
@@ -330,219 +354,6 @@
                 </div>
             </div>
         </div>
-
-        <!-- Stores Tab -->
-        <div id="storesContent" class="hidden p-6">
-            <div class="bg-white rounded-lg shadow p-6">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-lg font-bold">Store Management</h2>
-                    <button onclick="showAddStore()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
-                        Add Store
-                    </button>
-                </div>
-                
-                <div class="overflow-x-auto">
-                    <table class="min-w-full table-auto">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-4 py-2 text-left">Store Name</th>
-                                <th class="px-4 py-2 text-left">Location</th>
-                                <th class="px-4 py-2 text-left">Manager</th>
-                                <th class="px-4 py-2 text-left">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="storesTable">
-                            <!-- Store data will be displayed here -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <!-- Products Tab -->
-        <div id="productsContent" class="hidden p-6">
-            <div class="bg-white rounded-lg shadow p-6">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-lg font-bold">Product Management</h2>
-                    <button onclick="showAddProduct()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
-                        Add Product
-                    </button>
-                </div>
-                
-                <div class="overflow-x-auto">
-                    <table class="min-w-full table-auto">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-4 py-2 text-left">Product Name</th>
-                                <th class="px-4 py-2 text-left">Category</th>
-                                <th class="px-4 py-2 text-left">Price</th>
-                                <th class="px-4 py-2 text-left">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="productsTable">
-                            <!-- Product data will be displayed here -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <!-- Sales Data Tab -->
-        <div id="salesContent" class="hidden p-6">
-            <!-- Sales Reports Section -->
-            <div class="bg-white rounded-lg shadow p-6 mb-6">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-lg font-bold">Sales Reports</h2>
-                    <button onclick="toggleSalesManagement()" id="toggleSalesBtn" class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700">
-                        Show Sales Management
-                    </button>
-                </div>
-                
-                <!-- Report Controls -->
-                <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Report Type</label>
-                        <select id="salesReportType" class="w-full p-2 border rounded">
-                            <option value="daily">Daily Sales</option>
-                            <option value="monthly">Monthly Sales</option>
-                            <option value="product">By Product</option>
-                            <option value="store">By Store</option>
-                            <option value="staff">By Staff</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">From Date</label>
-                        <input type="date" id="salesFromDate" class="w-full p-2 border rounded">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">To Date</label>
-                        <input type="date" id="salesToDate" class="w-full p-2 border rounded">
-                    </div>
-                    <div class="flex items-end">
-                        <button onclick="generateSalesReport()" class="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700">
-                            Generate Report
-                        </button>
-                    </div>
-                    <div class="flex items-end">
-                        <button onclick="exportSalesReport()" class="w-full bg-green-600 text-white p-2 rounded hover:bg-green-700">
-                            Export CSV
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Report Results -->
-                <div id="salesReportResults" class="hidden">
-                    <div class="border-t pt-4">
-                        <div class="flex justify-between items-center mb-4">
-                            <h3 class="text-md font-bold" id="salesReportTitle">Sales Report</h3>
-                            <div class="text-right">
-                                <div class="text-sm text-gray-500">Report Summary</div>
-                                <div class="text-lg font-bold text-green-600" id="salesReportSummary">Total: $0.00</div>
-                            </div>
-                        </div>
-                        <div class="overflow-x-auto">
-                            <table class="min-w-full table-auto border">
-                                <thead class="bg-gray-50">
-                                    <tr id="salesReportHeaders">
-                                        <!-- Headers will be dynamically generated -->
-                                    </tr>
-                                </thead>
-                                <tbody id="salesReportTable">
-                                    <!-- Report data will be displayed here -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Sales Data Management -->
-            <div id="salesManagementSection" class="bg-white rounded-lg shadow p-6 hidden">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-lg font-bold">Sales Data Management</h2>
-                    <button onclick="showAddSale()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
-                        Add Sale
-                    </button>
-                </div>
-                
-                <div class="overflow-x-auto">
-                    <table class="min-w-full table-auto">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-4 py-2 text-left">Date</th>
-                                <th class="px-4 py-2 text-left">Employee</th>
-                                <th class="px-4 py-2 text-left">Store</th>
-                                <th class="px-4 py-2 text-left">Product</th>
-                                <th class="px-4 py-2 text-left">Quantity</th>
-                                <th class="px-4 py-2 text-left">Value</th>
-                                <th class="px-4 py-2 text-left">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="salesTable">
-                            <!-- Sales data will be displayed here -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <!-- Salary Report Tab -->
-        <div id="salaryContent" class="hidden p-6">
-            <div class="bg-white rounded-lg shadow p-6">
-                <h2 class="text-lg font-bold mb-4">Salary Reports</h2>
-                
-                <!-- Report Controls -->
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">From Date</label>
-                        <input type="date" id="salaryFromDate" class="w-full p-2 border rounded">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">To Date</label>
-                        <input type="date" id="salaryToDate" class="w-full p-2 border rounded">
-                    </div>
-                    <div class="flex items-end">
-                        <button onclick="generateSalaryReport()" class="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700">
-                            Generate Report
-                        </button>
-                    </div>
-                    <div class="flex items-end">
-                        <button onclick="exportSalaryReport()" class="w-full bg-green-600 text-white p-2 rounded hover:bg-green-700">
-                            Export CSV
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Report Results -->
-                <div id="salaryReportResults" class="hidden">
-                    <div class="border-t pt-4">
-                        <div class="flex justify-between items-center mb-4">
-                            <h3 class="text-md font-bold" id="salaryReportTitle">Salary Report</h3>
-                            <div class="text-right">
-                                <div class="text-sm text-gray-500">Total Payroll</div>
-                                <div class="text-lg font-bold text-blue-600" id="salaryReportSummary">Total: $0.00</div>
-                            </div>
-                        </div>
-                        <div class="overflow-x-auto">
-                            <table class="min-w-full table-auto border">
-                                <thead class="bg-gray-50">
-                                    <tr>
-                                        <th class="px-4 py-2 text-left border">Employee</th>
-                                        <th class="px-4 py-2 text-left border">Store</th>
-                                        <th class="px-4 py-2 text-left border">Salary Type</th>
-                                        <th class="px-4 py-2 text-left border">Performance</th>
-                                        <th class="px-4 py-2 text-left border">Calculated Salary</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="salaryTable">
-                                    <!-- Salary report will be displayed here -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
     </div>
 
     <!-- Modal -->
@@ -555,50 +366,111 @@
     </div>
 
     <script>
-        // Data storage
-        let employees = [
-            { id: 1, name: 'John Smith', username: 'john', password: 'pass123', store: 'Eden Perfume Downtown', salaryType: 'fixed', salaryAmount: 3000, target: 0 },
-            { id: 2, name: 'Sarah Johnson', username: 'sarah', password: 'pass123', store: 'Eden Perfume Mall', salaryType: 'commission_sales', salaryAmount: 5, target: 0 },
-            { id: 3, name: 'Mike Wilson', username: 'mike', password: 'pass123', store: 'Eden Perfume Boutique', salaryType: 'target_based', salaryAmount: 15, target: 100 }
-        ];
+        // Firebase-powered data management
+        let employees = [];
+        let stores = [];
+        let products = [];
+        let sales = [];
+        let currentEmployee = null;
 
-        let stores = [
-            { id: 1, name: 'Eden Perfume Downtown', location: 'Downtown Plaza', manager: 'Alice Brown' },
-            { id: 2, name: 'Eden Perfume Mall', location: 'Westfield Shopping Center', manager: 'Bob Green' },
-            { id: 3, name: 'Eden Perfume Boutique', location: 'North Side District', manager: 'Carol White' }
-        ];
+        // Initialize with sample data if database is empty
+        async function initializeData() {
+            try {
+                console.log('🔥 Initializing Firebase data...');
+                
+                // Check if data exists
+                const employeesSnapshot = await window.firestore.getDocs(window.firestore.collection(window.db, 'employees'));
+                
+                if (employeesSnapshot.empty) {
+                    console.log('📝 Adding sample data...');
+                    
+                    // Add sample data
+                    const sampleEmployees = [
+                        { name: 'John Smith', username: 'john', password: 'pass123', store: 'Eden Perfume Downtown', salaryType: 'fixed', salaryAmount: 3000, target: 0 },
+                        { name: 'Sarah Johnson', username: 'sarah', password: 'pass123', store: 'Eden Perfume Mall', salaryType: 'commission_sales', salaryAmount: 5, target: 0 },
+                        { name: 'Mike Wilson', username: 'mike', password: 'pass123', store: 'Eden Perfume Boutique', salaryType: 'target_based', salaryAmount: 15, target: 100 }
+                    ];
 
-        let products = [
-            { id: 1, name: 'Chanel No. 5', category: 'Luxury', price: 129.99 },
-            { id: 2, name: 'Dior Sauvage', category: 'Men\'s Fragrance', price: 89.99 },
-            { id: 3, name: 'Tom Ford Black Orchid', category: 'Unisex', price: 159.99 },
-            { id: 4, name: 'Versace Bright Crystal', category: 'Women\'s Fragrance', price: 79.99 },
-            { id: 5, name: 'Creed Aventus', category: 'Luxury', price: 299.99 },
-            { id: 6, name: 'Yves Saint Laurent Libre', category: 'Women\'s Fragrance', price: 99.99 },
-            { id: 7, name: 'Giorgio Armani Acqua di Gio', category: 'Men\'s Fragrance', price: 69.99 },
-            { id: 8, name: 'Marc Jacobs Daisy', category: 'Women\'s Fragrance', price: 59.99 }
-        ];
+                    const sampleStores = [
+                        { name: 'Eden Perfume Downtown', location: 'Downtown Plaza', manager: 'Alice Brown' },
+                        { name: 'Eden Perfume Mall', location: 'Westfield Shopping Center', manager: 'Bob Green' },
+                        { name: 'Eden Perfume Boutique', location: 'North Side District', manager: 'Carol White' }
+                    ];
 
-        let sales = [
-            { id: 1, date: '2024-01-15', employeeId: 1, storeId: 1, productId: 1, quantity: 1, value: 1299.99 },
-            { id: 2, date: '2024-01-16', employeeId: 2, storeId: 2, productId: 2, quantity: 2, value: 399.98 },
-            { id: 3, date: '2024-01-17', employeeId: 3, storeId: 3, productId: 3, quantity: 3, value: 149.97 },
-            { id: 4, date: '2024-01-18', employeeId: 1, storeId: 1, productId: 4, quantity: 1, value: 129.99 },
-            { id: 5, date: '2024-01-19', employeeId: 2, storeId: 2, productId: 5, quantity: 2, value: 179.98 }
-        ];
+                    const sampleProducts = [
+                        { name: 'Chanel No. 5', category: 'Luxury', price: 129.99 },
+                        { name: 'Dior Sauvage', category: 'Men\'s Fragrance', price: 89.99 },
+                        { name: 'Tom Ford Black Orchid', category: 'Unisex', price: 159.99 },
+                        { name: 'Versace Bright Crystal', category: 'Women\'s Fragrance', price: 79.99 },
+                        { name: 'Creed Aventus', category: 'Luxury', price: 299.99 },
+                        { name: 'Yves Saint Laurent Libre', category: 'Women\'s Fragrance', price: 99.99 },
+                        { name: 'Giorgio Armani Acqua di Gio', category: 'Men\'s Fragrance', price: 69.99 },
+                        { name: 'Marc Jacobs Daisy', category: 'Women\'s Fragrance', price: 59.99 }
+                    ];
 
-        let currentTab = 'employees';
+                    // Add to Firebase
+                    for (const emp of sampleEmployees) {
+                        await window.firestore.addDoc(window.firestore.collection(window.db, 'employees'), emp);
+                    }
+                    for (const store of sampleStores) {
+                        await window.firestore.addDoc(window.firestore.collection(window.db, 'stores'), store);
+                    }
+                    for (const product of sampleProducts) {
+                        await window.firestore.addDoc(window.firestore.collection(window.db, 'products'), product);
+                    }
+
+                    console.log('✅ Sample data initialized!');
+                }
+
+                // Load all data
+                await loadAllData();
+                console.log('✅ Data loaded successfully!');
+            } catch (error) {
+                console.error('❌ Error initializing data:', error);
+                alert('Error connecting to database. Please check your Firebase configuration and ensure Firestore is enabled.');
+            }
+        }
+
+        // Load all data from Firebase
+        async function loadAllData() {
+            try {
+                // Load employees
+                const employeesSnapshot = await window.firestore.getDocs(window.firestore.collection(window.db, 'employees'));
+                employees = employeesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+                // Load stores
+                const storesSnapshot = await window.firestore.getDocs(window.firestore.collection(window.db, 'stores'));
+                stores = storesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+                // Load products
+                const productsSnapshot = await window.firestore.getDocs(window.firestore.collection(window.db, 'products'));
+                products = productsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+                // Load sales
+                const salesSnapshot = await window.firestore.getDocs(window.firestore.collection(window.db, 'sales'));
+                sales = salesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+                console.log(`📊 Loaded: ${employees.length} employees, ${stores.length} stores, ${products.length} products, ${sales.length} sales`);
+            } catch (error) {
+                console.error('❌ Error loading data:', error);
+            }
+        }
 
         // Login function
-        function login() {
+        async function login() {
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
+
+            if (!username || !password) {
+                alert('Please enter both username and password!');
+                return;
+            }
 
             // Check admin login
             if (username === 'admin' && password === 'admin123') {
                 document.getElementById('loginScreen').classList.add('hidden');
                 document.getElementById('dashboard').classList.remove('hidden');
-                loadEmployees();
+                await loadEmployees();
                 return;
             }
 
@@ -607,7 +479,7 @@
             if (employee) {
                 document.getElementById('loginScreen').classList.add('hidden');
                 document.getElementById('employeePortal').classList.remove('hidden');
-                loadEmployeePortal(employee);
+                await loadEmployeePortal(employee);
                 return;
             }
 
@@ -621,169 +493,11 @@
             document.getElementById('employeePortal').classList.add('hidden');
             document.getElementById('username').value = '';
             document.getElementById('password').value = '';
+            currentEmployee = null;
         }
 
-        // Tab management
-        function showTab(tabName) {
-            // Hide all content
-            document.getElementById('employeesContent').classList.add('hidden');
-            document.getElementById('storesContent').classList.add('hidden');
-            document.getElementById('productsContent').classList.add('hidden');
-            document.getElementById('salesContent').classList.add('hidden');
-            document.getElementById('salaryContent').classList.add('hidden');
-
-            // Reset all tab buttons
-            document.getElementById('employeesTab').className = 'py-4 px-6 text-gray-600 hover:text-purple-600 hover:bg-purple-50/30 rounded-t-xl transition-all duration-200';
-            document.getElementById('storesTab').className = 'py-4 px-6 text-gray-600 hover:text-purple-600 hover:bg-purple-50/30 rounded-t-xl transition-all duration-200';
-            document.getElementById('productsTab').className = 'py-4 px-6 text-gray-600 hover:text-purple-600 hover:bg-purple-50/30 rounded-t-xl transition-all duration-200';
-            document.getElementById('salesTab').className = 'py-4 px-6 text-gray-600 hover:text-purple-600 hover:bg-purple-50/30 rounded-t-xl transition-all duration-200';
-            document.getElementById('salaryTab').className = 'py-4 px-6 text-gray-600 hover:text-purple-600 hover:bg-purple-50/30 rounded-t-xl transition-all duration-200';
-
-            // Show selected content and activate tab
-            document.getElementById(tabName + 'Content').classList.remove('hidden');
-            document.getElementById(tabName + 'Tab').className = 'py-4 px-6 border-b-3 border-purple-500 text-purple-600 font-semibold bg-purple-50/50 rounded-t-xl';
-
-            currentTab = tabName;
-
-            // Load data for the selected tab
-            switch(tabName) {
-                case 'employees':
-                    loadEmployees();
-                    break;
-                case 'stores':
-                    loadStores();
-                    break;
-                case 'products':
-                    loadProducts();
-                    break;
-                case 'sales':
-                    loadSales();
-                    break;
-                case 'salary':
-                    loadSalaryReport();
-                    break;
-            }
-        }
-
-        // Employee Management
-        function loadEmployees() {
-            const tbody = document.getElementById('employeesTable');
-            tbody.innerHTML = employees.map(emp => `
-                <tr class="border-b hover:bg-gray-50">
-                    <td class="px-2 sm:px-4 py-2 text-xs sm:text-sm">${emp.name}</td>
-                    <td class="px-2 sm:px-4 py-2 text-xs sm:text-sm hidden sm:table-cell">${emp.username}</td>
-                    <td class="px-2 sm:px-4 py-2 text-xs sm:text-sm hidden md:table-cell">${emp.store}</td>
-                    <td class="px-2 sm:px-4 py-2">
-                        <span class="px-1 sm:px-2 py-1 text-xs rounded ${getSalaryTypeColor(emp.salaryType)}">
-                            ${getSalaryTypeText(emp.salaryType)}
-                        </span>
-                    </td>
-                    <td class="px-2 sm:px-4 py-2 text-xs sm:text-sm hidden lg:table-cell">${getSalaryDetails(emp)}</td>
-                    <td class="px-2 sm:px-4 py-2">
-                        <div class="flex flex-col sm:flex-row space-y-1 sm:space-y-0 sm:space-x-1">
-                            <button onclick="editEmployee(${emp.id})" class="bg-blue-500 text-white px-2 py-1 rounded text-xs hover:bg-blue-600">
-                                Edit
-                            </button>
-                            <button onclick="deleteEmployee(${emp.id})" class="bg-red-500 text-white px-2 py-1 rounded text-xs hover:bg-red-600">
-                                Delete
-                            </button>
-                        </div>
-                    </td>
-                </tr>
-            `).join('');
-        }
-
-        function getSalaryTypeColor(type) {
-            switch(type) {
-                case 'fixed': return 'bg-blue-100 text-blue-800';
-                case 'commission_sales': return 'bg-green-100 text-green-800';
-                case 'commission_qty': return 'bg-purple-100 text-purple-800';
-                case 'target_based': return 'bg-orange-100 text-orange-800';
-                default: return 'bg-gray-100 text-gray-800';
-            }
-        }
-
-        function getSalaryTypeText(type) {
-            switch(type) {
-                case 'fixed': return 'Fixed Salary';
-                case 'commission_sales': return 'Sales Commission';
-                case 'commission_qty': return 'Qty Commission';
-                case 'target_based': return 'Target Based';
-                default: return 'Unknown';
-            }
-        }
-
-        function getSalaryDetails(emp) {
-            switch(emp.salaryType) {
-                case 'fixed':
-                    return `$${emp.salaryAmount}/month`;
-                case 'commission_sales':
-                    return `${emp.salaryAmount}% of sales`;
-                case 'commission_qty':
-                    return `$${emp.salaryAmount} per unit`;
-                case 'target_based':
-                    return `Target: ${emp.target} units, $${emp.salaryAmount}/unit`;
-                default:
-                    return 'Not set';
-            }
-        }
-
-        function showAddEmployee() {
-            const content = `
-                <h3 class="text-lg font-bold mb-4">Add New Employee</h3>
-                <div class="space-y-4">
-                    <input type="text" id="empName" placeholder="Employee Name" class="w-full p-2 border rounded">
-                    <input type="text" id="empUsername" placeholder="Username" class="w-full p-2 border rounded">
-                    <input type="password" id="empPassword" placeholder="Password" class="w-full p-2 border rounded">
-                    <input type="text" id="empStore" placeholder="Store Name" class="w-full p-2 border rounded">
-                    
-                    <div class="bg-gray-50 p-4 rounded">
-                        <h4 class="font-bold mb-2">Salary Configuration</h4>
-                        <select id="empSalaryType" onchange="toggleSalaryFields()" class="w-full p-2 border rounded mb-2">
-                            <option value="fixed">Fixed Salary</option>
-                            <option value="commission_sales">Commission on Sales Value</option>
-                            <option value="commission_qty">Commission per Unit Sold</option>
-                            <option value="target_based">Target-Based Bonus</option>
-                        </select>
-                        
-                        <div id="salaryAmountField">
-                            <input type="number" id="empSalaryAmount" placeholder="Amount" class="w-full p-2 border rounded mb-2">
-                        </div>
-                        
-                        <div id="targetField" class="hidden">
-                            <input type="number" id="empTarget" placeholder="Monthly Target (units)" class="w-full p-2 border rounded">
-                        </div>
-                    </div>
-                </div>
-                <div class="flex justify-end space-x-2 mt-4">
-                    <button onclick="closeModal()" class="px-4 py-2 text-gray-600 hover:text-gray-800">Cancel</button>
-                    <button onclick="addEmployee()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Add Employee</button>
-                </div>
-            `;
-            showModal(content);
-        }
-
-        function toggleSalaryFields() {
-            const salaryType = document.getElementById('empSalaryType').value;
-            const targetField = document.getElementById('targetField');
-            const salaryAmountField = document.getElementById('salaryAmountField');
-            
-            if (salaryType === 'target_based') {
-                targetField.classList.remove('hidden');
-                document.getElementById('empSalaryAmount').placeholder = 'Bonus per unit above target';
-            } else {
-                targetField.classList.add('hidden');
-                if (salaryType === 'fixed') {
-                    document.getElementById('empSalaryAmount').placeholder = 'Monthly salary amount';
-                } else if (salaryType === 'commission_sales') {
-                    document.getElementById('empSalaryAmount').placeholder = 'Commission percentage';
-                } else if (salaryType === 'commission_qty') {
-                    document.getElementById('empSalaryAmount').placeholder = 'Amount per unit sold';
-                }
-            }
-        }
-
-        function addEmployee() {
+        // Add employee to Firebase
+        async function addEmployee() {
             const name = document.getElementById('empName').value;
             const username = document.getElementById('empUsername').value;
             const password = document.getElementById('empPassword').value;
@@ -797,877 +511,76 @@
                 return;
             }
 
-            const newEmployee = {
-                id: employees.length + 1,
-                name,
-                username,
-                password,
-                store,
-                salaryType,
-                salaryAmount,
-                target
-            };
-
-            employees.push(newEmployee);
-            closeModal();
-            loadEmployees();
-            alert('Employee added successfully!');
-        }
-
-        function editEmployee(id) {
-            const emp = employees.find(e => e.id === id);
-            const content = `
-                <h3 class="text-lg font-bold mb-4">Edit Employee</h3>
-                <div class="space-y-4">
-                    <input type="text" id="empName" value="${emp.name}" placeholder="Employee Name" class="w-full p-2 border rounded">
-                    <input type="text" id="empUsername" value="${emp.username}" placeholder="Username" class="w-full p-2 border rounded">
-                    <input type="password" id="empPassword" value="${emp.password}" placeholder="Password" class="w-full p-2 border rounded">
-                    <input type="text" id="empStore" value="${emp.store}" placeholder="Store Name" class="w-full p-2 border rounded">
-                    
-                    <div class="bg-gray-50 p-4 rounded">
-                        <h4 class="font-bold mb-2">Salary Configuration</h4>
-                        <select id="empSalaryType" onchange="toggleSalaryFields()" class="w-full p-2 border rounded mb-2">
-                            <option value="fixed" ${emp.salaryType === 'fixed' ? 'selected' : ''}>Fixed Salary</option>
-                            <option value="commission_sales" ${emp.salaryType === 'commission_sales' ? 'selected' : ''}>Commission on Sales Value</option>
-                            <option value="commission_qty" ${emp.salaryType === 'commission_qty' ? 'selected' : ''}>Commission per Unit Sold</option>
-                            <option value="target_based" ${emp.salaryType === 'target_based' ? 'selected' : ''}>Target-Based Bonus</option>
-                        </select>
-                        
-                        <div id="salaryAmountField">
-                            <input type="number" id="empSalaryAmount" value="${emp.salaryAmount}" placeholder="Amount" class="w-full p-2 border rounded mb-2">
-                        </div>
-                        
-                        <div id="targetField" ${emp.salaryType !== 'target_based' ? 'class="hidden"' : ''}>
-                            <input type="number" id="empTarget" value="${emp.target}" placeholder="Monthly Target (units)" class="w-full p-2 border rounded">
-                        </div>
-                    </div>
-                </div>
-                <div class="flex justify-end space-x-2 mt-4">
-                    <button onclick="closeModal()" class="px-4 py-2 text-gray-600 hover:text-gray-800">Cancel</button>
-                    <button onclick="updateEmployee(${id})" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Update Employee</button>
-                </div>
-            `;
-            showModal(content);
-        }
-
-        function updateEmployee(id) {
-            const name = document.getElementById('empName').value;
-            const username = document.getElementById('empUsername').value;
-            const password = document.getElementById('empPassword').value;
-            const store = document.getElementById('empStore').value;
-            const salaryType = document.getElementById('empSalaryType').value;
-            const salaryAmount = parseFloat(document.getElementById('empSalaryAmount').value) || 0;
-            const target = parseInt(document.getElementById('empTarget').value) || 0;
-
-            const empIndex = employees.findIndex(e => e.id === id);
-            employees[empIndex] = { id, name, username, password, store, salaryType, salaryAmount, target };
-            
-            closeModal();
-            loadEmployees();
-            alert('Employee updated successfully!');
-        }
-
-        function deleteEmployee(id) {
-            if (confirm('Are you sure you want to delete this employee?')) {
-                employees = employees.filter(e => e.id !== id);
+            try {
+                const newEmployee = { name, username, password, store, salaryType, salaryAmount, target };
+                const docRef = await window.firestore.addDoc(window.firestore.collection(window.db, 'employees'), newEmployee);
+                
+                employees.push({ id: docRef.id, ...newEmployee });
+                closeModal();
                 loadEmployees();
-                alert('Employee deleted successfully!');
+                alert('Employee added successfully!');
+            } catch (error) {
+                console.error('Error adding employee:', error);
+                alert('Error adding employee. Please try again.');
             }
         }
 
-        // Store Management
-        function loadStores() {
-            const tbody = document.getElementById('storesTable');
-            tbody.innerHTML = stores.map(store => `
-                <tr class="border-b hover:bg-gray-50">
-                    <td class="px-4 py-2">${store.name}</td>
-                    <td class="px-4 py-2">${store.location}</td>
-                    <td class="px-4 py-2">${store.manager}</td>
-                    <td class="px-4 py-2">
-                        <button onclick="editStore(${store.id})" class="bg-blue-500 text-white px-2 py-1 rounded text-sm hover:bg-blue-600 mr-1">
-                            Edit
-                        </button>
-                        <button onclick="deleteStore(${store.id})" class="bg-red-500 text-white px-2 py-1 rounded text-sm hover:bg-red-600">
-                            Delete
-                        </button>
-                    </td>
-                </tr>
-            `).join('');
-        }
-
-        function showAddStore() {
-            const content = `
-                <h3 class="text-lg font-bold mb-4">Add New Store</h3>
-                <div class="space-y-4">
-                    <input type="text" id="storeName" placeholder="Store Name" class="w-full p-2 border rounded">
-                    <input type="text" id="storeLocation" placeholder="Location" class="w-full p-2 border rounded">
-                    <input type="text" id="storeManager" placeholder="Manager Name" class="w-full p-2 border rounded">
-                </div>
-                <div class="flex justify-end space-x-2 mt-4">
-                    <button onclick="closeModal()" class="px-4 py-2 text-gray-600 hover:text-gray-800">Cancel</button>
-                    <button onclick="addStore()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Add Store</button>
-                </div>
-            `;
-            showModal(content);
-        }
-
-        function addStore() {
-            const name = document.getElementById('storeName').value;
-            const location = document.getElementById('storeLocation').value;
-            const manager = document.getElementById('storeManager').value;
-
-            if (!name || !location || !manager) {
-                alert('Please fill all fields!');
+        // Add sale to Firebase
+        async function addEmployeeSale() {
+            if (!currentEmployee) {
+                alert('Error: Employee not found!');
                 return;
             }
 
-            stores.push({ id: stores.length + 1, name, location, manager });
-            closeModal();
-            loadStores();
-            alert('Store added successfully!');
-        }
+            const date = document.getElementById('empSaleDate').value;
+            const storeId = document.getElementById('empSaleStore').value;
+            const productId = document.getElementById('empSaleProduct').value;
+            const quantity = parseInt(document.getElementById('empSaleQuantity').value);
+            const value = parseFloat(document.getElementById('empSaleValue').value);
 
-        function editStore(id) {
-            const store = stores.find(s => s.id === id);
-            const content = `
-                <h3 class="text-lg font-bold mb-4">Edit Store</h3>
-                <div class="space-y-4">
-                    <input type="text" id="storeName" value="${store.name}" placeholder="Store Name" class="w-full p-2 border rounded">
-                    <input type="text" id="storeLocation" value="${store.location}" placeholder="Location" class="w-full p-2 border rounded">
-                    <input type="text" id="storeManager" value="${store.manager}" placeholder="Manager Name" class="w-full p-2 border rounded">
-                </div>
-                <div class="flex justify-end space-x-2 mt-4">
-                    <button onclick="closeModal()" class="px-4 py-2 text-gray-600 hover:text-gray-800">Cancel</button>
-                    <button onclick="updateStore(${id})" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Update Store</button>
-                </div>
-            `;
-            showModal(content);
-        }
-
-        function updateStore(id) {
-            const name = document.getElementById('storeName').value;
-            const location = document.getElementById('storeLocation').value;
-            const manager = document.getElementById('storeManager').value;
-
-            const storeIndex = stores.findIndex(s => s.id === id);
-            stores[storeIndex] = { id, name, location, manager };
-            
-            closeModal();
-            loadStores();
-            alert('Store updated successfully!');
-        }
-
-        function deleteStore(id) {
-            if (confirm('Are you sure you want to delete this store?')) {
-                stores = stores.filter(s => s.id !== id);
-                loadStores();
-                alert('Store deleted successfully!');
-            }
-        }
-
-        // Product Management
-        function loadProducts() {
-            const tbody = document.getElementById('productsTable');
-            tbody.innerHTML = products.map(product => `
-                <tr class="border-b hover:bg-gray-50">
-                    <td class="px-4 py-2">${product.name}</td>
-                    <td class="px-4 py-2">${product.category}</td>
-                    <td class="px-4 py-2">$${product.price}</td>
-                    <td class="px-4 py-2">
-                        <button onclick="editProduct(${product.id})" class="bg-blue-500 text-white px-2 py-1 rounded text-sm hover:bg-blue-600 mr-1">
-                            Edit
-                        </button>
-                        <button onclick="deleteProduct(${product.id})" class="bg-red-500 text-white px-2 py-1 rounded text-sm hover:bg-red-600">
-                            Delete
-                        </button>
-                    </td>
-                </tr>
-            `).join('');
-        }
-
-        function showAddProduct() {
-            const content = `
-                <h3 class="text-lg font-bold mb-4">Add New Product</h3>
-                <div class="space-y-4">
-                    <input type="text" id="productName" placeholder="Product Name" class="w-full p-2 border rounded">
-                    <input type="text" id="productCategory" placeholder="Category" class="w-full p-2 border rounded">
-                    <input type="number" id="productPrice" placeholder="Price" step="0.01" class="w-full p-2 border rounded">
-                </div>
-                <div class="flex justify-end space-x-2 mt-4">
-                    <button onclick="closeModal()" class="px-4 py-2 text-gray-600 hover:text-gray-800">Cancel</button>
-                    <button onclick="addProduct()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Add Product</button>
-                </div>
-            `;
-            showModal(content);
-        }
-
-        function addProduct() {
-            const name = document.getElementById('productName').value;
-            const category = document.getElementById('productCategory').value;
-            const price = parseFloat(document.getElementById('productPrice').value);
-
-            if (!name || !category || !price) {
-                alert('Please fill all fields!');
-                return;
-            }
-
-            products.push({ id: products.length + 1, name, category, price });
-            closeModal();
-            loadProducts();
-            alert('Product added successfully!');
-        }
-
-        function editProduct(id) {
-            const product = products.find(p => p.id === id);
-            const content = `
-                <h3 class="text-lg font-bold mb-4">Edit Product</h3>
-                <div class="space-y-4">
-                    <input type="text" id="productName" value="${product.name}" placeholder="Product Name" class="w-full p-2 border rounded">
-                    <input type="text" id="productCategory" value="${product.category}" placeholder="Category" class="w-full p-2 border rounded">
-                    <input type="number" id="productPrice" value="${product.price}" placeholder="Price" step="0.01" class="w-full p-2 border rounded">
-                </div>
-                <div class="flex justify-end space-x-2 mt-4">
-                    <button onclick="closeModal()" class="px-4 py-2 text-gray-600 hover:text-gray-800">Cancel</button>
-                    <button onclick="updateProduct(${id})" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Update Product</button>
-                </div>
-            `;
-            showModal(content);
-        }
-
-        function updateProduct(id) {
-            const name = document.getElementById('productName').value;
-            const category = document.getElementById('productCategory').value;
-            const price = parseFloat(document.getElementById('productPrice').value);
-
-            const productIndex = products.findIndex(p => p.id === id);
-            products[productIndex] = { id, name, category, price };
-            
-            closeModal();
-            loadProducts();
-            alert('Product updated successfully!');
-        }
-
-        function deleteProduct(id) {
-            if (confirm('Are you sure you want to delete this product?')) {
-                products = products.filter(p => p.id !== id);
-                loadProducts();
-                alert('Product deleted successfully!');
-            }
-        }
-
-        // Sales Management
-        function loadSales() {
-            const tbody = document.getElementById('salesTable');
-            tbody.innerHTML = sales.map(sale => {
-                const employee = employees.find(e => e.id === sale.employeeId);
-                const store = stores.find(s => s.id === sale.storeId);
-                const product = products.find(p => p.id === sale.productId);
-                return `
-                    <tr class="border-b hover:bg-gray-50">
-                        <td class="px-4 py-2">${sale.date}</td>
-                        <td class="px-4 py-2">${employee ? employee.name : 'Unknown'}</td>
-                        <td class="px-4 py-2">${store ? store.name : 'Unknown'}</td>
-                        <td class="px-4 py-2">${product ? product.name : 'Unknown'}</td>
-                        <td class="px-4 py-2">${sale.quantity}</td>
-                        <td class="px-4 py-2">$${sale.value}</td>
-                        <td class="px-4 py-2">
-                            <button onclick="editSale(${sale.id})" class="bg-blue-500 text-white px-2 py-1 rounded text-sm hover:bg-blue-600 mr-1">
-                                Edit
-                            </button>
-                            <button onclick="deleteSale(${sale.id})" class="bg-red-500 text-white px-2 py-1 rounded text-sm hover:bg-red-600">
-                                Delete
-                            </button>
-                        </td>
-                    </tr>
-                `;
-            }).join('');
-        }
-
-        function showAddSale() {
-            const employeeOptions = employees.map(emp => `<option value="${emp.id}">${emp.name}</option>`).join('');
-            const storeOptions = stores.map(store => `<option value="${store.id}">${store.name}</option>`).join('');
-            const productOptions = products.map(prod => `<option value="${prod.id}">${prod.name}</option>`).join('');
-            
-            const content = `
-                <h3 class="text-lg font-bold mb-4">Add New Sale</h3>
-                <div class="space-y-4">
-                    <input type="date" id="saleDate" value="${new Date().toISOString().split('T')[0]}" class="w-full p-2 border rounded">
-                    <select id="saleEmployee" class="w-full p-2 border rounded">
-                        <option value="">Select Employee</option>
-                        ${employeeOptions}
-                    </select>
-                    <select id="saleStore" class="w-full p-2 border rounded">
-                        <option value="">Select Store</option>
-                        ${storeOptions}
-                    </select>
-                    <select id="saleProduct" onchange="updateAdminProductPrice()" class="w-full p-2 border rounded">
-                        <option value="">Select Product</option>
-                        ${productOptions}
-                    </select>
-                    <input type="number" id="saleQuantity" placeholder="Quantity" class="w-full p-2 border rounded" onchange="calculateAdminTotalValue()">
-                    <input type="number" id="saleValue" placeholder="Total Value" step="0.01" class="w-full p-2 border rounded" readonly>
-                    <div class="text-xs text-gray-500 mt-1">Auto-calculated: Price × Quantity</div>
-                </div>
-                <div class="flex justify-end space-x-2 mt-4">
-                    <button onclick="closeModal()" class="px-4 py-2 text-gray-600 hover:text-gray-800">Cancel</button>
-                    <button onclick="addSale()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Add Sale</button>
-                </div>
-            `;
-            showModal(content);
-        }
-
-        function addSale() {
-            const date = document.getElementById('saleDate').value;
-            const employeeId = parseInt(document.getElementById('saleEmployee').value);
-            const storeId = parseInt(document.getElementById('saleStore').value);
-            const productId = parseInt(document.getElementById('saleProduct').value);
-            const quantity = parseInt(document.getElementById('saleQuantity').value);
-            const value = parseFloat(document.getElementById('saleValue').value);
-
-            if (!date || !employeeId || !storeId || !productId || !quantity) {
+            if (!date || !storeId || !productId || !quantity) {
                 alert('Please fill all required fields!');
                 return;
             }
 
-            if (quantity <= 0) {
-                alert('Quantity must be greater than 0!');
+            if (quantity <= 0 || !value || value <= 0) {
+                alert('Please enter valid quantity and ensure total value is calculated!');
                 return;
             }
 
-            if (!value || value <= 0) {
-                alert('Please select a product and enter quantity to calculate total value!');
-                return;
-            }
+            try {
+                const newSale = {
+                    date,
+                    employeeId: currentEmployee.id,
+                    storeId,
+                    productId,
+                    quantity,
+                    value
+                };
 
-            // Generate unique ID
-            const newId = Math.max(...sales.map(s => s.id), 0) + 1;
-            sales.push({ id: newId, date, employeeId, storeId, productId, quantity, value });
-            closeModal();
-            loadSales();
-            
-            // Clear any existing report to force refresh
-            document.getElementById('salesReportResults').classList.add('hidden');
-            
-            alert('Sale added successfully!');
-        }
+                const docRef = await window.firestore.addDoc(window.firestore.collection(window.db, 'sales'), newSale);
+                sales.push({ id: docRef.id, ...newSale });
 
-        function editSale(id) {
-            const sale = sales.find(s => s.id === id);
-            const employeeOptions = employees.map(emp => 
-                `<option value="${emp.id}" ${emp.id === sale.employeeId ? 'selected' : ''}>${emp.name}</option>`
-            ).join('');
-            const storeOptions = stores.map(store => 
-                `<option value="${store.id}" ${store.id === sale.storeId ? 'selected' : ''}>${store.name}</option>`
-            ).join('');
-            const productOptions = products.map(prod => 
-                `<option value="${prod.id}" ${prod.id === sale.productId ? 'selected' : ''}>${prod.name}</option>`
-            ).join('');
-            
-            const content = `
-                <h3 class="text-lg font-bold mb-4">Edit Sale</h3>
-                <div class="space-y-4">
-                    <input type="date" id="saleDate" value="${sale.date}" class="w-full p-2 border rounded">
-                    <select id="saleEmployee" class="w-full p-2 border rounded">
-                        ${employeeOptions}
-                    </select>
-                    <select id="saleStore" class="w-full p-2 border rounded">
-                        ${storeOptions}
-                    </select>
-                    <select id="saleProduct" class="w-full p-2 border rounded">
-                        ${productOptions}
-                    </select>
-                    <input type="number" id="saleQuantity" value="${sale.quantity}" placeholder="Quantity" class="w-full p-2 border rounded">
-                    <input type="number" id="saleValue" value="${sale.value}" placeholder="Total Value" step="0.01" class="w-full p-2 border rounded">
-                </div>
-                <div class="flex justify-end space-x-2 mt-4">
-                    <button onclick="closeModal()" class="px-4 py-2 text-gray-600 hover:text-gray-800">Cancel</button>
-                    <button onclick="updateSale(${id})" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Update Sale</button>
-                </div>
-            `;
-            showModal(content);
-        }
+                // Clear form
+                document.getElementById('empSaleDate').value = new Date().toISOString().split('T')[0];
+                document.getElementById('empSaleStore').value = '';
+                document.getElementById('empSaleProduct').value = '';
+                document.getElementById('empSaleQuantity').value = '';
+                document.getElementById('empSaleValue').value = '';
 
-        function updateSale(id) {
-            const date = document.getElementById('saleDate').value;
-            const employeeId = parseInt(document.getElementById('saleEmployee').value);
-            const storeId = parseInt(document.getElementById('saleStore').value);
-            const productId = parseInt(document.getElementById('saleProduct').value);
-            const quantity = parseInt(document.getElementById('saleQuantity').value);
-            const value = parseFloat(document.getElementById('saleValue').value);
-
-            const saleIndex = sales.findIndex(s => s.id === id);
-            sales[saleIndex] = { id, date, employeeId, storeId, productId, quantity, value };
-            
-            closeModal();
-            loadSales();
-            
-            // Clear any existing report to force refresh
-            document.getElementById('salesReportResults').classList.add('hidden');
-            
-            alert('Sale updated successfully!');
-        }
-
-        function deleteSale(id) {
-            if (confirm('Are you sure you want to delete this sale?')) {
-                sales = sales.filter(s => s.id !== id);
-                loadSales();
+                // Refresh displays
+                updateEmployeeStats(currentEmployee);
+                loadEmployeeSales(currentEmployee.id);
                 
-                // Clear any existing report to force refresh
-                document.getElementById('salesReportResults').classList.add('hidden');
-                
-                alert('Sale deleted successfully!');
-            }
-        }
-
-        // Sales Reports
-        function generateSalesReport() {
-            const reportType = document.getElementById('salesReportType').value;
-            const fromDate = document.getElementById('salesFromDate').value;
-            const toDate = document.getElementById('salesToDate').value;
-
-            if (!fromDate || !toDate) {
-                alert('Please select both from and to dates!');
-                return;
-            }
-
-            if (new Date(fromDate) > new Date(toDate)) {
-                alert('From date cannot be later than to date!');
-                return;
-            }
-
-            // Filter sales by date range
-            const filteredSales = sales.filter(sale => {
-                const saleDate = new Date(sale.date);
-                return saleDate >= new Date(fromDate) && saleDate <= new Date(toDate);
-            });
-
-            let reportData = [];
-            let headers = [];
-            let title = '';
-
-            switch(reportType) {
-                case 'daily':
-                    reportData = generateDailySalesReport(filteredSales);
-                    headers = ['<th class="px-4 py-2 text-left border">Date</th>', '<th class="px-4 py-2 text-left border">Total Sales</th>', '<th class="px-4 py-2 text-left border">Total Quantity</th>', '<th class="px-4 py-2 text-left border">Total Value</th>'];
-                    title = 'Daily Sales Report';
-                    break;
-                case 'monthly':
-                    reportData = generateMonthlySalesReport(filteredSales);
-                    headers = ['<th class="px-4 py-2 text-left border">Month</th>', '<th class="px-4 py-2 text-left border">Total Sales</th>', '<th class="px-4 py-2 text-left border">Total Quantity</th>', '<th class="px-4 py-2 text-left border">Total Value</th>'];
-                    title = 'Monthly Sales Report';
-                    break;
-                case 'product':
-                    reportData = generateProductSalesReport(filteredSales);
-                    headers = ['<th class="px-4 py-2 text-left border">Product</th>', '<th class="px-4 py-2 text-left border">Category</th>', '<th class="px-4 py-2 text-left border">Total Sold</th>', '<th class="px-4 py-2 text-left border">Total Value</th>'];
-                    title = 'Product Sales Report';
-                    break;
-                case 'store':
-                    reportData = generateStoreSalesReport(filteredSales);
-                    headers = ['<th class="px-4 py-2 text-left border">Store</th>', '<th class="px-4 py-2 text-left border">Location</th>', '<th class="px-4 py-2 text-left border">Total Sales</th>', '<th class="px-4 py-2 text-left border">Total Value</th>'];
-                    title = 'Store Sales Report';
-                    break;
-                case 'staff':
-                    reportData = generateStaffSalesReport(filteredSales);
-                    headers = ['<th class="px-4 py-2 text-left border">Employee</th>', '<th class="px-4 py-2 text-left border">Store</th>', '<th class="px-4 py-2 text-left border">Total Sales</th>', '<th class="px-4 py-2 text-left border">Total Value</th>'];
-                    title = 'Staff Sales Report';
-                    break;
-            }
-
-            // Display report
-            document.getElementById('salesReportTitle').textContent = title;
-            document.getElementById('salesReportHeaders').innerHTML = headers.join('');
-            document.getElementById('salesReportTable').innerHTML = reportData.rows;
-            document.getElementById('salesReportSummary').textContent = `Total: $${reportData.total.toFixed(2)}`;
-            document.getElementById('salesReportResults').classList.remove('hidden');
-        }
-
-        function generateDailySalesReport(filteredSales) {
-            const dailyData = {};
-            let total = 0;
-
-            filteredSales.forEach(sale => {
-                const date = sale.date;
-                if (!dailyData[date]) {
-                    dailyData[date] = { count: 0, quantity: 0, value: 0 };
-                }
-                dailyData[date].count++;
-                dailyData[date].quantity += sale.quantity;
-                dailyData[date].value += parseFloat(sale.value) || 0;
-                total += parseFloat(sale.value) || 0;
-            });
-
-            const rows = Object.keys(dailyData).sort().map(date => `
-                <tr class="border-b hover:bg-gray-50">
-                    <td class="px-4 py-2 border">${date}</td>
-                    <td class="px-4 py-2 border">${dailyData[date].count}</td>
-                    <td class="px-4 py-2 border">${dailyData[date].quantity}</td>
-                    <td class="px-4 py-2 border font-bold">$${dailyData[date].value.toFixed(2)}</td>
-                </tr>
-            `).join('');
-
-            return { rows, total };
-        }
-
-        function generateMonthlySalesReport(filteredSales) {
-            const monthlyData = {};
-            let total = 0;
-
-            filteredSales.forEach(sale => {
-                const date = new Date(sale.date);
-                const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-                if (!monthlyData[monthKey]) {
-                    monthlyData[monthKey] = { count: 0, quantity: 0, value: 0 };
-                }
-                monthlyData[monthKey].count++;
-                monthlyData[monthKey].quantity += sale.quantity;
-                monthlyData[monthKey].value += parseFloat(sale.value) || 0;
-                total += parseFloat(sale.value) || 0;
-            });
-
-            const rows = Object.keys(monthlyData).sort().map(month => `
-                <tr class="border-b hover:bg-gray-50">
-                    <td class="px-4 py-2 border">${month}</td>
-                    <td class="px-4 py-2 border">${monthlyData[month].count}</td>
-                    <td class="px-4 py-2 border">${monthlyData[month].quantity}</td>
-                    <td class="px-4 py-2 border font-bold">$${monthlyData[month].value.toFixed(2)}</td>
-                </tr>
-            `).join('');
-
-            return { rows, total };
-        }
-
-        function generateProductSalesReport(filteredSales) {
-            const productData = {};
-            let total = 0;
-
-            filteredSales.forEach(sale => {
-                const product = products.find(p => p.id === sale.productId);
-                const productName = product ? product.name : 'Unknown Product';
-                const category = product ? product.category : 'Unknown';
-                
-                if (!productData[productName]) {
-                    productData[productName] = { category, quantity: 0, value: 0 };
-                }
-                productData[productName].quantity += sale.quantity;
-                productData[productName].value += parseFloat(sale.value) || 0;
-                total += parseFloat(sale.value) || 0;
-            });
-
-            const rows = Object.keys(productData).map(productName => `
-                <tr class="border-b hover:bg-gray-50">
-                    <td class="px-4 py-2 border">${productName}</td>
-                    <td class="px-4 py-2 border">${productData[productName].category}</td>
-                    <td class="px-4 py-2 border">${productData[productName].quantity}</td>
-                    <td class="px-4 py-2 border font-bold">$${productData[productName].value.toFixed(2)}</td>
-                </tr>
-            `).join('');
-
-            return { rows, total };
-        }
-
-        function generateStoreSalesReport(filteredSales) {
-            const storeData = {};
-            let total = 0;
-
-            filteredSales.forEach(sale => {
-                const store = stores.find(s => s.id === sale.storeId);
-                const storeName = store ? store.name : 'Unknown Store';
-                const location = store ? store.location : 'Unknown';
-                
-                if (!storeData[storeName]) {
-                    storeData[storeName] = { location, count: 0, value: 0 };
-                }
-                storeData[storeName].count++;
-                storeData[storeName].value += parseFloat(sale.value) || 0;
-                total += parseFloat(sale.value) || 0;
-            });
-
-            const rows = Object.keys(storeData).map(storeName => `
-                <tr class="border-b hover:bg-gray-50">
-                    <td class="px-4 py-2 border">${storeName}</td>
-                    <td class="px-4 py-2 border">${storeData[storeName].location}</td>
-                    <td class="px-4 py-2 border">${storeData[storeName].count}</td>
-                    <td class="px-4 py-2 border font-bold">$${storeData[storeName].value.toFixed(2)}</td>
-                </tr>
-            `).join('');
-
-            return { rows, total };
-        }
-
-        function generateStaffSalesReport(filteredSales) {
-            const staffData = {};
-            let total = 0;
-
-            filteredSales.forEach(sale => {
-                const employee = employees.find(e => e.id === sale.employeeId);
-                const empName = employee ? employee.name : 'Unknown Employee';
-                const empStore = employee ? employee.store : 'Unknown';
-                
-                if (!staffData[empName]) {
-                    staffData[empName] = { store: empStore, count: 0, value: 0 };
-                }
-                staffData[empName].count++;
-                staffData[empName].value += parseFloat(sale.value) || 0;
-                total += parseFloat(sale.value) || 0;
-            });
-
-            const rows = Object.keys(staffData).map(empName => `
-                <tr class="border-b hover:bg-gray-50">
-                    <td class="px-4 py-2 border">${empName}</td>
-                    <td class="px-4 py-2 border">${staffData[empName].store}</td>
-                    <td class="px-4 py-2 border">${staffData[empName].count}</td>
-                    <td class="px-4 py-2 border font-bold">$${staffData[empName].value.toFixed(2)}</td>
-                </tr>
-            `).join('');
-
-            return { rows, total };
-        }
-
-        function exportSalesReport() {
-            const reportType = document.getElementById('salesReportType').value;
-            const fromDate = document.getElementById('salesFromDate').value;
-            const toDate = document.getElementById('salesToDate').value;
-
-            if (!document.getElementById('salesReportResults').classList.contains('hidden')) {
-                try {
-                    // Create CSV content
-                    const table = document.getElementById('salesReportTable');
-                    const headers = Array.from(document.getElementById('salesReportHeaders').children).map(th => 
-                        th.textContent.replace(/,/g, ';').trim()
-                    );
-                    const rows = Array.from(table.children).map(tr => 
-                        Array.from(tr.children).map(td => td.textContent.replace(/,/g, ';').trim())
-                    );
-
-                    let csvContent = headers.join(',') + '\n';
-                    csvContent += rows.map(row => row.join(',')).join('\n');
-
-                    // Download CSV
-                    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-                    const url = window.URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = `${reportType}_sales_report_${fromDate}_to_${toDate}.csv`;
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
-                    window.URL.revokeObjectURL(url);
-                    
-                    alert('Report exported successfully!');
-                } catch (error) {
-                    alert('Error exporting report. Please try again.');
-                }
-            } else {
-                alert('Please generate a report first!');
-            }
-        }
-
-        // Salary Report
-        function loadSalaryReport() {
-            // Set default dates to current month
-            const now = new Date();
-            const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
-            const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-            
-            document.getElementById('salaryFromDate').value = firstDay.toISOString().split('T')[0];
-            document.getElementById('salaryToDate').value = lastDay.toISOString().split('T')[0];
-        }
-
-        function generateSalaryReport() {
-            const fromDate = document.getElementById('salaryFromDate').value;
-            const toDate = document.getElementById('salaryToDate').value;
-
-            if (!fromDate || !toDate) {
-                alert('Please select both from and to dates!');
-                return;
-            }
-
-            if (new Date(fromDate) > new Date(toDate)) {
-                alert('From date cannot be later than to date!');
-                return;
-            }
-
-            // Filter sales by date range
-            const periodSales = sales.filter(sale => {
-                const saleDate = new Date(sale.date);
-                return saleDate >= new Date(fromDate) && saleDate <= new Date(toDate);
-            });
-
-            let totalPayroll = 0;
-            const tbody = document.getElementById('salaryTable');
-            
-            tbody.innerHTML = employees.map(emp => {
-                const empSales = periodSales.filter(sale => sale.employeeId === emp.id);
-                const totalQuantity = empSales.reduce((sum, sale) => sum + sale.quantity, 0);
-                const totalValue = empSales.reduce((sum, sale) => sum + (parseFloat(sale.value) || 0), 0);
-                
-                let calculatedSalary = 0;
-                let performance = '';
-
-                switch(emp.salaryType) {
-                    case 'fixed':
-                        // Calculate proportional salary for the period
-                        const days = Math.ceil((new Date(toDate) - new Date(fromDate)) / (1000 * 60 * 60 * 24)) + 1;
-                        calculatedSalary = (parseFloat(emp.salaryAmount) / 30) * days; // Assuming 30 days per month
-                        performance = `${totalQuantity} units sold`;
-                        break;
-                    case 'commission_sales':
-                        calculatedSalary = (totalValue * parseFloat(emp.salaryAmount)) / 100;
-                        performance = `$${totalValue.toFixed(2)} sales value`;
-                        break;
-                    case 'commission_qty':
-                        calculatedSalary = totalQuantity * parseFloat(emp.salaryAmount);
-                        performance = `${totalQuantity} units sold`;
-                        break;
-                    case 'target_based':
-                        if (totalQuantity >= emp.target) {
-                            calculatedSalary = (totalQuantity - emp.target) * parseFloat(emp.salaryAmount);
-                            performance = `Target achieved: ${totalQuantity}/${emp.target}`;
-                        } else {
-                            calculatedSalary = 0;
-                            performance = `Target not met: ${totalQuantity}/${emp.target}`;
-                        }
-                        break;
-                }
-
-                totalPayroll += calculatedSalary;
-
-                return `
-                    <tr class="border-b hover:bg-gray-50">
-                        <td class="px-4 py-2 border">${emp.name}</td>
-                        <td class="px-4 py-2 border">${emp.store}</td>
-                        <td class="px-4 py-2 border">
-                            <span class="px-2 py-1 text-xs rounded ${getSalaryTypeColor(emp.salaryType)}">
-                                ${getSalaryTypeText(emp.salaryType)}
-                            </span>
-                        </td>
-                        <td class="px-4 py-2 border">${performance}</td>
-                        <td class="px-4 py-2 border font-bold">$${calculatedSalary.toFixed(2)}</td>
-                    </tr>
-                `;
-            }).join('');
-
-            // Update summary and show results
-            document.getElementById('salaryReportTitle').textContent = `Salary Report (${fromDate} to ${toDate})`;
-            document.getElementById('salaryReportSummary').textContent = `Total: $${totalPayroll.toFixed(2)}`;
-            document.getElementById('salaryReportResults').classList.remove('hidden');
-        }
-
-        function exportSalaryReport() {
-            const fromDate = document.getElementById('salaryFromDate').value;
-            const toDate = document.getElementById('salaryToDate').value;
-
-            if (!document.getElementById('salaryReportResults').classList.contains('hidden')) {
-                try {
-                    // Create CSV content
-                    const headers = ['Employee', 'Store', 'Salary Type', 'Performance', 'Calculated Salary'];
-                    const table = document.getElementById('salaryTable');
-                    const rows = Array.from(table.children).map(tr => 
-                        Array.from(tr.children).map(td => td.textContent.replace(/,/g, ';').replace(/\n/g, ' ').trim())
-                    );
-
-                    let csvContent = headers.join(',') + '\n';
-                    csvContent += rows.map(row => row.join(',')).join('\n');
-
-                    // Download CSV
-                    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-                    const url = window.URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = `salary_report_${fromDate}_to_${toDate}.csv`;
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
-                    window.URL.revokeObjectURL(url);
-                    
-                    alert('Salary report exported successfully!');
-                } catch (error) {
-                    alert('Error exporting salary report. Please try again.');
-                }
-            } else {
-                alert('Please generate a report first!');
-            }
-        }
-
-        // Modal functions
-        function showModal(content) {
-            document.getElementById('modalContent').innerHTML = content;
-            document.getElementById('modal').classList.remove('hidden');
-        }
-
-        function closeModal() {
-            document.getElementById('modal').classList.add('hidden');
-        }
-
-        // Price calculation functions
-        function updateEmployeeProductPrice() {
-            const productId = parseInt(document.getElementById('empSaleProduct').value);
-            const quantityInput = document.getElementById('empSaleQuantity');
-            const valueInput = document.getElementById('empSaleValue');
-            
-            if (productId) {
-                const product = products.find(p => p.id === productId);
-                if (product) {
-                    // Store the unit price in a data attribute for calculation
-                    valueInput.setAttribute('data-unit-price', product.price);
-                    calculateEmployeeTotalValue();
-                }
-            } else {
-                valueInput.value = '';
-                valueInput.removeAttribute('data-unit-price');
-            }
-        }
-
-        function calculateEmployeeTotalValue() {
-            const quantityInput = document.getElementById('empSaleQuantity');
-            const valueInput = document.getElementById('empSaleValue');
-            const unitPrice = parseFloat(valueInput.getAttribute('data-unit-price'));
-            const quantity = parseInt(quantityInput.value);
-            
-            if (unitPrice && quantity && quantity > 0) {
-                const totalValue = unitPrice * quantity;
-                valueInput.value = totalValue.toFixed(2);
-            } else {
-                valueInput.value = '';
-            }
-        }
-
-        function updateAdminProductPrice() {
-            const productId = parseInt(document.getElementById('saleProduct').value);
-            const quantityInput = document.getElementById('saleQuantity');
-            const valueInput = document.getElementById('saleValue');
-            
-            if (productId) {
-                const product = products.find(p => p.id === productId);
-                if (product) {
-                    // Store the unit price in a data attribute for calculation
-                    valueInput.setAttribute('data-unit-price', product.price);
-                    calculateAdminTotalValue();
-                }
-            } else {
-                valueInput.value = '';
-                valueInput.removeAttribute('data-unit-price');
-            }
-        }
-
-        function calculateAdminTotalValue() {
-            const quantityInput = document.getElementById('saleQuantity');
-            const valueInput = document.getElementById('saleValue');
-            const unitPrice = parseFloat(valueInput.getAttribute('data-unit-price'));
-            const quantity = parseInt(quantityInput.value);
-            
-            if (unitPrice && quantity && quantity > 0) {
-                const totalValue = unitPrice * quantity;
-                valueInput.value = totalValue.toFixed(2);
-            } else {
-                valueInput.value = '';
+                alert('Sale added successfully!');
+            } catch (error) {
+                console.error('Error adding sale:', error);
+                alert('Error adding sale. Please try again.');
             }
         }
 
         // Employee Portal Functions
-        let currentEmployee = null;
-
-        function loadEmployeePortal(employee) {
+        async function loadEmployeePortal(employee) {
             currentEmployee = employee;
             
             // Set employee info
@@ -1686,7 +599,7 @@
             // Calculate current month stats
             updateEmployeeStats(employee);
 
-            // Load recent sales
+            // Load today's sales
             loadEmployeeSales(employee.id);
         }
 
@@ -1745,160 +658,6 @@
             document.getElementById('empEstimatedSalary').textContent = `$${estimatedSalary.toFixed(2)}`;
         }
 
-        function addEmployeeSale() {
-            if (!currentEmployee) {
-                alert('Error: Employee not found!');
-                return;
-            }
-
-            const date = document.getElementById('empSaleDate').value;
-            const storeId = parseInt(document.getElementById('empSaleStore').value);
-            const productId = parseInt(document.getElementById('empSaleProduct').value);
-            const quantity = parseInt(document.getElementById('empSaleQuantity').value);
-            const value = parseFloat(document.getElementById('empSaleValue').value);
-
-            if (!date || !storeId || !productId || !quantity) {
-                alert('Please fill all required fields!');
-                return;
-            }
-
-            if (quantity <= 0) {
-                alert('Quantity must be greater than 0!');
-                return;
-            }
-
-            if (!value || value <= 0) {
-                alert('Please select a product and enter quantity to calculate total value!');
-                return;
-            }
-
-            // Add the sale
-            const newSale = {
-                id: sales.length + 1,
-                date,
-                employeeId: currentEmployee.id,
-                storeId,
-                productId,
-                quantity,
-                value
-            };
-
-            sales.push(newSale);
-
-            // Clear the form
-            document.getElementById('empSaleDate').value = new Date().toISOString().split('T')[0];
-            document.getElementById('empSaleStore').value = '';
-            document.getElementById('empSaleProduct').value = '';
-            document.getElementById('empSaleQuantity').value = '';
-            document.getElementById('empSaleValue').value = '';
-
-            // Refresh the display
-            updateEmployeeStats(currentEmployee);
-            loadEmployeeSales(currentEmployee.id);
-            
-            // Clear any existing admin reports to force refresh
-            if (document.getElementById('salesReportResults')) {
-                document.getElementById('salesReportResults').classList.add('hidden');
-            }
-
-            alert('Sale added successfully!');
-        }
-
-        function editEmployeeSale(saleId) {
-            const sale = sales.find(s => s.id === saleId);
-            if (!sale) {
-                alert('Sale not found!');
-                return;
-            }
-
-            const storeOptions = stores.map(store => 
-                `<option value="${store.id}" ${store.id === sale.storeId ? 'selected' : ''}>${store.name} - ${store.location}</option>`
-            ).join('');
-            const productOptions = products.map(product => 
-                `<option value="${product.id}" ${product.id === sale.productId ? 'selected' : ''}>${product.name} - $${product.price}</option>`
-            ).join('');
-
-            const content = `
-                <h3 class="text-lg font-bold mb-4">Edit Sale</h3>
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Date</label>
-                        <input type="date" id="editSaleDate" value="${sale.date}" class="w-full p-2 border rounded">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Store</label>
-                        <select id="editSaleStore" class="w-full p-2 border rounded">
-                            ${storeOptions}
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Product</label>
-                        <select id="editSaleProduct" class="w-full p-2 border rounded">
-                            ${productOptions}
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Quantity</label>
-                        <input type="number" id="editSaleQuantity" value="${sale.quantity}" class="w-full p-2 border rounded" min="1">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Total Value</label>
-                        <input type="number" id="editSaleValue" value="${sale.value}" step="0.01" class="w-full p-2 border rounded" min="0">
-                    </div>
-                </div>
-                <div class="flex justify-end space-x-2 mt-4">
-                    <button onclick="closeModal()" class="px-4 py-2 text-gray-600 hover:text-gray-800">Cancel</button>
-                    <button onclick="updateEmployeeSale(${saleId})" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Update Sale</button>
-                </div>
-            `;
-            showModal(content);
-        }
-
-        function updateEmployeeSale(saleId) {
-            const date = document.getElementById('editSaleDate').value;
-            const storeId = parseInt(document.getElementById('editSaleStore').value);
-            const productId = parseInt(document.getElementById('editSaleProduct').value);
-            const quantity = parseInt(document.getElementById('editSaleQuantity').value);
-            const value = parseFloat(document.getElementById('editSaleValue').value);
-
-            if (!date || !storeId || !productId || !quantity || !value) {
-                alert('Please fill all fields!');
-                return;
-            }
-
-            if (quantity <= 0 || value <= 0) {
-                alert('Quantity and value must be greater than 0!');
-                return;
-            }
-
-            // Update the sale
-            const saleIndex = sales.findIndex(s => s.id === saleId);
-            if (saleIndex !== -1) {
-                sales[saleIndex] = {
-                    id: saleId,
-                    date,
-                    employeeId: currentEmployee.id,
-                    storeId,
-                    productId,
-                    quantity,
-                    value
-                };
-
-                closeModal();
-                updateEmployeeStats(currentEmployee);
-                loadEmployeeSales(currentEmployee.id);
-                
-                // Clear any existing admin reports to force refresh
-                if (document.getElementById('salesReportResults')) {
-                    document.getElementById('salesReportResults').classList.add('hidden');
-                }
-                
-                alert('Sale updated successfully!');
-            } else {
-                alert('Error updating sale!');
-            }
-        }
-
         function loadEmployeeSales(employeeId) {
             const today = new Date().toISOString().split('T')[0];
             const empSales = sales.filter(sale => sale.employeeId === employeeId && sale.date === today)
@@ -1926,7 +685,7 @@
                         <td class="px-2 sm:px-4 py-2 text-xs sm:text-sm">${sale.quantity}</td>
                         <td class="px-2 sm:px-4 py-2 text-xs sm:text-sm font-semibold">$${sale.value.toFixed(2)}</td>
                         <td class="px-2 sm:px-4 py-2">
-                            <button onclick="editEmployeeSale(${sale.id})" class="bg-blue-500 text-white px-2 py-1 rounded text-xs hover:bg-blue-600">
+                            <button onclick="editEmployeeSale('${sale.id}')" class="bg-blue-500 text-white px-2 py-1 rounded text-xs hover:bg-blue-600">
                                 Edit
                             </button>
                         </td>
@@ -1935,26 +694,141 @@
             }).join('');
         }
 
-        // Toggle Sales Management Section
-        function toggleSalesManagement() {
-            const section = document.getElementById('salesManagementSection');
-            const button = document.getElementById('toggleSalesBtn');
+        // Price calculation functions
+        function updateEmployeeProductPrice() {
+            const productId = document.getElementById('empSaleProduct').value;
+            const quantityInput = document.getElementById('empSaleQuantity');
+            const valueInput = document.getElementById('empSaleValue');
             
-            if (section.classList.contains('hidden')) {
-                section.classList.remove('hidden');
-                button.textContent = 'Hide Sales Management';
-                button.className = 'bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700';
-                // Load sales data when showing management section
-                loadSales();
+            if (productId) {
+                const product = products.find(p => p.id === productId);
+                if (product) {
+                    valueInput.setAttribute('data-unit-price', product.price);
+                    calculateEmployeeTotalValue();
+                }
             } else {
-                section.classList.add('hidden');
-                button.textContent = 'Show Sales Management';
-                button.className = 'bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700';
+                valueInput.value = '';
+                valueInput.removeAttribute('data-unit-price');
             }
         }
 
-        // Initialize
-        document.addEventListener('DOMContentLoaded', function() {
+        function calculateEmployeeTotalValue() {
+            const quantityInput = document.getElementById('empSaleQuantity');
+            const valueInput = document.getElementById('empSaleValue');
+            const unitPrice = parseFloat(valueInput.getAttribute('data-unit-price'));
+            const quantity = parseInt(quantityInput.value);
+            
+            if (unitPrice && quantity && quantity > 0) {
+                const totalValue = unitPrice * quantity;
+                valueInput.value = totalValue.toFixed(2);
+            } else {
+                valueInput.value = '';
+            }
+        }
+
+        // Helper functions
+        function getSalaryTypeText(type) {
+            switch(type) {
+                case 'fixed': return 'Fixed Salary';
+                case 'commission_sales': return 'Sales Commission';
+                case 'commission_qty': return 'Qty Commission';
+                case 'target_based': return 'Target Based';
+                default: return 'Unknown';
+            }
+        }
+
+        function getSalaryTypeColor(type) {
+            switch(type) {
+                case 'fixed': return 'bg-blue-100 text-blue-800';
+                case 'commission_sales': return 'bg-green-100 text-green-800';
+                case 'commission_qty': return 'bg-purple-100 text-purple-800';
+                case 'target_based': return 'bg-orange-100 text-orange-800';
+                default: return 'bg-gray-100 text-gray-800';
+            }
+        }
+
+        // Modal functions
+        function showModal(content) {
+            document.getElementById('modalContent').innerHTML = content;
+            document.getElementById('modal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('modal').classList.add('hidden');
+        }
+
+        // Admin functions
+        async function loadEmployees() {
+            const tbody = document.getElementById('employeesTable');
+            tbody.innerHTML = employees.map(emp => `
+                <tr class="border-b hover:bg-gray-50">
+                    <td class="px-2 sm:px-4 py-2 text-xs sm:text-sm">${emp.name}</td>
+                    <td class="px-2 sm:px-4 py-2 text-xs sm:text-sm hidden sm:table-cell">${emp.username}</td>
+                    <td class="px-2 sm:px-4 py-2 text-xs sm:text-sm hidden md:table-cell">${emp.store}</td>
+                    <td class="px-2 sm:px-4 py-2">
+                        <span class="px-1 sm:px-2 py-1 text-xs rounded ${getSalaryTypeColor(emp.salaryType)}">
+                            ${getSalaryTypeText(emp.salaryType)}
+                        </span>
+                    </td>
+                    <td class="px-2 sm:px-4 py-2 text-xs sm:text-sm hidden lg:table-cell">$${emp.salaryAmount}</td>
+                    <td class="px-2 sm:px-4 py-2">
+                        <button class="bg-blue-500 text-white px-2 py-1 rounded text-xs hover:bg-blue-600 mr-1">
+                            Edit
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function showAddEmployee() {
+            const content = `
+                <h3 class="text-lg font-bold mb-4">Add New Employee</h3>
+                <div class="space-y-4">
+                    <input type="text" id="empName" placeholder="Employee Name" class="w-full p-2 border rounded">
+                    <input type="text" id="empUsername" placeholder="Username" class="w-full p-2 border rounded">
+                    <input type="password" id="empPassword" placeholder="Password" class="w-full p-2 border rounded">
+                    <input type="text" id="empStore" placeholder="Store Name" class="w-full p-2 border rounded">
+                    
+                    <div class="bg-gray-50 p-4 rounded">
+                        <h4 class="font-bold mb-2">Salary Configuration</h4>
+                        <select id="empSalaryType" class="w-full p-2 border rounded mb-2">
+                            <option value="fixed">Fixed Salary</option>
+                            <option value="commission_sales">Commission on Sales Value</option>
+                            <option value="commission_qty">Commission per Unit Sold</option>
+                            <option value="target_based">Target-Based Bonus</option>
+                        </select>
+                        
+                        <input type="number" id="empSalaryAmount" placeholder="Amount" class="w-full p-2 border rounded mb-2">
+                        <input type="number" id="empTarget" placeholder="Monthly Target (units)" class="w-full p-2 border rounded">
+                    </div>
+                </div>
+                <div class="flex justify-end space-x-2 mt-4">
+                    <button onclick="closeModal()" class="px-4 py-2 text-gray-600 hover:text-gray-800">Cancel</button>
+                    <button onclick="addEmployee()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Add Employee</button>
+                </div>
+            `;
+            showModal(content);
+        }
+
+        function editEmployeeSale(saleId) {
+            // Placeholder for edit functionality
+            alert('Edit functionality coming soon!');
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', async function() {
+            console.log('🚀 Starting application...');
+            
+            // Wait for Firebase to load
+            setTimeout(async () => {
+                if (window.db) {
+                    await initializeData();
+                } else {
+                    console.error('❌ Firebase not loaded properly');
+                    alert('Firebase connection failed. Please check your configuration.');
+                }
+            }, 2000);
+
             // Add Enter key support for login
             document.getElementById('username').addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') login();
@@ -1963,19 +837,34 @@
             document.getElementById('password').addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') login();
             });
-
-            // Set default dates for reports
-            const today = new Date();
-            const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-            const todayStr = today.toISOString().split('T')[0];
-            const firstDayStr = firstDayOfMonth.toISOString().split('T')[0];
-
-            // Set sales report default dates
-            if (document.getElementById('salesFromDate')) {
-                document.getElementById('salesFromDate').value = firstDayStr;
-                document.getElementById('salesToDate').value = todayStr;
-            }
         });
-    </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96945faa73bef9db',t:'MTc1NDIwODk5NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+    
+async function checkFirebaseConnection() {
+    const indicator = document.getElementById('firebaseStatus');
+    try {
+        const testSnapshot = await window.firestore.getDocs(window.firestore.collection(window.db, 'employees'));
+        if (testSnapshot) {
+            indicator.classList.remove('bg-gray-400', 'bg-red-500');
+            indicator.classList.add('bg-green-500');
+            indicator.title = "Firebase Connected ✅";
+        }
+    } catch (err) {
+        console.error("❌ Firebase offline or error:", err);
+        indicator.classList.remove('bg-gray-400', 'bg-green-500');
+        indicator.classList.add('bg-red-500');
+        indicator.title = "Firebase Offline ❌";
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(checkFirebaseConnection, 2000);
+    setInterval(checkFirebaseConnection, 60000);
+});
+</script>
+
+
+<!-- Firebase Status Indicator -->
+<div id="firebaseStatus" title="Checking Firebase..." class="fixed bottom-4 right-4 w-4 h-4 rounded-full bg-gray-400 shadow-md border-2 border-white z-50 transition-colors"></div>
+</body>
+
 </html>
