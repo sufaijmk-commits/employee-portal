@@ -787,7 +787,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <input type="text" id="empName" placeholder="Employee Name" class="w-full p-2 border rounded">
                     <input type="text" id="empUsername" placeholder="Username" class="w-full p-2 border rounded">
                     <input type="password" id="empPassword" placeholder="Password" class="w-full p-2 border rounded">
-                    <input type="text" id="empStore" placeholder="Store Name" class="w-full p-2 border rounded">
+                    <select id="empStore" class="w-full p-2 border rounded"><option value="">Select Store</option>${stores.map(store => `<option value="${store.name}">${store.name}</option>`).join("")}</select>
                     
                     <div class="bg-gray-50 p-4 rounded">
                         <h4 class="font-bold mb-2">Salary Configuration</h4>
