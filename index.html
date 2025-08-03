@@ -16,9 +16,9 @@
             apiKey: "AIzaSyAzUuzfU7AlTPAJK1nQwolpTkAJbGBfXXc",
             authDomain: "eden-perfume-sales.firebaseapp.com",
             projectId: "eden-perfume-sales",
-            storageBucket: "eden-perfume-sales.appspot.com",
-            messagingSenderId: "1012424244702",
-            appId: "1:1012424244702:web:825d00ba25fc1d6116f14f"
+            storageBucket: "eden-perfume-sales.firebasestorage.app.firebasestorage.app",
+            messagingSenderId: "1012424244702", // ← Get this from Firebase Console
+            appId: "1:1012424244702:web:825d00ba25fc1d6116f14f" // ← Same number here
         };
 
         // Initialize Firebase
@@ -421,16 +421,12 @@
             }
 
             // Check admin login
-            
-if (username === 'admin' && password === 'admin123') {
-    document.getElementById('loginScreen').classList.add('hidden');
-    document.getElementById('employeePortal').classList.add('hidden');
-    document.getElementById('dashboard').classList.remove('hidden');
-    await loadAllData();
-    await loadEmployees();
-    return;
-}
-
+            if (username === 'admin' && password === 'admin123') {
+                document.getElementById('loginScreen').classList.add('hidden');
+                document.getElementById('dashboard').classList.remove('hidden');
+                await loadEmployees();
+                return;
+            }
 
             // Check employee login
             const employee = employees.find(emp => emp.username === username && emp.password === password);
@@ -456,10 +452,10 @@ if (username === 'admin' && password === 'admin123') {
 
         // Add employee to Firebase
         async function addEmployee() {
-            const name = document.getElementById('empName').value.trim();
-            const username = document.getElementById('empUsername').value.trim();
-            const password = document.getElementById('empPassword').value.trim();
-            const store = document.getElementById('empStore').value.trim();
+            const name = document.getElementById('empName').value;
+            const username = document.getElementById('empUsername').value;
+            const password = document.getElementById('empPassword').value;
+            const store = document.getElementById('empStore').value;
             const salaryType = document.getElementById('empSalaryType').value;
             const salaryAmount = parseFloat(document.getElementById('empSalaryAmount').value) || 0;
             const target = parseInt(document.getElementById('empTarget').value) || 0;
@@ -745,9 +741,7 @@ if (username === 'admin' && password === 'admin123') {
                     <input type="text" id="empName" placeholder="Employee Name" class="w-full p-2 border rounded">
                     <input type="text" id="empUsername" placeholder="Username" class="w-full p-2 border rounded">
                     <input type="password" id="empPassword" placeholder="Password" class="w-full p-2 border rounded">
-                    <select id="empStore" class="w-full p-2 border rounded">
-    <option value="">Select Store</option>
-</select>
+                    <input type="text" id="empStore" placeholder="Store Name" class="w-full p-2 border rounded">
                     
                     <div class="bg-gray-50 p-4 rounded">
                         <h4 class="font-bold mb-2">Salary Configuration</h4>
@@ -799,5 +793,5 @@ if (username === 'admin' && password === 'admin123') {
             });
         });
     </script>
-</body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9694b2f66742f9f0',t:'MTc1NDIxMjQwNy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
