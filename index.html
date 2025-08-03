@@ -424,7 +424,7 @@
             if (username === 'admin' && password === 'admin123') {
                 document.getElementById('loginScreen').classList.add('hidden');
                 document.getElementById('dashboard').classList.remove('hidden');
-                await loadEmployees();
+                await loadAllData(); await loadEmployees();
                 return;
             }
 
