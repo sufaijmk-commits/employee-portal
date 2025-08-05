@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Eden Perfume - Sales Management System</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌸</text></svg>">
-    <!-- Tailwind CSS will be configured manually -->
     
     <!-- Firebase SDK with better error handling -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js" onerror="handleFirebaseLoadError('app')"></script>
@@ -617,8 +616,6 @@
             </div>
         </div>
 
-
-
         <!-- Tab Content -->
         <div class="p-6">
             <!-- Employees Tab -->
@@ -1013,20 +1010,39 @@
         let syncStatus = 'offline';
 
         // Firebase Configuration
-        function initializeFirebase(config) {
+        async function initializeFirebase(config) {
             try {
                 // Check if Firebase is available and loaded properly
                 if (typeof firebase === 'undefined' || window.firebaseLoadError) {
                     console.warn('Firebase SDK not available, falling back to local mode');
-                    return false;
+                    throw new Error('Firebase SDK not loaded. Please check your internet connection and try again.');
+                }
+                
+                // Validate config object
+                if (!config || typeof config !== 'object') {
+                    throw new Error('Invalid Firebase configuration');
                 }
                 
                 // Check if Firebase is already initialized
-                if (firebase.apps.length === 0) {
-                    firebase.initializeApp(config);
+                if (firebase.apps.length > 0) {
+                    // Delete existing app to reinitialize with new config
+                    await firebase.app().delete();
                 }
                 
+                // Initialize Firebase with new config
+                const app = firebase.initializeApp(config);
                 db = firebase.firestore();
+                
+                // Test the connection by trying to access Firestore
+                await db.enableNetwork();
+                
+                // Try to read from a test collection to verify connection
+                try {
+                    await db.collection('test').limit(1).get();
+                } catch (testError) {
+                    console.warn('Firestore test read failed, but connection established:', testError.message);
+                }
+                
                 isFirebaseMode = true;
                 syncStatus = 'connected';
                 updateSyncStatus();
@@ -1037,8 +1053,24 @@
                 return true;
             } catch (error) {
                 console.error('Firebase initialization error:', error);
-                alert('Failed to connect to Firebase: ' + error.message + '\n\nFalling back to local storage mode.');
-                return false;
+                isFirebaseMode = false;
+                db = null;
+                syncStatus = 'offline';
+                updateSyncStatus();
+                
+                // Provide more specific error messages
+                let errorMessage = 'Failed to connect to Firebase: ';
+                if (error.code === 'auth/invalid-api-key') {
+                    errorMessage += 'Invalid API key. Please check your Firebase configuration.';
+                } else if (error.code === 'auth/project-not-found') {
+                    errorMessage += 'Project not found. Please check your Project ID.';
+                } else if (error.message.includes('network')) {
+                    errorMessage += 'Network error. Please check your internet connection.';
+                } else {
+                    errorMessage += error.message;
+                }
+                
+                throw new Error(errorMessage);
             }
         }
 
@@ -1053,21 +1085,40 @@
             loader.classList.remove('hidden');
             
             const config = {
-                apiKey: document.getElementById('apiKey').value,
-                authDomain: document.getElementById('authDomain').value,
-                projectId: document.getElementById('projectId').value,
-                storageBucket: document.getElementById('storageBucket').value,
-                messagingSenderId: document.getElementById('messagingSenderId').value,
-                appId: document.getElementById('appId').value
+                apiKey: document.getElementById('apiKey').value.trim(),
+                authDomain: document.getElementById('authDomain').value.trim(),
+                projectId: document.getElementById('projectId').value.trim(),
+                storageBucket: document.getElementById('storageBucket').value.trim(),
+                messagingSenderId: document.getElementById('messagingSenderId').value.trim(),
+                appId: document.getElementById('appId').value.trim()
             };
             
-            // Save config to localStorage for future use
-            localStorage.setItem('firebaseConfig', JSON.stringify(config));
+            // Validate all fields are filled
+            const requiredFields = ['apiKey', 'authDomain', 'projectId', 'storageBucket', 'messagingSenderId', 'appId'];
+            const missingFields = requiredFields.filter(field => !config[field]);
             
-            if (initializeFirebase(config)) {
-                document.getElementById('firebaseConfigModal').classList.add('hidden');
-                document.getElementById('loginScreen').classList.remove('hidden');
-                await loadAllData();
+            if (missingFields.length > 0) {
+                alert('Please fill in all required fields: ' + missingFields.join(', '));
+                connectBtn.textContent = 'Connect to Firebase';
+                loader.classList.add('hidden');
+                return;
+            }
+            
+            try {
+                // Save config to localStorage for future use
+                localStorage.setItem('firebaseConfig', JSON.stringify(config));
+                
+                if (await initializeFirebase(config)) {
+                    document.getElementById('firebaseConfigModal').classList.add('hidden');
+                    document.getElementById('loginScreen').classList.remove('hidden');
+                    await loadAllData();
+                    alert('Successfully connected to Firebase!');
+                } else {
+                    throw new Error('Firebase initialization failed');
+                }
+            } catch (error) {
+                console.error('Firebase connection error:', error);
+                alert('Failed to connect to Firebase: ' + error.message + '\n\nPlease check your configuration and try again.');
             }
             
             connectBtn.textContent = 'Connect to Firebase';
@@ -1144,22 +1195,33 @@
                 attempts: 0
             };
             
+            console.log('Queuing item for sync:', syncItem);
+            
             syncQueue.push(syncItem);
             localStorage.setItem('eden_sync_queue', JSON.stringify(syncQueue));
+            
+            console.log('Current sync queue length:', syncQueue.length);
+            console.log('Firebase mode:', isFirebaseMode);
             
             if (isFirebaseMode) {
                 syncStatus = 'pending';
                 updateSyncStatus();
+                console.log('Triggering sync in 1 second...');
                 // Trigger sync after short delay
                 setTimeout(processSyncQueue, 1000);
+            } else {
+                console.log('Firebase mode disabled, item will remain in queue');
             }
         }
 
         // Process sync queue
         async function processSyncQueue() {
             if (!isFirebaseMode || isSyncing || syncQueue.length === 0) {
+                console.log('Sync skipped:', { isFirebaseMode, isSyncing, queueLength: syncQueue.length });
                 return;
             }
+            
+            console.log('Starting sync process with', syncQueue.length, 'items');
             
             isSyncing = true;
             syncStatus = 'connected';
@@ -1170,8 +1232,10 @@
             
             for (const item of itemsToProcess) {
                 try {
+                    console.log('Processing sync item:', item);
                     await processSyncItem(item);
                     processedItems.push(item);
+                    console.log('Successfully processed sync item:', item.type, item.action);
                 } catch (error) {
                     console.error('Sync error for item:', item, error);
                     item.attempts = (item.attempts || 0) + 1;
@@ -1188,6 +1252,8 @@
             syncQueue = syncQueue.filter(item => !processedItems.includes(item));
             localStorage.setItem('eden_sync_queue', JSON.stringify(syncQueue));
             
+            console.log('Sync completed. Remaining queue items:', syncQueue.length);
+            
             isSyncing = false;
             syncStatus = syncQueue.length > 0 ? 'pending' : 'synced';
             lastSyncTime = new Date().toISOString();
@@ -1198,42 +1264,75 @@
         async function processSyncItem(item) {
             const { action, type, data } = item;
             
-            switch (action) {
-                case 'create':
-                    if (data.id && data.id.toString().length <= 10) {
-                        // Local ID, need to create new document
+            try {
+                switch (action) {
+                    case 'create':
+                        console.log(`Creating ${type} in Firebase:`, data);
+                        
+                        // Create document in Firebase with the data
                         const docRef = await db.collection(type + 's').add({
                             ...data,
                             localId: data.id,
-                            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                         });
+                        
+                        console.log(`${type} created in Firebase with ID:`, docRef.id);
                         
                         // Update local data with Firebase ID
                         const collection = getCollectionByType(type);
                         const localItem = collection.find(item => item.id === data.id);
                         if (localItem) {
                             localItem.firebaseId = docRef.id;
+                            saveLocalData();
                         }
-                        saveLocalData();
-                    }
-                    break;
-                    
-                case 'update':
-                    const firebaseId = data.firebaseId || data.id;
-                    if (firebaseId && firebaseId.toString().length > 10) {
-                        await db.collection(type + 's').doc(firebaseId).update({
-                            ...data,
-                            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-                        });
-                    }
-                    break;
-                    
-                case 'delete':
-                    const deleteId = data.firebaseId || data.id;
-                    if (deleteId && deleteId.toString().length > 10) {
-                        await db.collection(type + 's').doc(deleteId).delete();
-                    }
-                    break;
+                        break;
+                        
+                    case 'update':
+                        console.log(`Updating ${type} in Firebase:`, data);
+                        
+                        const firebaseId = data.firebaseId;
+                        if (firebaseId) {
+                            await db.collection(type + 's').doc(firebaseId).update({
+                                ...data,
+                                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                            });
+                            console.log(`${type} updated in Firebase`);
+                        } else {
+                            // If no Firebase ID, treat as create
+                            console.log(`No Firebase ID found for ${type}, creating new document`);
+                            const docRef = await db.collection(type + 's').add({
+                                ...data,
+                                localId: data.id,
+                                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                            });
+                            
+                            // Update local data with Firebase ID
+                            const collection = getCollectionByType(type);
+                            const localItem = collection.find(item => item.id === data.id);
+                            if (localItem) {
+                                localItem.firebaseId = docRef.id;
+                                saveLocalData();
+                            }
+                        }
+                        break;
+                        
+                    case 'delete':
+                        console.log(`Deleting ${type} from Firebase:`, data);
+                        
+                        const deleteId = data.firebaseId;
+                        if (deleteId) {
+                            await db.collection(type + 's').doc(deleteId).delete();
+                            console.log(`${type} deleted from Firebase`);
+                        } else {
+                            console.warn(`No Firebase ID found for ${type} deletion:`, data);
+                        }
+                        break;
+                }
+            } catch (error) {
+                console.error(`Error processing ${action} for ${type}:`, error);
+                throw error;
             }
         }
 
@@ -1372,49 +1471,971 @@
             }
         }
 
-        // Firebase Data Loading
-        async function loadEmployees() {
-            if (!isFirebaseMode) return;
+        // Modal Form Submission
+        document.getElementById('modalForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const saveBtnText = document.getElementById('saveBtnText');
+            const saveLoader = document.getElementById('saveLoader');
+            const originalText = saveBtnText.textContent;
+            
+            saveBtnText.textContent = 'Saving...';
+            saveLoader.classList.remove('hidden');
+            
             try {
-                const snapshot = await db.collection('employees').get();
-                employees = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                let itemData = {};
+                
+                switch(editingType) {
+                    case 'employee':
+                        itemData = {
+                            name: document.getElementById('modalName').value.trim(),
+                            username: document.getElementById('modalUsername').value.trim(),
+                            storeId: document.getElementById('modalStoreId').value,
+                            salaryType: document.getElementById('modalSalaryType').value,
+                            baseSalary: parseFloat(document.getElementById('modalBaseSalary').value) || 0,
+                            commissionRate: document.getElementById('modalCommissionRate') ? parseFloat(document.getElementById('modalCommissionRate').value) || 0.1 : 0.1
+                        };
+                        
+                        // Handle password
+                        const password = document.getElementById('modalPassword').value;
+                        if (password || !editingItem) {
+                            itemData.password = password;
+                        }
+                        
+                        // If editing, preserve existing ID
+                        if (editingItem) {
+                            itemData.id = editingItem.id;
+                            if (!password) {
+                                itemData.password = editingItem.password; // Keep existing password
+                            }
+                        }
+                        
+                        await saveEmployee(itemData);
+                        await loadEmployeesTable();
+                        break;
+                        
+                    case 'store':
+                        itemData = {
+                            name: document.getElementById('modalName').value.trim(),
+                            location: document.getElementById('modalLocation').value.trim(),
+                            manager: document.getElementById('modalManager').value.trim(),
+                            phone: document.getElementById('modalPhone').value.trim()
+                        };
+                        
+                        if (editingItem) {
+                            itemData.id = editingItem.id;
+                        }
+                        
+                        await saveStore(itemData);
+                        await loadStoresTable();
+                        break;
+                        
+                    case 'product':
+                        itemData = {
+                            name: document.getElementById('modalName').value.trim(),
+                            price: parseFloat(document.getElementById('modalPrice').value) || 0,
+                            description: document.getElementById('modalDescription').value.trim()
+                        };
+                        
+                        if (editingItem) {
+                            itemData.id = editingItem.id;
+                        }
+                        
+                        await saveProduct(itemData);
+                        await loadProductsTable();
+                        break;
+                        
+                    case 'collection':
+                        // Get selected product IDs
+                        const selectedProducts = Array.from(document.querySelectorAll('.product-checkbox:checked')).map(cb => cb.value);
+                        
+                        itemData = {
+                            name: document.getElementById('modalName').value.trim(),
+                            description: document.getElementById('modalDescription').value.trim(),
+                            status: document.getElementById('modalStatus').value,
+                            productIds: selectedProducts
+                        };
+                        
+                        if (editingItem) {
+                            itemData.id = editingItem.id;
+                        }
+                        
+                        await saveCollection(itemData);
+                        await loadCollectionsTable();
+                        break;
+                }
+                
+                closeModal();
+                
+                // Safe string handling for alert message
+                const itemTypeName = editingType ? editingType.charAt(0).toUpperCase() + editingType.slice(1) : 'Item';
+                const actionText = editingItem ? 'updated' : 'created';
+                alert(`${itemTypeName} ${actionText} successfully!`);
+                
+                // Update dropdowns if needed
+                if (editingType === 'store' || editingType === 'product') {
+                    populateStoreDropdown();
+                    populateProductDropdown();
+                }
+                
             } catch (error) {
-                console.error('Error loading employees:', error);
+                console.error('Error saving item:', error);
+                alert('Error saving item: ' + error.message);
+            }
+            
+            saveBtnText.textContent = originalText;
+            saveLoader.classList.add('hidden');
+        });
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Check if Firebase config exists
+            const savedConfig = localStorage.getItem('firebaseConfig');
+            if (savedConfig) {
+                try {
+                    const config = JSON.parse(savedConfig);
+                    
+                    // Pre-fill the form with saved config
+                    document.getElementById('apiKey').value = config.apiKey || '';
+                    document.getElementById('authDomain').value = config.authDomain || '';
+                    document.getElementById('projectId').value = config.projectId || '';
+                    document.getElementById('storageBucket').value = config.storageBucket || '';
+                    document.getElementById('messagingSenderId').value = config.messagingSenderId || '';
+                    document.getElementById('appId').value = config.appId || '';
+                    
+                    // Try to auto-connect
+                    if (await initializeFirebase(config)) {
+                        document.getElementById('firebaseConfigModal').classList.add('hidden');
+                        document.getElementById('loginScreen').classList.remove('hidden');
+                        await loadAllData();
+                        return;
+                    }
+                } catch (error) {
+                    console.error('Error loading saved Firebase config:', error);
+                    // Clear invalid config
+                    localStorage.removeItem('firebaseConfig');
+                }
+            }
+            
+            // Show Firebase config modal if no saved config or connection failed
+            document.getElementById('firebaseConfigModal').classList.remove('hidden');
+        });
+
+        // Placeholder functions for missing functionality
+        function refreshData() {
+            loadAllData();
+            if (currentUserRole === 'employee') {
+                updateEmployeeStats();
+                updateTodaysSalesTable();
+            }
+        }
+
+        function quickAddSale() {
+            alert('Quick Add Sale feature coming soon!');
+        }
+
+        function viewTodaysSummary() {
+            alert('Today\'s Summary feature coming soon!');
+        }
+
+        function backupData() {
+            alert('Backup feature coming soon!');
+        }
+
+        function downloadAllMasterData() {
+            alert('Download All feature coming soon!');
+        }
+
+        function restoreData() {
+            alert('Restore feature coming soon!');
+        }
+
+        function clearAllData() {
+            if (confirm('This will delete ALL data. Are you sure?')) {
                 employees = [];
-            }
-        }
-
-        async function loadStores() {
-            if (!isFirebaseMode) return;
-            try {
-                const snapshot = await db.collection('stores').get();
-                stores = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            } catch (error) {
-                console.error('Error loading stores:', error);
                 stores = [];
-            }
-        }
-
-        async function loadProducts() {
-            if (!isFirebaseMode) return;
-            try {
-                const snapshot = await db.collection('products').get();
-                products = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            } catch (error) {
-                console.error('Error loading products:', error);
                 products = [];
+                collections = [];
+                sales = [];
+                saveLocalData();
+                alert('All data cleared!');
+                location.reload();
             }
         }
 
-        async function loadSales() {
-            if (!isFirebaseMode) return;
-            try {
-                const snapshot = await db.collection('sales').get();
-                sales = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            } catch (error) {
-                console.error('Error loading sales:', error);
-                sales = [];
+        function openModal(type, item = null) {
+            editingType = type;
+            editingItem = item;
+            
+            const modal = document.getElementById('modal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalFields = document.getElementById('modalFields');
+            const saveBtnText = document.getElementById('saveBtnText');
+            
+            // Set modal title
+            const isEditing = item !== null;
+            modalTitle.textContent = isEditing ? `Edit ${type.charAt(0).toUpperCase() + type.slice(1)}` : `Add ${type.charAt(0).toUpperCase() + type.slice(1)}`;
+            saveBtnText.textContent = isEditing ? 'Update' : 'Save';
+            
+            // Generate form fields based on type
+            let fieldsHTML = '';
+            
+            switch(type) {
+                case 'employee':
+                    fieldsHTML = `
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
+                            <input type="text" id="modalName" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" placeholder="Enter full name" required value="${item ? item.name || '' : ''}">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Username</label>
+                            <input type="text" id="modalUsername" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" placeholder="Enter username" required value="${item ? item.username || '' : ''}">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                            <input type="password" id="modalPassword" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" placeholder="Enter password" ${!isEditing ? 'required' : ''} value="">
+                            ${isEditing ? '<p class="text-xs text-gray-500 mt-1">Leave blank to keep current password</p>' : ''}
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Store</label>
+                            <select id="modalStoreId" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" required>
+                                <option value="">Select Store</option>
+                                ${stores.map(store => `<option value="${store.id}" ${item && item.storeId === store.id ? 'selected' : ''}>${store.name}</option>`).join('')}
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Salary Type</label>
+                            <select id="modalSalaryType" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" required onchange="updateSalaryFields()">
+                                <option value="fixed" ${item && item.salaryType === 'fixed' ? 'selected' : ''}>Fixed Salary</option>
+                                <option value="commission" ${item && item.salaryType === 'commission' ? 'selected' : ''}>Commission Based</option>
+                                <option value="qty_sold" ${item && item.salaryType === 'qty_sold' ? 'selected' : ''}>Quantity Sold</option>
+                                <option value="days_present" ${item && item.salaryType === 'days_present' ? 'selected' : ''}>Days Present</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Base Salary ($)</label>
+                            <input type="number" id="modalBaseSalary" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" placeholder="Enter base salary" min="0" step="0.01" required value="${item ? item.baseSalary || '' : ''}">
+                        </div>
+                        <div id="commissionRateField" class="hidden">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Commission Rate (0.1 = 10%)</label>
+                            <input type="number" id="modalCommissionRate" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" placeholder="0.1" min="0" max="1" step="0.01" value="${item ? item.commissionRate || '0.1' : '0.1'}">
+                        </div>
+                    `;
+                    break;
+                    
+                case 'store':
+                    fieldsHTML = `
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Store Name</label>
+                            <input type="text" id="modalName" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" placeholder="Enter store name" required value="${item ? item.name || '' : ''}">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Location</label>
+                            <input type="text" id="modalLocation" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" placeholder="Enter location" required value="${item ? item.location || '' : ''}">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Manager Name</label>
+                            <input type="text" id="modalManager" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" placeholder="Enter manager name" required value="${item ? item.manager || '' : ''}">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
+                            <input type="tel" id="modalPhone" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" placeholder="Enter phone number" required value="${item ? item.phone || '' : ''}">
+                        </div>
+                    `;
+                    break;
+                    
+                case 'product':
+                    fieldsHTML = `
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Product Name</label>
+                            <input type="text" id="modalName" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" placeholder="Enter product name" required value="${item ? item.name || '' : ''}">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Price ($)</label>
+                            <input type="number" id="modalPrice" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" placeholder="Enter price" min="0" step="0.01" required value="${item ? item.price || '' : ''}">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Description (Optional)</label>
+                            <textarea id="modalDescription" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" placeholder="Enter product description" rows="3">${item ? item.description || '' : ''}</textarea>
+                        </div>
+                    `;
+                    break;
+                    
+                case 'collection':
+                    fieldsHTML = `
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Collection Name</label>
+                            <input type="text" id="modalName" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" placeholder="Enter collection name" required value="${item ? item.name || '' : ''}">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                            <textarea id="modalDescription" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" placeholder="Enter collection description" rows="3" required>${item ? item.description || '' : ''}</textarea>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
+                            <select id="modalStatus" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" required>
+                                <option value="active" ${item && item.status === 'active' ? 'selected' : ''}>Active</option>
+                                <option value="inactive" ${item && item.status === 'inactive' ? 'selected' : ''}>Inactive</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Products in Collection</label>
+                            <div class="border border-gray-300 rounded-lg p-3 max-h-40 overflow-y-auto">
+                                ${products.map(product => `
+                                    <label class="flex items-center space-x-2 mb-2">
+                                        <input type="checkbox" class="product-checkbox" value="${product.id}" ${item && item.productIds && item.productIds.includes(product.id) ? 'checked' : ''}>
+                                        <span class="text-sm">${product.name} - $${product.price}</span>
+                                    </label>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+                    break;
             }
+            
+            modalFields.innerHTML = fieldsHTML;
+            
+            // Show commission rate field if commission type is selected
+            if (type === 'employee') {
+                updateSalaryFields();
+            }
+            
+            modal.classList.remove('hidden');
+        }
+
+        function updateSalaryFields() {
+            const salaryType = document.getElementById('modalSalaryType').value;
+            const commissionField = document.getElementById('commissionRateField');
+            
+            if (salaryType === 'commission') {
+                commissionField.classList.remove('hidden');
+            } else {
+                commissionField.classList.add('hidden');
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('modal').classList.add('hidden');
+            editingItem = null;
+            editingType = null;
+        }
+
+        function editItem(type, id) {
+            let item = null;
+            
+            switch(type) {
+                case 'employee':
+                    item = employees.find(emp => emp.id === id);
+                    break;
+                case 'store':
+                    item = stores.find(store => store.id === id);
+                    break;
+                case 'product':
+                    item = products.find(product => product.id === id);
+                    break;
+                case 'collection':
+                    item = collections.find(collection => collection.id === id);
+                    break;
+            }
+            
+            if (item) {
+                openModal(type, item);
+            } else {
+                alert('Item not found!');
+            }
+        }
+
+        async function deleteItem(type, id) {
+            if (confirm('Are you sure you want to delete this item?')) {
+                try {
+                    switch(type) {
+                        case 'employee':
+                            await deleteEmployee(id);
+                            await loadEmployeesTable();
+                            break;
+                        case 'store':
+                            await deleteStore(id);
+                            await loadStoresTable();
+                            break;
+                        case 'product':
+                            await deleteProduct(id);
+                            await loadProductsTable();
+                            break;
+                        case 'collection':
+                            await deleteCollection(id);
+                            await loadCollectionsTable();
+                            break;
+                    }
+                    alert('Item deleted successfully!');
+                } catch (error) {
+                    alert('Error deleting item: ' + error.message);
+                }
+            }
+        }
+
+        function loadDatabaseManager() {
+            alert('Database Manager coming soon!');
+        }
+
+        function generateSalesReport() {
+            alert('Sales Report generation coming soon!');
+        }
+
+        function generateSalaryReport() {
+            alert('Salary Report generation coming soon!');
+        }
+
+        function printReport(type) {
+            alert('Print functionality coming soon!');
+        }
+
+        function downloadExcel(type) {
+            alert('Excel download coming soon!');
+        }
+
+        function downloadPDF(type) {
+            alert('PDF download coming soon!');
+        }
+
+        function populateEmployeeDropdown() {
+            const select = document.getElementById('salaryEmployee');
+            if (select) {
+                select.innerHTML = '<option value="">All Employees</option>';
+                employees.forEach(emp => {
+                    const option = document.createElement('option');
+                    option.value = emp.id;
+                    option.textContent = emp.name;
+                    select.appendChild(option);
+                });
+            }
+        }
+
+        // Login System
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const loginBtn = document.getElementById('loginBtnText');
+            const loader = document.getElementById('loginLoader');
+            
+            loginBtn.textContent = 'Signing in...';
+            loader.classList.remove('hidden');
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            // Check admin credentials
+            if (username === 'admin' && password === 'admin123') {
+                currentUser = { name: 'Administrator', role: 'admin' };
+                currentUserRole = 'admin';
+                await showDashboard();
+                loginBtn.textContent = 'Sign In';
+                loader.classList.add('hidden');
+                return;
+            }
+            
+            // Check employee credentials
+            const employee = employees.find(emp => 
+                emp.username === username && emp.password === password
+            );
+            
+            if (employee) {
+                currentUser = employee;
+                currentUserRole = 'employee';
+                await showEmployeePortal();
+                loginBtn.textContent = 'Sign In';
+                loader.classList.add('hidden');
+                return;
+            }
+            
+            alert('Invalid credentials. Please try again.');
+            loginBtn.textContent = 'Sign In';
+            loader.classList.add('hidden');
+        });
+
+        function logout() {
+            currentUser = null;
+            currentUserRole = null;
+            document.getElementById('loginScreen').classList.remove('hidden');
+            document.getElementById('dashboard').classList.add('hidden');
+            document.getElementById('employeePortal').classList.add('hidden');
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+        }
+
+        // Employee Portal Functions
+        async function showEmployeePortal() {
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('employeePortal').classList.remove('hidden');
+            
+            // Update employee info
+            document.getElementById('employeeName').textContent = currentUser.name;
+            document.getElementById('employeeStore').textContent = getStoreName(currentUser.storeId);
+            
+            // Update current date
+            updateCurrentDate('employeeCurrentDate');
+            
+            // Set today's date in the form
+            document.getElementById('saleDate').value = getTodayString();
+            
+            // Populate dropdowns
+            populateProductDropdown();
+            populateStoreDropdown();
+            
+            // Update stats and sales table
+            updateEmployeeStats();
+            updateTodaysSalesTable();
+        }
+
+        function populateProductDropdown() {
+            try {
+                const select = document.getElementById('saleProduct');
+                if (!select) {
+                    console.error('Product dropdown element not found');
+                    return;
+                }
+                
+                select.innerHTML = '<option value="">Select Product</option>';
+                
+                if (!products || !Array.isArray(products)) {
+                    console.error('Products array is not valid');
+                    return;
+                }
+                
+                products.filter(product => product && product.id && product.name).forEach(product => {
+                    try {
+                        const option = document.createElement('option');
+                        option.value = product.id;
+                        option.textContent = `${product.name} - $${(product.price || 0).toFixed(2)}`;
+                        select.appendChild(option);
+                    } catch (error) {
+                        console.error('Error creating product option:', error);
+                    }
+                });
+            } catch (error) {
+                console.error('Error in populateProductDropdown:', error);
+            }
+        }
+
+        function populateStoreDropdown() {
+            try {
+                const select = document.getElementById('saleStore');
+                if (!select) {
+                    console.log('Store dropdown element not found (this is normal for some views)');
+                    return;
+                }
+                
+                select.innerHTML = '<option value="">Select Store</option>';
+                
+                if (!stores || !Array.isArray(stores)) {
+                    console.error('Stores array is not valid');
+                    return;
+                }
+                
+                stores.filter(store => store && store.id && store.name).forEach(store => {
+                    try {
+                        const option = document.createElement('option');
+                        option.value = store.id;
+                        option.textContent = store.name;
+                        select.appendChild(option);
+                    } catch (error) {
+                        console.error('Error creating store option:', error);
+                    }
+                });
+                
+                // Set default store for employee
+                if (currentUser && currentUser.storeId) {
+                    select.value = currentUser.storeId;
+                }
+            } catch (error) {
+                console.error('Error in populateStoreDropdown:', error);
+            }
+        }
+
+        function updateEmployeeStats() {
+            try {
+                if (!currentUser || !currentUser.id) {
+                    console.error('No current user found');
+                    return;
+                }
+                
+                // Ensure arrays are initialized
+                initializeArrays();
+                
+                const today = getTodayString();
+                const todaysSales = sales.filter(sale => 
+                    sale && sale.date === today && sale.employeeId === currentUser.id
+                );
+                
+                const totalSales = todaysSales.reduce((sum, sale) => sum + (sale.amount || 0), 0);
+                const bottlesSold = todaysSales.reduce((sum, sale) => sum + (sale.quantity || 0), 0);
+                
+                // Calculate estimated salary based on salary type
+                let estimatedSalary = currentUser.baseSalary || 0;
+                const monthSales = sales.filter(sale => {
+                    if (!sale || !sale.date) return false;
+                    try {
+                        const saleDate = new Date(sale.date);
+                        const currentDate = new Date();
+                        return saleDate.getMonth() === currentDate.getMonth() && 
+                               saleDate.getFullYear() === currentDate.getFullYear() &&
+                               sale.employeeId === currentUser.id;
+                    } catch (error) {
+                        return false;
+                    }
+                });
+                
+                const monthlyQuantity = monthSales.reduce((sum, sale) => sum + (sale.quantity || 0), 0);
+                const monthlySalesAmount = monthSales.reduce((sum, sale) => sum + (sale.amount || 0), 0);
+                const uniqueDays = [...new Set(monthSales.map(sale => sale.date).filter(date => date))].length;
+                
+                switch(currentUser.salaryType) {
+                    case 'commission':
+                        estimatedSalary += monthlySalesAmount * (currentUser.commissionRate || 0.1);
+                        break;
+                    case 'qty_sold':
+                        estimatedSalary += monthlyQuantity * 5; // $5 per item
+                        break;
+                    case 'days_present':
+                        estimatedSalary += uniqueDays * 50; // $50 per day
+                        break;
+                }
+                
+                // Safe DOM element updates with null checks
+                const totalSalesTodayEl = document.getElementById('totalSalesToday');
+                const bottlesSoldEl = document.getElementById('bottlesSold');
+                const estimatedSalaryEl = document.getElementById('estimatedSalary');
+                
+                if (totalSalesTodayEl) {
+                    totalSalesTodayEl.textContent = `$${totalSales.toFixed(2)}`;
+                }
+                if (bottlesSoldEl) {
+                    bottlesSoldEl.textContent = bottlesSold.toString();
+                }
+                if (estimatedSalaryEl) {
+                    estimatedSalaryEl.textContent = `$${estimatedSalary.toFixed(2)}`;
+                }
+            } catch (error) {
+                console.error('Error in updateEmployeeStats:', error);
+            }
+        }
+
+        function updateTodaysSalesTable() {
+            try {
+                if (!currentUser || !currentUser.id) {
+                    console.error('No current user found for sales table update');
+                    return;
+                }
+                
+                const today = getTodayString();
+                const todaysSales = sales.filter(sale => 
+                    sale && sale.date === today && sale.employeeId === currentUser.id
+                );
+                
+                const tbody = document.getElementById('todaysSalesTable');
+                if (!tbody) {
+                    console.error('Sales table body element not found');
+                    return;
+                }
+                
+                if (todaysSales.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" class="text-center py-8 text-gray-500">No sales recorded today</td></tr>';
+                    return;
+                }
+                
+                tbody.innerHTML = todaysSales.filter(sale => sale && sale.id).map(sale => {
+                    // Safe property access with fallbacks
+                    const saleTime = sale.time || 'N/A';
+                    const storeName = getStoreName(sale.storeId);
+                    const productName = getProductName(sale.productId);
+                    const quantity = sale.quantity || 0;
+                    const amount = sale.amount || 0;
+                    const saleId = sale.id || '';
+                    
+                    return `
+                        <tr class="border-b hover:bg-gray-50">
+                            <td class="py-3 px-4">${saleTime}</td>
+                            <td class="py-3 px-4">${storeName}</td>
+                            <td class="py-3 px-4">${productName}</td>
+                            <td class="py-3 px-4">${quantity}</td>
+                            <td class="py-3 px-4">$${amount.toFixed(2)}</td>
+                            <td class="py-3 px-4">
+                                <button onclick="deleteSale('${saleId}')" class="text-red-600 hover:text-red-800 text-sm">
+                                    Delete
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            } catch (error) {
+                console.error('Error in updateTodaysSalesTable:', error);
+                const tbody = document.getElementById('todaysSalesTable');
+                if (tbody) {
+                    tbody.innerHTML = '<tr><td colspan="6" class="text-center py-8 text-red-500">Error loading sales data</td></tr>';
+                }
+            }
+        }
+
+        // Add Sale Form
+        document.getElementById('addSaleForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = 'Adding...';
+            submitBtn.disabled = true;
+            
+            const date = document.getElementById('saleDate').value;
+            const productId = document.getElementById('saleProduct').value;
+            const quantity = parseInt(document.getElementById('saleQuantity').value);
+            const storeId = document.getElementById('saleStore') ? document.getElementById('saleStore').value : currentUser.storeId;
+            
+            if (!date || !productId || !quantity || !storeId) {
+                alert('Please fill in all fields');
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+                return;
+            }
+            
+            if (quantity <= 0) {
+                alert('Quantity must be greater than 0');
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+                return;
+            }
+            
+            const product = getProduct(productId);
+            if (!product) {
+                alert('Invalid product selected');
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+                return;
+            }
+            
+            const newSale = {
+                date: date,
+                time: getCurrentTime(),
+                employeeId: currentUser.id,
+                storeId: storeId,
+                productId: productId,
+                quantity: quantity,
+                amount: product.price * quantity
+            };
+            
+            try {
+                await saveSale(newSale);
+                
+                // Reset form
+                document.getElementById('saleQuantity').value = '';
+                document.getElementById('saleProduct').value = '';
+                if (document.getElementById('saleStore')) {
+                    document.getElementById('saleStore').value = currentUser.storeId || '';
+                }
+                
+                // Reload data and update displays
+                updateEmployeeStats();
+                updateTodaysSalesTable();
+                
+                alert('Sale added successfully!');
+            } catch (error) {
+                alert('Error adding sale: ' + error.message);
+            }
+            
+            submitBtn.textContent = originalText;
+            submitBtn.disabled = false;
+        });
+
+        async function deleteSale(saleId) {
+            if (!saleId) {
+                console.error('deleteSale requires valid saleId');
+                return;
+            }
+            
+            if (confirm('Are you sure you want to delete this sale?')) {
+                try {
+                    await deleteSaleRecord(saleId);
+                    updateEmployeeStats();
+                    updateTodaysSalesTable();
+                } catch (error) {
+                    console.error('Error in deleteSale:', error);
+                    alert('Error deleting sale: ' + error.message);
+                }
+            }
+        }
+
+        // Admin Dashboard Functions
+        async function showDashboard() {
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('dashboard').classList.remove('hidden');
+            
+            // Update current date
+            updateCurrentDate('adminCurrentDate');
+            
+            // Show employees tab by default
+            await switchTab('employees');
+        }
+
+        async function switchTab(tabName) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.add('hidden');
+            });
+            
+            // Remove active class from all tab buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('tab-active', 'border-purple-500');
+                btn.classList.add('border-transparent');
+            });
+            
+            // Show selected tab content
+            document.getElementById(tabName + '-tab').classList.remove('hidden');
+            
+            // Add active class to selected tab button
+            const activeBtn = document.querySelector(`[data-tab="${tabName}"]`);
+            activeBtn.classList.add('tab-active', 'border-purple-500');
+            activeBtn.classList.remove('border-transparent');
+            
+            // Load data for the selected tab
+            switch(tabName) {
+                case 'employees':
+                    await loadEmployeesTable();
+                    break;
+                case 'stores':
+                    await loadStoresTable();
+                    break;
+                case 'products':
+                    await loadProductsTable();
+                    break;
+                case 'collections':
+                    await loadCollectionsTable();
+                    break;
+                case 'database':
+                    await loadDatabaseManager();
+                    break;
+                case 'sales':
+                    // Initialize filter dropdown
+                    document.getElementById('reportType').dispatchEvent(new Event('change'));
+                    break;
+                case 'salary':
+                    populateEmployeeDropdown();
+                    break;
+            }
+        }
+
+        async function loadEmployeesTable() {
+            try {
+                const tbody = document.getElementById('employeesTable');
+                
+                if (!tbody) {
+                    console.error('Employees table body element not found');
+                    return;
+                }
+                
+                if (!employees || !Array.isArray(employees) || employees.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" class="text-center py-8 text-gray-500">No employees found. Click "Add Employee" to create your first employee.</td></tr>';
+                    return;
+                }
+                
+                tbody.innerHTML = employees.filter(emp => emp && emp.id).map(emp => {
+                    // Safe property access with fallbacks
+                    const empName = emp.name || 'N/A';
+                    const empUsername = emp.username || 'N/A';
+                    const storeName = getStoreName(emp.storeId);
+                    const salaryType = emp.salaryType || 'fixed';
+                    const baseSalary = emp.baseSalary || 0;
+                    const empId = emp.id || '';
+                    
+                    return `
+                        <tr class="border-b hover:bg-gray-50">
+                            <td class="py-4 px-6">${empName}</td>
+                            <td class="py-4 px-6">${empUsername}</td>
+                            <td class="py-4 px-6">${storeName}</td>
+                            <td class="py-4 px-6 capitalize">${salaryType}</td>
+                            <td class="py-4 px-6">$${baseSalary}</td>
+                            <td class="py-4 px-6">
+                                <button onclick="editItem('employee', '${empId}')" class="text-blue-600 hover:text-blue-800 mr-3">Edit</button>
+                                <button onclick="deleteItem('employee', '${empId}')" class="text-red-600 hover:text-red-800">Delete</button>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            } catch (error) {
+                console.error('Error in loadEmployeesTable:', error);
+                const tbody = document.getElementById('employeesTable');
+                if (tbody) {
+                    tbody.innerHTML = '<tr><td colspan="6" class="text-center py-8 text-red-500">Error loading employees data</td></tr>';
+                }
+            }
+        }
+
+        async function loadStoresTable() {
+            const tbody = document.getElementById('storesTable');
+            
+            if (stores.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center py-8 text-gray-500">No stores found. Click "Add Store" to create your first store.</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = stores.filter(store => store && store.id).map(store => `
+                <tr class="border-b hover:bg-gray-50">
+                    <td class="py-4 px-6">${store.name || 'N/A'}</td>
+                    <td class="py-4 px-6">${store.location || 'N/A'}</td>
+                    <td class="py-4 px-6">${store.manager || 'N/A'}</td>
+                    <td class="py-4 px-6">${store.phone || 'N/A'}</td>
+                    <td class="py-4 px-6">
+                        <button onclick="editItem('store', '${store.id}')" class="text-blue-600 hover:text-blue-800 mr-3">Edit</button>
+                        <button onclick="deleteItem('store', '${store.id}')" class="text-red-600 hover:text-red-800">Delete</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        async function loadProductsTable() {
+            const tbody = document.getElementById('productsTable');
+            
+            if (products.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="3" class="text-center py-8 text-gray-500">No products found. Click "Add Product" to create your first product.</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = products.filter(product => product && product.id).map(product => `
+                <tr class="border-b hover:bg-gray-50">
+                    <td class="py-4 px-6">${product.name || 'N/A'}</td>
+                    <td class="py-4 px-6">$${product.price || 0}</td>
+                    <td class="py-4 px-6">
+                        <button onclick="editItem('product', '${product.id}')" class="text-blue-600 hover:text-blue-800 mr-3">Edit</button>
+                        <button onclick="deleteItem('product', '${product.id}')" class="text-red-600 hover:text-red-800">Delete</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        async function loadCollectionsTable() {
+            const tbody = document.getElementById('collectionsTable');
+            
+            if (collections.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center py-8 text-gray-500">No collections found. Click "Add Collection" to create your first collection.</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = collections.filter(collection => collection && collection.id).map(collection => {
+                // Count products in this collection
+                const productCount = collection.productIds ? collection.productIds.length : 0;
+                const status = collection.status || 'active';
+                const statusColor = status === 'active' ? 'text-green-600' : 'text-gray-500';
+                
+                return `
+                    <tr class="border-b hover:bg-gray-50">
+                        <td class="py-4 px-6">${collection.name || 'N/A'}</td>
+                        <td class="py-4 px-6">${collection.description || 'N/A'}</td>
+                        <td class="py-4 px-6">${productCount}</td>
+                        <td class="py-4 px-6 ${statusColor} capitalize">${status}</td>
+                        <td class="py-4 px-6">
+                            <button onclick="editItem('collection', '${collection.id}')" class="text-blue-600 hover:text-blue-800 mr-3">Edit</button>
+                            <button onclick="deleteItem('collection', '${collection.id}')" class="text-red-600 hover:text-red-800">Delete</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
         }
 
         // Local-First Data Saving
@@ -1805,2437 +2826,6 @@
             });
             document.getElementById(elementId).textContent = dateString;
         }
-
-        // Login System
-        document.getElementById('loginForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const loginBtn = document.getElementById('loginBtnText');
-            const loader = document.getElementById('loginLoader');
-            
-            loginBtn.textContent = 'Signing in...';
-            loader.classList.remove('hidden');
-            
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-            
-            // Check admin credentials
-            if (username === 'admin' && password === 'admin123') {
-                currentUser = { name: 'Administrator', role: 'admin' };
-                currentUserRole = 'admin';
-                await showDashboard();
-                loginBtn.textContent = 'Sign In';
-                loader.classList.add('hidden');
-                return;
-            }
-            
-            // Check employee credentials
-            const employee = employees.find(emp => 
-                emp.username === username && emp.password === password
-            );
-            
-            if (employee) {
-                currentUser = employee;
-                currentUserRole = 'employee';
-                await showEmployeePortal();
-                loginBtn.textContent = 'Sign In';
-                loader.classList.add('hidden');
-                return;
-            }
-            
-            alert('Invalid credentials. Please try again.');
-            loginBtn.textContent = 'Sign In';
-            loader.classList.add('hidden');
-        });
-
-        function logout() {
-            currentUser = null;
-            currentUserRole = null;
-            document.getElementById('loginScreen').classList.remove('hidden');
-            document.getElementById('dashboard').classList.add('hidden');
-            document.getElementById('employeePortal').classList.add('hidden');
-            document.getElementById('username').value = '';
-            document.getElementById('password').value = '';
-        }
-
-        // Employee Portal Functions
-        async function showEmployeePortal() {
-            document.getElementById('loginScreen').classList.add('hidden');
-            document.getElementById('employeePortal').classList.remove('hidden');
-            
-            // Update employee info
-            document.getElementById('employeeName').textContent = currentUser.name;
-            document.getElementById('employeeStore').textContent = getStoreName(currentUser.storeId);
-            
-            // Update current date
-            updateCurrentDate('employeeCurrentDate');
-            
-            // Set today's date in the form
-            document.getElementById('saleDate').value = getTodayString();
-            
-            // Populate dropdowns
-            populateProductDropdown();
-            populateStoreDropdown();
-            
-            // Update stats and sales table
-            updateEmployeeStats();
-            updateTodaysSalesTable();
-        }
-
-        function populateProductDropdown() {
-            try {
-                const select = document.getElementById('saleProduct');
-                if (!select) {
-                    console.error('Product dropdown element not found');
-                    return;
-                }
-                
-                select.innerHTML = '<option value="">Select Product</option>';
-                
-                if (!products || !Array.isArray(products)) {
-                    console.error('Products array is not valid');
-                    return;
-                }
-                
-                products.filter(product => product && product.id && product.name).forEach(product => {
-                    try {
-                        const option = document.createElement('option');
-                        option.value = product.id;
-                        option.textContent = `${product.name} - $${(product.price || 0).toFixed(2)}`;
-                        select.appendChild(option);
-                    } catch (error) {
-                        console.error('Error creating product option:', error);
-                    }
-                });
-            } catch (error) {
-                console.error('Error in populateProductDropdown:', error);
-            }
-        }
-
-        function populateStoreDropdown() {
-            try {
-                const select = document.getElementById('saleStore');
-                if (!select) {
-                    console.log('Store dropdown element not found (this is normal for some views)');
-                    return;
-                }
-                
-                select.innerHTML = '<option value="">Select Store</option>';
-                
-                if (!stores || !Array.isArray(stores)) {
-                    console.error('Stores array is not valid');
-                    return;
-                }
-                
-                stores.filter(store => store && store.id && store.name).forEach(store => {
-                    try {
-                        const option = document.createElement('option');
-                        option.value = store.id;
-                        option.textContent = store.name;
-                        select.appendChild(option);
-                    } catch (error) {
-                        console.error('Error creating store option:', error);
-                    }
-                });
-                
-                // Set default store for employee
-                if (currentUser && currentUser.storeId) {
-                    select.value = currentUser.storeId;
-                }
-            } catch (error) {
-                console.error('Error in populateStoreDropdown:', error);
-            }
-        }
-
-        function updateEmployeeStats() {
-            try {
-                if (!currentUser || !currentUser.id) {
-                    console.error('No current user found');
-                    return;
-                }
-                
-                // Ensure arrays are initialized
-                initializeArrays();
-                
-                const today = getTodayString();
-                const todaysSales = sales.filter(sale => 
-                    sale && sale.date === today && sale.employeeId === currentUser.id
-                );
-                
-                const totalSales = todaysSales.reduce((sum, sale) => sum + (sale.amount || 0), 0);
-                const bottlesSold = todaysSales.reduce((sum, sale) => sum + (sale.quantity || 0), 0);
-                
-                // Calculate estimated salary based on salary type
-                let estimatedSalary = currentUser.baseSalary || 0;
-                const monthSales = sales.filter(sale => {
-                    if (!sale || !sale.date) return false;
-                    try {
-                        const saleDate = new Date(sale.date);
-                        const currentDate = new Date();
-                        return saleDate.getMonth() === currentDate.getMonth() && 
-                               saleDate.getFullYear() === currentDate.getFullYear() &&
-                               sale.employeeId === currentUser.id;
-                    } catch (error) {
-                        return false;
-                    }
-                });
-                
-                const monthlyQuantity = monthSales.reduce((sum, sale) => sum + (sale.quantity || 0), 0);
-                const monthlySalesAmount = monthSales.reduce((sum, sale) => sum + (sale.amount || 0), 0);
-                const uniqueDays = [...new Set(monthSales.map(sale => sale.date).filter(date => date))].length;
-                
-                switch(currentUser.salaryType) {
-                    case 'commission':
-                        estimatedSalary += monthlySalesAmount * (currentUser.commissionRate || 0.1);
-                        break;
-                    case 'qty_sold':
-                        estimatedSalary += monthlyQuantity * 5; // $5 per item
-                        break;
-                    case 'days_present':
-                        estimatedSalary += uniqueDays * 50; // $50 per day
-                        break;
-                }
-                
-                // Safe DOM element updates with null checks
-                const totalSalesTodayEl = document.getElementById('totalSalesToday');
-                const bottlesSoldEl = document.getElementById('bottlesSold');
-                const estimatedSalaryEl = document.getElementById('estimatedSalary');
-                
-                if (totalSalesTodayEl) {
-                    totalSalesTodayEl.textContent = `$${totalSales.toFixed(2)}`;
-                }
-                if (bottlesSoldEl) {
-                    bottlesSoldEl.textContent = bottlesSold.toString();
-                }
-                if (estimatedSalaryEl) {
-                    estimatedSalaryEl.textContent = `$${estimatedSalary.toFixed(2)}`;
-                }
-            } catch (error) {
-                console.error('Error in updateEmployeeStats:', error);
-            }
-        }
-
-        function updateTodaysSalesTable() {
-            try {
-                if (!currentUser || !currentUser.id) {
-                    console.error('No current user found for sales table update');
-                    return;
-                }
-                
-                const today = getTodayString();
-                const todaysSales = sales.filter(sale => 
-                    sale && sale.date === today && sale.employeeId === currentUser.id
-                );
-                
-                const tbody = document.getElementById('todaysSalesTable');
-                if (!tbody) {
-                    console.error('Sales table body element not found');
-                    return;
-                }
-                
-                if (todaysSales.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="6" class="text-center py-8 text-gray-500">No sales recorded today</td></tr>';
-                    return;
-                }
-                
-                tbody.innerHTML = todaysSales.filter(sale => sale && sale.id).map(sale => {
-                    // Safe property access with fallbacks
-                    const saleTime = sale.time || 'N/A';
-                    const storeName = getStoreName(sale.storeId);
-                    const productName = getProductName(sale.productId);
-                    const quantity = sale.quantity || 0;
-                    const amount = sale.amount || 0;
-                    const saleId = sale.id || '';
-                    
-                    return `
-                        <tr class="border-b hover:bg-gray-50">
-                            <td class="py-3 px-4">${saleTime}</td>
-                            <td class="py-3 px-4">${storeName}</td>
-                            <td class="py-3 px-4">${productName}</td>
-                            <td class="py-3 px-4">${quantity}</td>
-                            <td class="py-3 px-4">$${amount.toFixed(2)}</td>
-                            <td class="py-3 px-4">
-                                <button onclick="deleteSale('${saleId}')" class="text-red-600 hover:text-red-800 text-sm">
-                                    Delete
-                                </button>
-                            </td>
-                        </tr>
-                    `;
-                }).join('');
-            } catch (error) {
-                console.error('Error in updateTodaysSalesTable:', error);
-                const tbody = document.getElementById('todaysSalesTable');
-                if (tbody) {
-                    tbody.innerHTML = '<tr><td colspan="6" class="text-center py-8 text-red-500">Error loading sales data</td></tr>';
-                }
-            }
-        }
-
-        // Add Sale Form
-        document.getElementById('addSaleForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const submitBtn = e.target.querySelector('button[type="submit"]');
-            const originalText = submitBtn.textContent;
-            submitBtn.textContent = 'Adding...';
-            submitBtn.disabled = true;
-            
-            const date = document.getElementById('saleDate').value;
-            const productId = document.getElementById('saleProduct').value;
-            const quantity = parseInt(document.getElementById('saleQuantity').value);
-            const storeId = document.getElementById('saleStore') ? document.getElementById('saleStore').value : currentUser.storeId;
-            
-            if (!date || !productId || !quantity || !storeId) {
-                alert('Please fill in all fields');
-                submitBtn.textContent = originalText;
-                submitBtn.disabled = false;
-                return;
-            }
-            
-            if (quantity <= 0) {
-                alert('Quantity must be greater than 0');
-                submitBtn.textContent = originalText;
-                submitBtn.disabled = false;
-                return;
-            }
-            
-            const product = getProduct(productId);
-            if (!product) {
-                alert('Invalid product selected');
-                submitBtn.textContent = originalText;
-                submitBtn.disabled = false;
-                return;
-            }
-            
-            const newSale = {
-                date: date,
-                time: getCurrentTime(),
-                employeeId: currentUser.id,
-                storeId: storeId,
-                productId: productId,
-                quantity: quantity,
-                amount: product.price * quantity
-            };
-            
-            try {
-                await saveSale(newSale);
-                
-                // Reset form
-                document.getElementById('saleQuantity').value = '';
-                document.getElementById('saleProduct').value = '';
-                if (document.getElementById('saleStore')) {
-                    document.getElementById('saleStore').value = currentUser.storeId || '';
-                }
-                
-                // Reload data and update displays
-                await loadSales();
-                updateEmployeeStats();
-                updateTodaysSalesTable();
-                
-                alert('Sale added successfully!');
-            } catch (error) {
-                alert('Error adding sale: ' + error.message);
-            }
-            
-            submitBtn.textContent = originalText;
-            submitBtn.disabled = false;
-        });
-
-        async function deleteSale(saleId) {
-            if (!saleId) {
-                console.error('deleteSale requires valid saleId');
-                return;
-            }
-            
-            if (confirm('Are you sure you want to delete this sale?')) {
-                try {
-                    await deleteSaleRecord(saleId);
-                    await loadSales();
-                    updateEmployeeStats();
-                    updateTodaysSalesTable();
-                } catch (error) {
-                    console.error('Error in deleteSale:', error);
-                    alert('Error deleting sale: ' + error.message);
-                }
-            }
-        }
-
-        // Admin Dashboard Functions
-        async function showDashboard() {
-            document.getElementById('loginScreen').classList.add('hidden');
-            document.getElementById('dashboard').classList.remove('hidden');
-            
-            // Update current date
-            updateCurrentDate('adminCurrentDate');
-            
-            // Show employees tab by default
-            await switchTab('employees');
-        }
-
-        async function switchTab(tabName) {
-            // Hide all tab contents
-            document.querySelectorAll('.tab-content').forEach(tab => {
-                tab.classList.add('hidden');
-            });
-            
-            // Remove active class from all tab buttons
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.classList.remove('tab-active', 'border-purple-500');
-                btn.classList.add('border-transparent');
-            });
-            
-            // Show selected tab content
-            document.getElementById(tabName + '-tab').classList.remove('hidden');
-            
-            // Add active class to selected tab button
-            const activeBtn = document.querySelector(`[data-tab="${tabName}"]`);
-            activeBtn.classList.add('tab-active', 'border-purple-500');
-            activeBtn.classList.remove('border-transparent');
-            
-            // Load data for the selected tab
-            switch(tabName) {
-                case 'employees':
-                    await loadEmployeesTable();
-                    break;
-                case 'stores':
-                    await loadStoresTable();
-                    break;
-                case 'products':
-                    await loadProductsTable();
-                    break;
-                case 'collections':
-                    await loadCollectionsTable();
-                    break;
-                case 'database':
-                    await loadDatabaseManager();
-                    break;
-                case 'sales':
-                    // Initialize filter dropdown
-                    document.getElementById('reportType').dispatchEvent(new Event('change'));
-                    break;
-                case 'salary':
-                    populateEmployeeDropdown();
-                    break;
-            }
-        }
-
-        async function loadEmployeesTable() {
-            try {
-                await loadEmployees();
-                const tbody = document.getElementById('employeesTable');
-                
-                if (!tbody) {
-                    console.error('Employees table body element not found');
-                    return;
-                }
-                
-                if (!employees || !Array.isArray(employees) || employees.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="6" class="text-center py-8 text-gray-500">No employees found. Click "Add Employee" to create your first employee.</td></tr>';
-                    return;
-                }
-                
-                tbody.innerHTML = employees.filter(emp => emp && emp.id).map(emp => {
-                    // Safe property access with fallbacks
-                    const empName = emp.name || 'N/A';
-                    const empUsername = emp.username || 'N/A';
-                    const storeName = getStoreName(emp.storeId);
-                    const salaryType = emp.salaryType || 'fixed';
-                    const baseSalary = emp.baseSalary || 0;
-                    const empId = emp.id || '';
-                    
-                    return `
-                        <tr class="border-b hover:bg-gray-50">
-                            <td class="py-4 px-6">${empName}</td>
-                            <td class="py-4 px-6">${empUsername}</td>
-                            <td class="py-4 px-6">${storeName}</td>
-                            <td class="py-4 px-6 capitalize">${salaryType}</td>
-                            <td class="py-4 px-6">$${baseSalary}</td>
-                            <td class="py-4 px-6">
-                                <button onclick="editItem('employee', '${empId}')" class="text-blue-600 hover:text-blue-800 mr-3">Edit</button>
-                                <button onclick="deleteItem('employee', '${empId}')" class="text-red-600 hover:text-red-800">Delete</button>
-                            </td>
-                        </tr>
-                    `;
-                }).join('');
-            } catch (error) {
-                console.error('Error in loadEmployeesTable:', error);
-                const tbody = document.getElementById('employeesTable');
-                if (tbody) {
-                    tbody.innerHTML = '<tr><td colspan="6" class="text-center py-8 text-red-500">Error loading employees data</td></tr>';
-                }
-            }
-        }
-
-        async function loadStoresTable() {
-            await loadStores();
-            const tbody = document.getElementById('storesTable');
-            
-            if (stores.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" class="text-center py-8 text-gray-500">No stores found. Click "Add Store" to create your first store.</td></tr>';
-                return;
-            }
-            
-            tbody.innerHTML = stores.filter(store => store && store.id).map(store => `
-                <tr class="border-b hover:bg-gray-50">
-                    <td class="py-4 px-6">${store.name || 'N/A'}</td>
-                    <td class="py-4 px-6">${store.location || 'N/A'}</td>
-                    <td class="py-4 px-6">${store.manager || 'N/A'}</td>
-                    <td class="py-4 px-6">${store.phone || 'N/A'}</td>
-                    <td class="py-4 px-6">
-                        <button onclick="editItem('store', '${store.id}')" class="text-blue-600 hover:text-blue-800 mr-3">Edit</button>
-                        <button onclick="deleteItem('store', '${store.id}')" class="text-red-600 hover:text-red-800">Delete</button>
-                    </td>
-                </tr>
-            `).join('');
-        }
-
-        async function loadProductsTable() {
-            await loadProducts();
-            const tbody = document.getElementById('productsTable');
-            
-            if (products.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="3" class="text-center py-8 text-gray-500">No products found. Click "Add Product" to create your first product.</td></tr>';
-                return;
-            }
-            
-            tbody.innerHTML = products.filter(product => product && product.id).map(product => `
-                <tr class="border-b hover:bg-gray-50">
-                    <td class="py-4 px-6">${product.name || 'N/A'}</td>
-                    <td class="py-4 px-6">$${product.price || 0}</td>
-                    <td class="py-4 px-6">
-                        <button onclick="editItem('product', '${product.id}')" class="text-blue-600 hover:text-blue-800 mr-3">Edit</button>
-                        <button onclick="deleteItem('product', '${product.id}')" class="text-red-600 hover:text-red-800">Delete</button>
-                    </td>
-                </tr>
-            `).join('');
-        }
-
-        async function loadCollectionsTable() {
-            const tbody = document.getElementById('collectionsTable');
-            
-            if (collections.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" class="text-center py-8 text-gray-500">No collections found. Click "Add Collection" to create your first collection.</td></tr>';
-                return;
-            }
-            
-            tbody.innerHTML = collections.filter(collection => collection && collection.id).map(collection => {
-                // Count products in this collection
-                const productCount = collection.productIds ? collection.productIds.length : 0;
-                const status = collection.status || 'active';
-                const statusColor = status === 'active' ? 'text-green-600' : 'text-gray-500';
-                
-                return `
-                    <tr class="border-b hover:bg-gray-50">
-                        <td class="py-4 px-6">${collection.name || 'N/A'}</td>
-                        <td class="py-4 px-6">${collection.description || 'N/A'}</td>
-                        <td class="py-4 px-6">${productCount}</td>
-                        <td class="py-4 px-6 ${statusColor} capitalize">${status}</td>
-                        <td class="py-4 px-6">
-                            <button onclick="editItem('collection', '${collection.id}')" class="text-blue-600 hover:text-blue-800 mr-3">Edit</button>
-                            <button onclick="deleteItem('collection', '${collection.id}')" class="text-red-600 hover:text-red-800">Delete</button>
-                        </td>
-                    </tr>
-                `;
-            }).join('');
-        }
-
-        // Modal Functions
-        function openModal(type, item = null) {
-            // Comprehensive null and type checking
-            if (!type || typeof type !== 'string' || type.length === 0) {
-                console.error('Modal type is required and must be a valid string');
-                return;
-            }
-            
-            editingType = type;
-            editingItem = item;
-            
-            const modal = document.getElementById('modal');
-            const title = document.getElementById('modalTitle');
-            const fields = document.getElementById('modalFields');
-            
-            if (!modal || !title || !fields) {
-                console.error('Modal elements not found');
-                return;
-            }
-            
-            // Safe string manipulation with null check
-            let typeCapitalized = 'Item';
-            try {
-                if (type && typeof type === 'string' && type.length > 0) {
-                    typeCapitalized = type.charAt(1).toUpperCase() + type.slice(1);
-                }
-            } catch (error) {
-                console.error('Error capitalizing type:', error);
-                typeCapitalized = 'Item';
-            }
-            title.textContent = item ? `Edit ${typeCapitalized}` : `Add ${typeCapitalized}`;
-            
-            // Generate form fields based on type
-            let fieldsHTML = '';
-            
-            switch(type) {
-                case 'employee':
-                    fieldsHTML = `
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Name</label>
-                            <input type="text" id="empName" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" value="${item && item.name ? item.name : ''}" required>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Username</label>
-                            <input type="text" id="empUsername" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" value="${item && item.username ? item.username : ''}" required>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
-                            <input type="password" id="empPassword" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" value="${item && item.password ? item.password : ''}" required>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Store</label>
-                            <select id="empStore" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" required>
-                                <option value="">Select Store</option>
-                                ${stores && Array.isArray(stores) ? stores.map(store => `<option value="${store && store.id ? store.id : ''}" ${item && item.storeId === (store && store.id) ? 'selected' : ''}>${store && store.name ? store.name : 'Unknown Store'}</option>`).join('') : ''}
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Salary Type</label>
-                            <select id="empSalaryType" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" required>
-                                <option value="fixed" ${item && item.salaryType === 'fixed' ? 'selected' : ''}>Fixed</option>
-                                <option value="commission" ${item && item.salaryType === 'commission' ? 'selected' : ''}>Commission</option>
-                                <option value="qty_sold" ${item && item.salaryType === 'qty_sold' ? 'selected' : ''}>Quantity Sold</option>
-                                <option value="days_present" ${item && item.salaryType === 'days_present' ? 'selected' : ''}>Days Present</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Base Salary</label>
-                            <input type="number" id="empBaseSalary" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" value="${item && item.baseSalary ? item.baseSalary : ''}" required>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Commission Rate</label>
-                            <input type="number" step="0.01" id="empCommissionRate" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" value="${item && item.commissionRate ? item.commissionRate : '0'}">
-                        </div>
-                    `;
-                    break;
-                    
-                case 'store':
-                    fieldsHTML = `
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Store Name</label>
-                            <input type="text" id="storeName" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" value="${item && item.name ? item.name : ''}" required>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Location</label>
-                            <input type="text" id="storeLocation" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" value="${item && item.location ? item.location : ''}" required>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Manager</label>
-                            <input type="text" id="storeManager" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" value="${item && item.manager ? item.manager : ''}" required>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Phone</label>
-                            <input type="tel" id="storePhone" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" value="${item && item.phone ? item.phone : ''}" required>
-                        </div>
-                    `;
-                    break;
-                    
-                case 'product':
-                    fieldsHTML = `
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Product Name</label>
-                            <input type="text" id="productName" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" value="${item && item.name ? item.name : ''}" required>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Price</label>
-                            <input type="number" step="0.01" id="productPrice" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" value="${item && item.price ? item.price : ''}" required>
-                        </div>
-                    `;
-                    break;
-                    
-                case 'collection':
-                    const selectedProducts = item && item.productIds ? item.productIds : [];
-                    fieldsHTML = `
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Collection Name</label>
-                            <input type="text" id="collectionName" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" value="${item && item.name ? item.name : ''}" required>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
-                            <textarea id="collectionDescription" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" rows="3" placeholder="Enter collection description">${item && item.description ? item.description : ''}</textarea>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
-                            <select id="collectionStatus" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" required>
-                                <option value="active" ${item && item.status === 'active' ? 'selected' : ''}>Active</option>
-                                <option value="inactive" ${item && item.status === 'inactive' ? 'selected' : ''}>Inactive</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Products in Collection</label>
-                            <div class="border border-gray-300 rounded-lg p-3 max-h-40 overflow-y-auto">
-                                ${products.map(product => `
-                                    <label class="flex items-center space-x-2 mb-2">
-                                        <input type="checkbox" class="collection-product" value="${product.id}" ${selectedProducts.includes(product.id) ? 'checked' : ''}>
-                                        <span class="text-sm">${product.name} - $${product.price}</span>
-                                    </label>
-                                `).join('')}
-                                ${products.length === 0 ? '<p class="text-gray-500 text-sm">No products available. Add products first.</p>' : ''}
-                            </div>
-                        </div>
-                    `;
-                    break;
-                    
-                case 'sale':
-                    fieldsHTML = `
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Date</label>
-                            <input type="date" id="saleDate" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" value="${item && item.date ? item.date : getTodayString()}" required>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Time</label>
-                            <input type="time" id="saleTime" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" value="${item && item.time ? item.time : getCurrentTime()}" required>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Employee</label>
-                            <select id="saleEmployee" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" required>
-                                <option value="">Select Employee</option>
-                                ${employees && Array.isArray(employees) ? employees.map(emp => `<option value="${emp && emp.id ? emp.id : ''}" ${item && item.employeeId === (emp && emp.id) ? 'selected' : ''}>${emp && emp.name ? emp.name : 'Unknown Employee'}</option>`).join('') : ''}
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Store</label>
-                            <select id="saleStoreModal" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" required>
-                                <option value="">Select Store</option>
-                                ${stores && Array.isArray(stores) ? stores.map(store => `<option value="${store && store.id ? store.id : ''}" ${item && item.storeId === (store && store.id) ? 'selected' : ''}>${store && store.name ? store.name : 'Unknown Store'}</option>`).join('') : ''}
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Product</label>
-                            <select id="saleProductModal" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" required>
-                                <option value="">Select Product</option>
-                                ${products && Array.isArray(products) ? products.map(product => `<option value="${product && product.id ? product.id : ''}" ${item && item.productId === (product && product.id) ? 'selected' : ''}>${product && product.name ? product.name : 'Unknown Product'} - $${product && product.price ? product.price : '0'}</option>`).join('') : ''}
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Quantity</label>
-                            <input type="number" id="saleQuantityModal" min="1" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" value="${item && item.quantity ? item.quantity : '1'}" required>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Amount</label>
-                            <input type="number" step="0.01" id="saleAmountModal" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" value="${item && item.amount ? item.amount : ''}" required readonly>
-                        </div>
-                    `;
-                    
-                    // Add auto-calculation for amount
-                    setTimeout(() => {
-                        const productSelect = document.getElementById('saleProductModal');
-                        const quantityInput = document.getElementById('saleQuantityModal');
-                        const amountInput = document.getElementById('saleAmountModal');
-                        
-                        function calculateAmount() {
-                            const selectedProductId = productSelect.value;
-                            const quantity = parseInt(quantityInput.value) || 0;
-                            
-                            if (selectedProductId && quantity > 0) {
-                                const product = products.find(p => p.id === selectedProductId);
-                                if (product) {
-                                    amountInput.value = (product.price * quantity).toFixed(2);
-                                }
-                            } else {
-                                amountInput.value = '';
-                            }
-                        }
-                        
-                        productSelect.addEventListener('change', calculateAmount);
-                        quantityInput.addEventListener('input', calculateAmount);
-                        
-                        // Calculate initial amount if editing
-                        if (item) {
-                            calculateAmount();
-                        }
-                    }, 100);
-                    break;
-            }
-            
-            fields.innerHTML = fieldsHTML;
-            modal.classList.remove('hidden');
-        }
-
-        function closeModal() {
-            document.getElementById('modal').classList.add('hidden');
-            editingItem = null;
-            editingType = null;
-        }
-
-        // Modal Form Submit
-        document.getElementById('modalForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const saveBtn = document.getElementById('saveBtnText');
-            const loader = document.getElementById('saveLoader');
-            
-            saveBtn.textContent = 'Saving...';
-            loader.classList.remove('hidden');
-            
-            try {
-                let newItem = {};
-                
-                switch(editingType) {
-                    case 'employee':
-                        // Validate required fields
-                        const empName = document.getElementById('empName').value.trim();
-                        const empUsername = document.getElementById('empUsername').value.trim();
-                        const empPassword = document.getElementById('empPassword').value;
-                        const empStore = document.getElementById('empStore').value;
-                        const empBaseSalary = document.getElementById('empBaseSalary').value;
-                        
-                        if (!empName || !empUsername || !empPassword || !empStore || !empBaseSalary) {
-                            throw new Error('Please fill in all required fields');
-                        }
-                        
-                        // Check for duplicate username (only for new employees or different username)
-                        const existingEmployee = employees.find(emp => 
-                            emp.username === empUsername && 
-                            (!editingItem || emp.id !== editingItem.id)
-                        );
-                        if (existingEmployee) {
-                            throw new Error('Username already exists. Please choose a different username.');
-                        }
-                        
-                        newItem = {
-                            id: editingItem ? editingItem.id : null,
-                            name: empName,
-                            username: empUsername,
-                            password: empPassword,
-                            storeId: empStore,
-                            salaryType: document.getElementById('empSalaryType').value,
-                            baseSalary: parseFloat(empBaseSalary),
-                            commissionRate: parseFloat(document.getElementById('empCommissionRate').value) || 0
-                        };
-                        
-                        await saveEmployee(newItem);
-                        await loadEmployeesTable();
-                        break;
-                        
-                    case 'store':
-                        const storeName = document.getElementById('storeName').value.trim();
-                        const storeLocation = document.getElementById('storeLocation').value.trim();
-                        const storeManager = document.getElementById('storeManager').value.trim();
-                        const storePhone = document.getElementById('storePhone').value.trim();
-                        
-                        if (!storeName || !storeLocation || !storeManager || !storePhone) {
-                            throw new Error('Please fill in all required fields');
-                        }
-                        
-                        newItem = {
-                            id: editingItem ? editingItem.id : null,
-                            name: storeName,
-                            location: storeLocation,
-                            manager: storeManager,
-                            phone: storePhone
-                        };
-                        
-                        await saveStore(newItem);
-                        await loadStoresTable();
-                        break;
-                        
-                    case 'product':
-                        const productName = document.getElementById('productName').value.trim();
-                        const productPrice = document.getElementById('productPrice').value;
-                        
-                        if (!productName || !productPrice || parseFloat(productPrice) <= 0) {
-                            throw new Error('Please enter a valid product name and price');
-                        }
-                        
-                        newItem = {
-                            id: editingItem ? editingItem.id : null,
-                            name: productName,
-                            price: parseFloat(productPrice)
-                        };
-                        
-                        await saveProduct(newItem);
-                        await loadProductsTable();
-                        // Update product dropdown in employee portal if needed
-                        if (currentUserRole === 'employee') {
-                            populateProductDropdown();
-                        }
-                        break;
-                        
-                    case 'collection':
-                        const collectionName = document.getElementById('collectionName').value.trim();
-                        const collectionDescription = document.getElementById('collectionDescription').value.trim();
-                        const collectionStatus = document.getElementById('collectionStatus').value;
-                        
-                        if (!collectionName) {
-                            throw new Error('Please enter a collection name');
-                        }
-                        
-                        // Get selected products
-                        const selectedProductIds = Array.from(document.querySelectorAll('.collection-product:checked'))
-                            .map(checkbox => checkbox.value);
-                        
-                        newItem = {
-                            id: editingItem ? editingItem.id : null,
-                            name: collectionName,
-                            description: collectionDescription,
-                            status: collectionStatus,
-                            productIds: selectedProductIds,
-                            createdAt: editingItem ? editingItem.createdAt : new Date().toISOString()
-                        };
-                        
-                        await saveCollection(newItem);
-                        await loadCollectionsTable();
-                        break;
-                        
-                    case 'sale':
-                        const saleDate = document.getElementById('saleDate').value;
-                        const saleTime = document.getElementById('saleTime').value;
-                        const saleEmployee = document.getElementById('saleEmployee').value;
-                        const saleStore = document.getElementById('saleStoreModal').value;
-                        const saleProduct = document.getElementById('saleProductModal').value;
-                        const saleQuantity = document.getElementById('saleQuantityModal').value;
-                        const saleAmount = document.getElementById('saleAmountModal').value;
-                        
-                        if (!saleDate || !saleTime || !saleEmployee || !saleStore || !saleProduct || !saleQuantity || !saleAmount) {
-                            throw new Error('Please fill in all required fields');
-                        }
-                        
-                        if (parseInt(saleQuantity) <= 0) {
-                            throw new Error('Quantity must be greater than 0');
-                        }
-                        
-                        if (parseFloat(saleAmount) <= 0) {
-                            throw new Error('Amount must be greater than 0');
-                        }
-                        
-                        newItem = {
-                            id: editingItem ? editingItem.id : null,
-                            date: saleDate,
-                            time: saleTime,
-                            employeeId: saleEmployee,
-                            storeId: saleStore,
-                            productId: saleProduct,
-                            quantity: parseInt(saleQuantity),
-                            amount: parseFloat(saleAmount)
-                        };
-                        
-                        await saveSale(newItem);
-                        
-                        // Refresh database view if we're in database manager
-                        if (currentDbCollection === 'sales') {
-                            await loadDatabaseCollection();
-                        }
-                        
-                        // Also refresh employee portal if needed
-                        if (currentUserRole === 'employee') {
-                            updateEmployeeStats();
-                            updateTodaysSalesTable();
-                        }
-                        break;
-                }
-                
-                closeModal();
-                alert(`${editingType.charAt(1).toUpperCase() + editingType.slice(1)} saved successfully!`);
-                
-            } catch (error) {
-                alert('Error: ' + error.message);
-            }
-            
-            saveBtn.textContent = 'Save';
-            loader.classList.add('hidden');
-        });
-
-        async function editItem(type, id) {
-            if (!type || !id) {
-                console.error('editItem requires valid type and id');
-                return;
-            }
-            
-            let item;
-            
-            try {
-                switch(type) {
-                    case 'employee':
-                        if (Array.isArray(employees)) {
-                            item = employees.find(emp => emp && emp.id === id);
-                        }
-                        break;
-                    case 'store':
-                        if (Array.isArray(stores)) {
-                            item = stores.find(store => store && store.id === id);
-                        }
-                        break;
-                    case 'product':
-                        if (Array.isArray(products)) {
-                            item = products.find(product => product && product.id === id);
-                        }
-                        break;
-                    case 'collection':
-                        if (Array.isArray(collections)) {
-                            item = collections.find(collection => collection && collection.id === id);
-                        }
-                        break;
-                }
-                
-                if (item) {
-                    openModal(type, item);
-                } else {
-                    console.error(`Item not found: ${type} with id ${id}`);
-                }
-            } catch (error) {
-                console.error('Error in editItem:', error);
-            }
-        }
-
-        async function deleteItem(type, id) {
-            if (!type || !id) {
-                console.error('deleteItem requires valid type and id');
-                return;
-            }
-            
-            if (!confirm('Are you sure you want to delete this item?')) {
-                return;
-            }
-            
-            try {
-                switch(type) {
-                    case 'employee':
-                        await deleteEmployee(id);
-                        await loadEmployeesTable();
-                        break;
-                    case 'store':
-                        await deleteStore(id);
-                        await loadStoresTable();
-                        break;
-                    case 'product':
-                        await deleteProduct(id);
-                        await loadProductsTable();
-                        if (currentUserRole === 'employee') {
-                            populateProductDropdown();
-                        }
-                        break;
-                    case 'collection':
-                        await deleteCollection(id);
-                        await loadCollectionsTable();
-                        break;
-                }
-                alert('Item deleted successfully!');
-            } catch (error) {
-                console.error('Error in deleteItem:', error);
-                alert('Error deleting item: ' + error.message);
-            }
-        }
-
-        // Reports Functions (keeping the same logic as before)
-        async function generateSalesReport() {
-            await loadSales();
-            
-            const startDate = document.getElementById('reportStartDate').value;
-            const endDate = document.getElementById('reportEndDate').value;
-            const reportType = document.getElementById('reportType').value;
-            const filterValue = document.getElementById('reportFilter').value;
-            
-            if (!startDate || !endDate) {
-                alert('Please select both start and end dates');
-                return;
-            }
-            
-            if (new Date(startDate) > new Date(endDate)) {
-                alert('Start date cannot be later than end date');
-                return;
-            }
-            
-            let filteredSales = sales.filter(sale => {
-                return sale.date >= startDate && sale.date <= endDate;
-            });
-            
-            // Apply additional filters
-            if (filterValue) {
-                switch(reportType) {
-                    case 'store':
-                        filteredSales = filteredSales.filter(sale => sale.storeId == filterValue);
-                        break;
-                    case 'staff':
-                        filteredSales = filteredSales.filter(sale => sale.employeeId == filterValue);
-                        break;
-                    case 'product':
-                        filteredSales = filteredSales.filter(sale => sale.productId == filterValue);
-                        break;
-                }
-            }
-            
-            const tbody = document.getElementById('salesReportTable');
-            const header = document.getElementById('salesReportHeader');
-            
-            if (filteredSales.length === 0) {
-                header.innerHTML = `
-                    <th class="text-left py-4 px-6" colspan="6">No Data Found</th>
-                `;
-                tbody.innerHTML = '<tr><td colspan="6" class="text-center py-8 text-gray-500">No sales found for the selected criteria</td></tr>';
-                return;
-            }
-            
-            let reportData = [];
-            
-            switch(reportType) {
-                case 'daily':
-                    reportData = generateDailyReport(filteredSales);
-                    header.innerHTML = `
-                        <th class="text-left py-4 px-6">Date</th>
-                        <th class="text-left py-4 px-6">Total Sales</th>
-                        <th class="text-left py-4 px-6">Total Quantity</th>
-                        <th class="text-left py-4 px-6">Total Amount</th>
-                    `;
-                    tbody.innerHTML = reportData.map(item => `
-                        <tr class="border-b hover:bg-gray-50">
-                            <td class="py-4 px-6">${new Date(item.date).toLocaleDateString()}</td>
-                            <td class="py-4 px-6">${item.salesCount}</td>
-                            <td class="py-4 px-6">${item.totalQuantity}</td>
-                            <td class="py-4 px-6">$${item.totalAmount.toFixed(2)}</td>
-                        </tr>
-                    `).join('');
-                    break;
-                    
-                case 'monthly':
-                    reportData = generateMonthlyReport(filteredSales);
-                    header.innerHTML = `
-                        <th class="text-left py-4 px-6">Month</th>
-                        <th class="text-left py-4 px-6">Total Sales</th>
-                        <th class="text-left py-4 px-6">Total Quantity</th>
-                        <th class="text-left py-4 px-6">Total Amount</th>
-                    `;
-                    tbody.innerHTML = reportData.map(item => `
-                        <tr class="border-b hover:bg-gray-50">
-                            <td class="py-4 px-6">${new Date(item.month + '-01').toLocaleDateString('en-US', { year: 'numeric', month: 'long' })}</td>
-                            <td class="py-4 px-6">${item.salesCount}</td>
-                            <td class="py-4 px-6">${item.totalQuantity}</td>
-                            <td class="py-4 px-6">$${item.totalAmount.toFixed(2)}</td>
-                        </tr>
-                    `).join('');
-                    break;
-                    
-                case 'store':
-                    reportData = generateStoreReport(filteredSales);
-                    header.innerHTML = `
-                        <th class="text-left py-4 px-6">Store</th>
-                        <th class="text-left py-4 px-6">Total Sales</th>
-                        <th class="text-left py-4 px-6">Total Quantity</th>
-                        <th class="text-left py-4 px-6">Total Amount</th>
-                    `;
-                    tbody.innerHTML = reportData.map(item => `
-                        <tr class="border-b hover:bg-gray-50">
-                            <td class="py-4 px-6">${item.store}</td>
-                            <td class="py-4 px-6">${item.salesCount}</td>
-                            <td class="py-4 px-6">${item.totalQuantity}</td>
-                            <td class="py-4 px-6">$${item.totalAmount.toFixed(2)}</td>
-                        </tr>
-                    `).join('');
-                    break;
-                    
-                case 'staff':
-                    reportData = generateStaffReport(filteredSales);
-                    header.innerHTML = `
-                        <th class="text-left py-4 px-6">Employee</th>
-                        <th class="text-left py-4 px-6">Total Sales</th>
-                        <th class="text-left py-4 px-6">Total Quantity</th>
-                        <th class="text-left py-4 px-6">Total Amount</th>
-                    `;
-                    tbody.innerHTML = reportData.map(item => `
-                        <tr class="border-b hover:bg-gray-50">
-                            <td class="py-4 px-6">${item.employee}</td>
-                            <td class="py-4 px-6">${item.salesCount}</td>
-                            <td class="py-4 px-6">${item.totalQuantity}</td>
-                            <td class="py-4 px-6">$${item.totalAmount.toFixed(2)}</td>
-                        </tr>
-                    `).join('');
-                    break;
-                    
-                case 'product':
-                    reportData = generateProductReport(filteredSales);
-                    header.innerHTML = `
-                        <th class="text-left py-4 px-6">Product</th>
-                        <th class="text-left py-4 px-6">Total Sales</th>
-                        <th class="text-left py-4 px-6">Total Quantity</th>
-                        <th class="text-left py-4 px-6">Total Amount</th>
-                    `;
-                    tbody.innerHTML = reportData.map(item => `
-                        <tr class="border-b hover:bg-gray-50">
-                            <td class="py-4 px-6">${item.product}</td>
-                            <td class="py-4 px-6">${item.salesCount}</td>
-                            <td class="py-4 px-6">${item.totalQuantity}</td>
-                            <td class="py-4 px-6">$${item.totalAmount.toFixed(2)}</td>
-                        </tr>
-                    `).join('');
-                    break;
-                    
-                default: // all
-                    header.innerHTML = `
-                        <th class="text-left py-4 px-6">Date</th>
-                        <th class="text-left py-4 px-6">Employee</th>
-                        <th class="text-left py-4 px-6">Store</th>
-                        <th class="text-left py-4 px-6">Product</th>
-                        <th class="text-left py-4 px-6">Quantity</th>
-                        <th class="text-left py-4 px-6">Amount</th>
-                    `;
-                    tbody.innerHTML = filteredSales.map(sale => `
-                        <tr class="border-b hover:bg-gray-50">
-                            <td class="py-4 px-6">${new Date(sale.date).toLocaleDateString()}</td>
-                            <td class="py-4 px-6">${getEmployeeName(sale.employeeId)}</td>
-                            <td class="py-4 px-6">${getStoreName(sale.storeId)}</td>
-                            <td class="py-4 px-6">${getProductName(sale.productId)}</td>
-                            <td class="py-4 px-6">${sale.quantity}</td>
-                            <td class="py-4 px-6">$${sale.amount.toFixed(2)}</td>
-                        </tr>
-                    `).join('');
-            }
-            
-            // Add summary row for aggregated reports
-            if (['daily', 'monthly', 'store', 'staff', 'product'].includes(reportType)) {
-                const totalAmount = reportData.reduce((sum, item) => sum + item.totalAmount, 0);
-                const totalQuantity = reportData.reduce((sum, item) => sum + item.totalQuantity, 0);
-                const totalSales = reportData.reduce((sum, item) => sum + item.salesCount, 0);
-                
-                tbody.innerHTML += `
-                    <tr class="border-t-2 border-gray-400 bg-gray-100 font-bold">
-                        <td class="py-4 px-6">TOTAL</td>
-                        <td class="py-4 px-6">${totalSales}</td>
-                        <td class="py-4 px-6">${totalQuantity}</td>
-                        <td class="py-4 px-6">$${totalAmount.toFixed(2)}</td>
-                    </tr>
-                `;
-            }
-        }
-        
-        function generateDailyReport(sales) {
-            const dailyData = {};
-            sales.forEach(sale => {
-                if (!dailyData[sale.date]) {
-                    dailyData[sale.date] = { salesCount: 0, totalQuantity: 0, totalAmount: 0 };
-                }
-                dailyData[sale.date].salesCount++;
-                dailyData[sale.date].totalQuantity += sale.quantity;
-                dailyData[sale.date].totalAmount += sale.amount;
-            });
-            
-            return Object.keys(dailyData).map(date => ({
-                date,
-                ...dailyData[date]
-            })).sort((a, b) => a.date.localeCompare(b.date));
-        }
-        
-        function generateMonthlyReport(sales) {
-            const monthlyData = {};
-            sales.forEach(sale => {
-                const monthKey = sale.date.substring(0, 7); // YYYY-MM
-                if (!monthlyData[monthKey]) {
-                    monthlyData[monthKey] = { salesCount: 0, totalQuantity: 0, totalAmount: 0 };
-                }
-                monthlyData[monthKey].salesCount++;
-                monthlyData[monthKey].totalQuantity += sale.quantity;
-                monthlyData[monthKey].totalAmount += sale.amount;
-            });
-            
-            return Object.keys(monthlyData).map(month => ({
-                month,
-                ...monthlyData[month]
-            })).sort((a, b) => a.month.localeCompare(b.month));
-        }
-        
-        function generateStoreReport(sales) {
-            const storeData = {};
-            sales.forEach(sale => {
-                const storeName = getStoreName(sale.storeId);
-                if (!storeData[storeName]) {
-                    storeData[storeName] = { salesCount: 0, totalQuantity: 0, totalAmount: 0 };
-                }
-                storeData[storeName].salesCount++;
-                storeData[storeName].totalQuantity += sale.quantity;
-                storeData[storeName].totalAmount += sale.amount;
-            });
-            
-            return Object.keys(storeData).map(store => ({
-                store,
-                ...storeData[store]
-            }));
-        }
-        
-        function generateStaffReport(sales) {
-            const staffData = {};
-            sales.forEach(sale => {
-                const employeeName = getEmployeeName(sale.employeeId);
-                if (!staffData[employeeName]) {
-                    staffData[employeeName] = { salesCount: 0, totalQuantity: 0, totalAmount: 0 };
-                }
-                staffData[employeeName].salesCount++;
-                staffData[employeeName].totalQuantity += sale.quantity;
-                staffData[employeeName].totalAmount += sale.amount;
-            });
-            
-            return Object.keys(staffData).map(employee => ({
-                employee,
-                ...staffData[employee]
-            }));
-        }
-        
-        function generateProductReport(sales) {
-            const productData = {};
-            sales.forEach(sale => {
-                const productName = getProductName(sale.productId);
-                if (!productData[productName]) {
-                    productData[productName] = { salesCount: 0, totalQuantity: 0, totalAmount: 0 };
-                }
-                productData[productName].salesCount++;
-                productData[productName].totalQuantity += sale.quantity;
-                productData[productName].totalAmount += sale.amount;
-            });
-            
-            return Object.keys(productData).map(product => ({
-                product,
-                ...productData[product]
-            }));
-        }
-
-        async function generateSalaryReport() {
-            await loadEmployees();
-            await loadSales();
-            
-            const startDate = document.getElementById('salaryStartDate').value;
-            const endDate = document.getElementById('salaryEndDate').value;
-            const selectedEmployee = document.getElementById('salaryEmployee').value;
-            
-            if (!startDate || !endDate) {
-                alert('Please select both start and end dates');
-                return;
-            }
-            
-            const tbody = document.getElementById('salaryReportTable');
-            
-            let employeesToProcess = employees;
-            if (selectedEmployee) {
-                employeesToProcess = employees.filter(emp => emp.id == selectedEmployee);
-            }
-            
-            const salaryData = employeesToProcess.map(employee => {
-                // Filter sales for this employee in the selected date range
-                const employeeSales = sales.filter(sale => {
-                    return sale.date >= startDate && 
-                           sale.date <= endDate &&
-                           sale.employeeId === employee.id;
-                });
-                
-                const totalSales = employeeSales.reduce((sum, sale) => sum + sale.amount, 0);
-                const totalQuantity = employeeSales.reduce((sum, sale) => sum + sale.quantity, 0);
-                
-                let bonus = 0;
-                let daysOrQty = 0;
-                
-                switch(employee.salaryType) {
-                    case 'commission':
-                        // Calculate commission based on sales amount
-                        bonus = totalSales * (employee.commissionRate || 0.1);
-                        daysOrQty = employeeSales.length;
-                        break;
-                    case 'qty_sold':
-                        // Calculate bonus based on quantity sold
-                        bonus = totalQuantity * 5; // $5 per item sold
-                        daysOrQty = totalQuantity;
-                        break;
-                    case 'days_present':
-                        // Calculate bonus based on days present (unique dates with sales)
-                        const uniqueDates = [...new Set(employeeSales.map(sale => sale.date))];
-                        daysOrQty = uniqueDates.length;
-                        bonus = daysOrQty * 50; // $50 per day present
-                        break;
-                    default: // fixed
-                        daysOrQty = employeeSales.length;
-                        break;
-                }
-                
-                const totalSalary = (employee.baseSalary || 0) + bonus;
-                
-                return {
-                    employee: employee,
-                    totalSales: totalSales,
-                    bonus: bonus,
-                    totalSalary: totalSalary,
-                    daysOrQty: daysOrQty
-                };
-            });
-            
-            tbody.innerHTML = salaryData.map(data => `
-                <tr class="border-b hover:bg-gray-50">
-                    <td class="py-4 px-6">${data.employee.name}</td>
-                    <td class="py-4 px-6 capitalize">${data.employee.salaryType.replace('_', ' ')}</td>
-                    <td class="py-4 px-6">$${(data.employee.baseSalary || 0).toFixed(2)}</td>
-                    <td class="py-4 px-6">$${data.bonus.toFixed(2)}</td>
-                    <td class="py-4 px-6">$${data.totalSales.toFixed(2)}</td>
-                    <td class="py-4 px-6">${data.daysOrQty}</td>
-                    <td class="py-4 px-6">$${data.totalSalary.toFixed(2)}</td>
-                </tr>
-            `).join('');
-        }
-
-        // Master Data Download Function
-        async function downloadAllMasterData() {
-            // Force reload all data to ensure we have the latest
-            await loadAllData();
-            
-            // Ensure arrays are properly initialized
-            initializeArrays();
-            
-            const timestamp = new Date().toISOString().split('T')[0];
-            
-            // Create a comprehensive CSV with all master data
-            let csvContent = "EDEN PERFUME - MASTER DATA EXPORT\n";
-            csvContent += `Export Date: ${new Date().toLocaleDateString()}\n`;
-            csvContent += `Export Time: ${new Date().toLocaleTimeString()}\n`;
-            csvContent += `Database Mode: ${isFirebaseMode ? 'Firebase Connected' : 'Local Storage Mode'}\n`;
-            csvContent += `Total Records: ${employees.length + stores.length + products.length + collections.length + sales.length}\n\n`;
-            
-            // Employees Data
-            csvContent += "=== EMPLOYEES DATA ===\n";
-            csvContent += "ID,Name,Username,Password,Store ID,Store Name,Salary Type,Base Salary,Commission Rate\n";
-            if (employees.length === 0) {
-                csvContent += "No employees found\n";
-            } else {
-                employees.forEach(emp => {
-                    const store = stores.find(s => s.id === emp.storeId);
-                    csvContent += `"${emp.id || 'N/A'}","${emp.name || 'N/A'}","${emp.username || 'N/A'}","${emp.password || 'N/A'}","${emp.storeId || 'N/A'}","${store ? store.name : 'Unknown Store'}","${emp.salaryType || 'N/A'}","${emp.baseSalary || 0}","${emp.commissionRate || 0}"\n`;
-                });
-            }
-            
-            csvContent += "\n=== STORES DATA ===\n";
-            csvContent += "ID,Store Name,Location,Manager,Phone\n";
-            if (stores.length === 0) {
-                csvContent += "No stores found\n";
-            } else {
-                stores.forEach(store => {
-                    csvContent += `"${store.id || 'N/A'}","${store.name || 'N/A'}","${store.location || 'N/A'}","${store.manager || 'N/A'}","${store.phone || 'N/A'}"\n`;
-                });
-            }
-            
-            csvContent += "\n=== PRODUCTS DATA ===\n";
-            csvContent += "ID,Product Name,Price\n";
-            if (products.length === 0) {
-                csvContent += "No products found\n";
-            } else {
-                products.forEach(product => {
-                    csvContent += `"${product.id || 'N/A'}","${product.name || 'N/A'}","${product.price || 0}"\n`;
-                });
-            }
-            
-            csvContent += "\n=== COLLECTIONS DATA ===\n";
-            csvContent += "ID,Collection Name,Description,Status,Product Count,Product IDs\n";
-            if (collections.length === 0) {
-                csvContent += "No collections found\n";
-            } else {
-                collections.forEach(collection => {
-                    const productIds = collection.productIds || [];
-                    csvContent += `"${collection.id || 'N/A'}","${collection.name || 'N/A'}","${collection.description || 'N/A'}","${collection.status || 'N/A'}","${productIds.length}","${productIds.join(';')}"\n`;
-                });
-            }
-            
-            csvContent += "\n=== SALES DATA ===\n";
-            csvContent += "ID,Date,Time,Employee ID,Employee Name,Store ID,Store Name,Product ID,Product Name,Quantity,Amount\n";
-            if (sales.length === 0) {
-                csvContent += "No sales found\n";
-            } else {
-                sales.forEach(sale => {
-                    const employee = employees.find(e => e.id === sale.employeeId);
-                    const store = stores.find(s => s.id === sale.storeId);
-                    const product = products.find(p => p.id === sale.productId);
-                    csvContent += `"${sale.id || 'N/A'}","${sale.date || 'N/A'}","${sale.time || 'N/A'}","${sale.employeeId || 'N/A'}","${employee ? employee.name : 'Unknown Employee'}","${sale.storeId || 'N/A'}","${store ? store.name : 'Unknown Store'}","${sale.productId || 'N/A'}","${product ? product.name : 'Unknown Product'}","${sale.quantity || 0}","${sale.amount || 0}"\n`;
-                });
-            }
-            
-            csvContent += "\n=== SUMMARY ===\n";
-            csvContent += `Total Employees: ${employees.length}\n`;
-            csvContent += `Total Stores: ${stores.length}\n`;
-            csvContent += `Total Products: ${products.length}\n`;
-            csvContent += `Total Collections: ${collections.length}\n`;
-            csvContent += `Total Sales: ${sales.length}\n`;
-            csvContent += `Total Revenue: $${sales.reduce((sum, sale) => sum + (sale.amount || 0), 0).toFixed(2)}\n`;
-            csvContent += `Export completed at: ${new Date().toLocaleString()}\n`;
-            
-            // Create and download file
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            const url = URL.createObjectURL(blob);
-            link.setAttribute('href', url);
-            link.setAttribute('download', `eden_perfume_complete_export_${timestamp}.csv`);
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            URL.revokeObjectURL(url);
-            
-            alert(`Master data export completed!\n\nExported:\n- ${employees.length} Employees\n- ${stores.length} Stores\n- ${products.length} Products\n- ${collections.length} Collections\n- ${sales.length} Sales Records\n\nFile saved as: eden_perfume_complete_export_${timestamp}.csv`);
-        }
-
-        // Download Functions
-        function downloadExcel(reportType) {
-            const table = document.querySelector(`#${reportType}ReportTable`).closest('table');
-            
-            if (!table) {
-                alert('No report data to download. Please generate a report first.');
-                return;
-            }
-            
-            const data = [];
-            
-            // Get headers
-            const headers = Array.from(table.querySelectorAll('thead th')).map(th => th.textContent.trim());
-            if (headers.length > 0) {
-                data.push(headers);
-            }
-            
-            // Get data rows
-            const rows = table.querySelectorAll('tbody tr');
-            rows.forEach(row => {
-                const cells = Array.from(row.querySelectorAll('td')).map(td => td.textContent.trim());
-                if (cells.length > 1 && !cells[0].includes('No sales found') && !cells[0].includes('Select date range')) {
-                    data.push(cells);
-                }
-            });
-            
-            if (data.length <= 1) {
-                alert('No data available to download. Please generate a report first.');
-                return;
-            }
-            
-            // Add report metadata
-            const reportTitle = `Eden Perfume - ${reportType.charAt(1).toUpperCase() + reportType.slice(1)} Report`;
-            const timestamp = new Date().toLocaleDateString();
-            
-            let csvContent = `${reportTitle}\n`;
-            csvContent += `Generated on: ${timestamp}\n`;
-            csvContent += `Database Mode: ${isFirebaseMode ? 'Firebase' : 'Local Storage'}\n\n`;
-            
-            // Convert to CSV format
-            csvContent += data.map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
-            
-            // Create and download file
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            const url = URL.createObjectURL(blob);
-            link.setAttribute('href', url);
-            link.setAttribute('download', `${reportType}_report_${new Date().toISOString().split('T')[0]}.csv`);
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            
-            alert('Report downloaded successfully!');
-        }
-        
-        function downloadPDF(reportType) {
-            const table = document.querySelector(`#${reportType}ReportTable`).closest('table');
-            
-            if (!table) {
-                alert('No report data to download. Please generate a report first.');
-                return;
-            }
-            
-            const headers = Array.from(table.querySelectorAll('thead th')).map(th => th.textContent.trim());
-            const rows = Array.from(table.querySelectorAll('tbody tr'));
-            
-            let content = `Eden Perfume - ${reportType.charAt(1).toUpperCase() + reportType.slice(1)} Report\n`;
-            content += `Generated on: ${new Date().toLocaleDateString()}\n`;
-            content += `Generated at: ${new Date().toLocaleTimeString()}\n`;
-            content += `Database Mode: ${isFirebaseMode ? 'Firebase' : 'Local Storage'}\n\n`;
-            content += headers.join('\t') + '\n';
-            content += '-'.repeat(100) + '\n';
-            
-            let hasData = false;
-            rows.forEach(row => {
-                const cells = Array.from(row.querySelectorAll('td')).map(td => td.textContent.trim());
-                if (cells.length > 1 && !cells[0].includes('No sales found') && !cells[0].includes('Select date range')) {
-                    content += cells.join('\t') + '\n';
-                    hasData = true;
-                }
-            });
-            
-            if (!hasData) {
-                alert('No data available to download. Please generate a report first.');
-                return;
-            }
-            
-            content += '\n' + '-'.repeat(100) + '\n';
-            content += 'Report generated by Eden Perfume Sales Management System\n';
-            
-            // Create and download as text file (PDF generation would require external library)
-            const blob = new Blob([content], { type: 'text/plain;charset=utf-8;' });
-            const link = document.createElement('a');
-            const url = URL.createObjectURL(blob);
-            link.setAttribute('href', url);
-            link.setAttribute('download', `${reportType}_report_${new Date().toISOString().split('T')[0]}.txt`);
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            
-            alert('Report downloaded successfully!');
-        }
-        
-        // Update filter dropdown based on report type
-        document.getElementById('reportType').addEventListener('change', function() {
-            const reportType = this.value;
-            const filterSelect = document.getElementById('reportFilter');
-            
-            filterSelect.innerHTML = '<option value="">All</option>';
-            
-            switch(reportType) {
-                case 'store':
-                    stores.forEach(store => {
-                        const option = document.createElement('option');
-                        option.value = store.id;
-                        option.textContent = store.name;
-                        filterSelect.appendChild(option);
-                    });
-                    break;
-                case 'staff':
-                    employees.forEach(emp => {
-                        const option = document.createElement('option');
-                        option.value = emp.id;
-                        option.textContent = emp.name;
-                        filterSelect.appendChild(option);
-                    });
-                    break;
-                case 'product':
-                    products.forEach(product => {
-                        const option = document.createElement('option');
-                        option.value = product.id;
-                        option.textContent = product.name;
-                        filterSelect.appendChild(option);
-                    });
-                    break;
-            }
-        });
-        
-        // Populate employee dropdown for salary reports
-        function populateEmployeeDropdown() {
-            const select = document.getElementById('salaryEmployee');
-            select.innerHTML = '<option value="">All Employees</option>';
-            
-            employees.forEach(emp => {
-                const option = document.createElement('option');
-                option.value = emp.id;
-                option.textContent = emp.name;
-                select.appendChild(option);
-            });
-        }
-
-        // Database Manager Functions
-        let currentDbCollection = '';
-        let currentDbData = [];
-
-        async function loadDatabaseManager() {
-            // Update connection status
-            const statusEl = document.getElementById('dbConnectionStatus');
-            if (statusEl) {
-                statusEl.textContent = isFirebaseMode ? '🔥 Firebase Connected' : '📱 Local Storage Mode';
-                statusEl.className = isFirebaseMode ? 'text-sm text-green-600' : 'text-sm text-blue-600';
-            }
-            
-            // Reset view
-            document.getElementById('dbCollectionSelect').value = '';
-            document.getElementById('dbTableTitle').textContent = 'Select a collection to view data';
-            document.getElementById('dbTableCount').textContent = '0 entries';
-            document.getElementById('dbTableHeader').innerHTML = '<th class="text-left py-3 px-4 text-sm font-medium text-gray-700">Select a collection</th>';
-            document.getElementById('dbTableBody').innerHTML = '<tr><td class="text-center py-8 text-gray-500">Select a collection from the dropdown above</td></tr>';
-        }
-
-        async function loadDatabaseCollection() {
-            const selectedCollection = document.getElementById('dbCollectionSelect').value;
-            
-            if (!selectedCollection) {
-                await loadDatabaseManager();
-                return;
-            }
-            
-            currentDbCollection = selectedCollection;
-            
-            // Load fresh data
-            await loadAllData();
-            
-            // Get the data for the selected collection
-            switch(selectedCollection) {
-                case 'employees':
-                    currentDbData = [...employees];
-                    break;
-                case 'stores':
-                    currentDbData = [...stores];
-                    break;
-                case 'products':
-                    currentDbData = [...products];
-                    break;
-                case 'collections':
-                    currentDbData = [...collections];
-                    break;
-                case 'sales':
-                    currentDbData = [...sales];
-                    break;
-                default:
-                    currentDbData = [];
-            }
-            
-            renderDatabaseTable();
-        }
-
-        function renderDatabaseTable() {
-            const titleEl = document.getElementById('dbTableTitle');
-            const countEl = document.getElementById('dbTableCount');
-            const headerEl = document.getElementById('dbTableHeader');
-            const bodyEl = document.getElementById('dbTableBody');
-            
-            // Update title and count
-            titleEl.textContent = `${currentDbCollection.charAt(1).toUpperCase() + currentDbCollection.slice(1)} Collection`;
-            countEl.textContent = `${currentDbData.length} entries`;
-            
-            if (currentDbData.length === 0) {
-                headerEl.innerHTML = '<th class="text-left py-3 px-4 text-sm font-medium text-gray-700">No Data</th>';
-                bodyEl.innerHTML = `<tr><td class="text-center py-8 text-gray-500">No ${currentDbCollection} found in database</td></tr>`;
-                return;
-            }
-            
-            // Generate table headers based on data structure
-            const sampleItem = currentDbData[0];
-            const headers = Object.keys(sampleItem).filter(key => key !== 'firebaseId');
-            
-            headerEl.innerHTML = headers.map(header => 
-                `<th class="text-left py-3 px-4 text-sm font-medium text-gray-700">${header.charAt(1).toUpperCase() + header.slice(1)}</th>`
-            ).join('') + '<th class="text-left py-3 px-4 text-sm font-medium text-gray-700">Actions</th>';
-            
-            // Generate table rows
-            bodyEl.innerHTML = currentDbData.map(item => {
-                const cells = headers.map(header => {
-                    let value = item[header];
-                    
-                    // Format different data types
-                    if (value === null || value === undefined) {
-                        value = 'N/A';
-                    } else if (typeof value === 'boolean') {
-                        value = value ? 'Yes' : 'No';
-                    } else if (Array.isArray(value)) {
-                        value = `[${value.length} items]`;
-                    } else if (typeof value === 'object') {
-                        value = 'Object';
-                    } else if (typeof value === 'number') {
-                        // Format currency for price/amount fields
-                        if (header.toLowerCase().includes('price') || header.toLowerCase().includes('amount') || header.toLowerCase().includes('salary')) {
-                            value = `$${value.toFixed(2)}`;
-                        }
-                    } else if (typeof value === 'string' && value.length > 50) {
-                        value = value.substring(0, 50) + '...';
-                    }
-                    
-                    return `<td class="py-3 px-4 text-sm">${value}</td>`;
-                }).join('');
-                
-                const actions = `
-                    <td class="py-3 px-4 text-sm">
-                        <button onclick="editDatabaseEntry('${item.id}')" class="text-blue-600 hover:text-blue-800 mr-3 text-xs">Edit</button>
-                        <button onclick="deleteDatabaseEntry('${item.id}')" class="text-red-600 hover:text-red-800 mr-3 text-xs">Delete</button>
-                        <button onclick="viewDatabaseEntry('${item.id}')" class="text-green-600 hover:text-green-800 text-xs">View</button>
-                    </td>
-                `;
-                
-                return `<tr class="border-b hover:bg-gray-50">${cells}${actions}</tr>`;
-            }).join('');
-        }
-
-        function addDatabaseEntry() {
-            if (!currentDbCollection) {
-                alert('Please select a collection first');
-                return;
-            }
-            
-            // Use existing modal system
-            const singularType = currentDbCollection === 'sales' ? 'sale' : currentDbCollection.slice(0, -1);
-            openModal(singularType);
-        }
-
-        function editDatabaseEntry(id) {
-            if (!currentDbCollection || !id) {
-                alert('Invalid entry selection');
-                return;
-            }
-            
-            const item = currentDbData.find(item => item.id === id);
-            if (!item) {
-                alert('Entry not found');
-                return;
-            }
-            
-            const singularType = currentDbCollection === 'sales' ? 'sale' : currentDbCollection.slice(0, -1);
-            editItem(singularType, id);
-        }
-
-        async function deleteDatabaseEntry(id) {
-            if (!currentDbCollection || !id) {
-                alert('Invalid entry selection');
-                return;
-            }
-            
-            const item = currentDbData.find(item => item.id === id);
-            if (!item) {
-                alert('Entry not found');
-                return;
-            }
-            
-            if (!confirm(`Are you sure you want to delete this ${currentDbCollection.slice(0, -1)} entry?\n\nThis action cannot be undone.`)) {
-                return;
-            }
-            
-            try {
-                const singularType = currentDbCollection === 'sales' ? 'sale' : currentDbCollection.slice(0, -1);
-                await deleteItem(singularType, id);
-                
-                // Refresh the database view
-                await loadDatabaseCollection();
-                
-                alert('Entry deleted successfully!');
-            } catch (error) {
-                alert('Error deleting entry: ' + error.message);
-            }
-        }
-
-        function viewDatabaseEntry(id) {
-            if (!currentDbCollection || !id) {
-                alert('Invalid entry selection');
-                return;
-            }
-            
-            const item = currentDbData.find(item => item.id === id);
-            if (!item) {
-                alert('Entry not found');
-                return;
-            }
-            
-            // Create a detailed view of the entry
-            let details = `${currentDbCollection.charAt(1).toUpperCase() + currentDbCollection.slice(1)} Entry Details:\n\n`;
-            
-            Object.keys(item).forEach(key => {
-                if (key !== 'firebaseId') {
-                    let value = item[key];
-                    
-                    if (value === null || value === undefined) {
-                        value = 'N/A';
-                    } else if (Array.isArray(value)) {
-                        value = value.length > 0 ? value.join(', ') : 'Empty array';
-                    } else if (typeof value === 'object') {
-                        value = JSON.stringify(value, null, 2);
-                    }
-                    
-                    details += `${key.charAt(1).toUpperCase() + key.slice(1)}: ${value}\n`;
-                }
-            });
-            
-            // Add related information
-            if (currentDbCollection === 'employees' && item.storeId) {
-                const store = stores.find(s => s.id === item.storeId);
-                details += `\nStore Details: ${store ? store.name + ' - ' + store.location : 'Store not found'}`;
-            }
-            
-            if (currentDbCollection === 'sales') {
-                const employee = employees.find(e => e.id === item.employeeId);
-                const store = stores.find(s => s.id === item.storeId);
-                const product = products.find(p => p.id === item.productId);
-                
-                details += `\nEmployee: ${employee ? employee.name : 'Unknown'}`;
-                details += `\nStore: ${store ? store.name : 'Unknown'}`;
-                details += `\nProduct: ${product ? product.name : 'Unknown'}`;
-            }
-            
-            alert(details);
-        }
-
-        async function refreshDatabaseView() {
-            if (!currentDbCollection) {
-                alert('Please select a collection first');
-                return;
-            }
-            
-            try {
-                await loadDatabaseCollection();
-                alert('Database view refreshed successfully!');
-            } catch (error) {
-                alert('Error refreshing database view: ' + error.message);
-            }
-        }
-
-        // Additional Button Functions
-        async function refreshData() {
-            try {
-                await loadAllData();
-                
-                // Refresh current view
-                if (currentUserRole === 'admin') {
-                    const activeTab = document.querySelector('.tab-btn.tab-active');
-                    if (activeTab) {
-                        const tabName = activeTab.getAttribute('data-tab');
-                        if (tabName === 'database' && currentDbCollection) {
-                            await loadDatabaseCollection();
-                        } else {
-                            await switchTab(tabName);
-                        }
-                    }
-                } else if (currentUserRole === 'employee') {
-                    populateProductDropdown();
-                    populateStoreDropdown();
-                    updateEmployeeStats();
-                    updateTodaysSalesTable();
-                }
-                
-                alert('Data refreshed successfully!');
-            } catch (error) {
-                alert('Error refreshing data: ' + error.message);
-            }
-        }
-
-        // Backup and Restore Functions
-        function backupData() {
-            const backupData = {
-                employees: employees,
-                stores: stores,
-                products: products,
-                collections: collections,
-                sales: sales,
-                timestamp: new Date().toISOString(),
-                mode: isFirebaseMode ? 'firebase' : 'local'
-            };
-            
-            const dataStr = JSON.stringify(backupData, null, 2);
-            const blob = new Blob([dataStr], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = `eden_perfume_backup_${new Date().toISOString().split('T')[0]}.json`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            URL.revokeObjectURL(url);
-            
-            alert('Backup created successfully!');
-        }
-
-        function restoreData() {
-            const input = document.createElement('input');
-            input.type = 'file';
-            input.accept = '.json';
-            
-            input.onchange = function(e) {
-                const file = e.target.files[0];
-                if (!file) return;
-                
-                const reader = new FileReader();
-                reader.onload = async function(e) {
-                    try {
-                        const backupData = JSON.parse(e.target.result);
-                        
-                        if (!backupData.employees || !backupData.stores || !backupData.products || !backupData.sales) {
-                            throw new Error('Invalid backup file format');
-                        }
-                        
-                        if (confirm('This will replace all current data. Are you sure?')) {
-                            employees = backupData.employees;
-                            stores = backupData.stores;
-                            products = backupData.products;
-                            sales = backupData.sales;
-                            
-                            // Save to current storage
-                            if (isFirebaseMode) {
-                                // Note: This would require batch operations in a real Firebase implementation
-                                alert('Firebase restore requires manual implementation. Data loaded locally for now.');
-                            }
-                            saveLocalData();
-                            
-                            // Refresh current view
-                            await refreshData();
-                            alert('Data restored successfully!');
-                        }
-                    } catch (error) {
-                        alert('Error restoring data: ' + error.message);
-                    }
-                };
-                reader.readAsText(file);
-            };
-            
-            input.click();
-        }
-
-        // Clear all data function
-        async function clearAllData() {
-            if (!confirm('⚠️ WARNING: This will delete ALL data permanently. Are you absolutely sure?')) {
-                return;
-            }
-            
-            if (!confirm('This action cannot be undone. Type "DELETE" to confirm:')) {
-                return;
-            }
-            
-            const confirmation = prompt('Type "DELETE ALL DATA" to confirm:');
-            if (confirmation !== 'DELETE ALL DATA') {
-                alert('Confirmation text did not match. Operation cancelled.');
-                return;
-            }
-            
-            try {
-                if (isFirebaseMode) {
-                    // Clear Firebase collections
-                    const collections = ['employees', 'stores', 'products', 'sales'];
-                    for (const collection of collections) {
-                        const snapshot = await db.collection(collection).get();
-                        const batch = db.batch();
-                        snapshot.docs.forEach(doc => {
-                            batch.delete(doc.ref);
-                        });
-                        await batch.commit();
-                    }
-                }
-                
-                // Clear local arrays
-                employees = [];
-                stores = [];
-                products = [];
-                sales = [];
-                
-                // Clear local storage
-                localStorage.removeItem('eden_employees');
-                localStorage.removeItem('eden_stores');
-                localStorage.removeItem('eden_products');
-                localStorage.removeItem('eden_sales');
-                
-                // Refresh current view
-                await refreshData();
-                alert('All data cleared successfully!');
-                
-            } catch (error) {
-                alert('Error clearing data: ' + error.message);
-            }
-        }
-
-        // Print functions
-        function printReport(reportType) {
-            const table = document.querySelector(`#${reportType}ReportTable`).closest('table');
-            if (!table) {
-                alert('No report data to print. Please generate a report first.');
-                return;
-            }
-            
-            const printWindow = window.open('', '_blank');
-            const reportTitle = `Eden Perfume - ${reportType.charAt(1).toUpperCase() + reportType.slice(1)} Report`;
-            
-            printWindow.document.write(`
-                <!DOCTYPE html>
-                <html>
-                <head>
-                    <title>${reportTitle}</title>
-                    <style>
-                        body { font-family: Arial, sans-serif; margin: 20px; }
-                        .header { text-align: center; margin-bottom: 30px; }
-                        .header h1 { color: #667eea; margin: 0; }
-                        .header p { margin: 5px 0; color: #666; }
-                        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-                        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-                        th { background-color: #f8f9fa; font-weight: bold; }
-                        tr:nth-child(even) { background-color: #f9f9f9; }
-                        .footer { margin-top: 30px; text-align: center; font-size: 12px; color: #666; }
-                        @media print {
-                            body { margin: 0; }
-                            .no-print { display: none; }
-                        }
-                    </style>
-                </head>
-                <body>
-                    <div class="header">
-                        <h1>EDEN PERFUME</h1>
-                        <h2>${reportTitle}</h2>
-                        <p>Generated on: ${new Date().toLocaleDateString()}</p>
-                        <p>Generated at: ${new Date().toLocaleTimeString()}</p>
-                    </div>
-                    ${table.outerHTML}
-                    <div class="footer">
-                        <p>Report generated by Eden Perfume Sales Management System</p>
-                        <p>Database Mode: ${isFirebaseMode ? 'Firebase Cloud Database' : 'Local Storage Demo'}</p>
-                    </div>
-                </body>
-                </html>
-            `);
-            
-            printWindow.document.close();
-            printWindow.focus();
-            
-            // Wait for content to load then print
-            setTimeout(() => {
-                printWindow.print();
-                printWindow.close();
-            }, 500);
-        }
-
-        // Quick actions
-        function quickAddSale() {
-            if (currentUserRole !== 'employee') {
-                alert('Only employees can add sales');
-                return;
-            }
-            
-            // Focus on the add sale form
-            document.getElementById('saleProduct').focus();
-        }
-
-        function viewTodaysSummary() {
-            const today = getTodayString();
-            const todaysSales = sales.filter(sale => sale.date === today);
-            
-            if (todaysSales.length === 0) {
-                alert('No sales recorded today');
-                return;
-            }
-            
-            const totalAmount = todaysSales.reduce((sum, sale) => sum + sale.amount, 0);
-            const totalQuantity = todaysSales.reduce((sum, sale) => sum + sale.quantity, 0);
-            const uniqueEmployees = [...new Set(todaysSales.map(sale => sale.employeeId))].length;
-            
-            alert(`Today's Summary:\n\nTotal Sales: $${totalAmount.toFixed(2)}\nItems Sold: ${totalQuantity}\nActive Employees: ${uniqueEmployees}\nTransactions: ${todaysSales.length}`);
-        }
-
-
-
-        // Initialize
-        document.addEventListener('DOMContentLoaded', async function() {
-            try {
-                console.log('Initializing Eden Perfume System...');
-                
-                // Initialize arrays first
-                initializeArrays();
-                
-                // Always load local data first
-                loadLocalData();
-                
-                // Initialize sync status
-                updateSyncStatus();
-                
-                // Wait a moment for Firebase SDK to load
-                setTimeout(() => {
-                    // Check if Firebase config exists in localStorage
-                    const savedConfig = localStorage.getItem('firebaseConfig');
-                    
-                    if (savedConfig && typeof firebase !== 'undefined' && !window.firebaseLoadError) {
-                        try {
-                            const firebaseConfig = JSON.parse(savedConfig);
-                            
-                            // Try to initialize Firebase with saved config
-                            if (initializeFirebase(firebaseConfig)) {
-                                const configModal = document.getElementById('firebaseConfigModal');
-                                const loginScreen = document.getElementById('loginScreen');
-                                
-                                if (configModal) configModal.classList.add('hidden');
-                                if (loginScreen) loginScreen.classList.remove('hidden');
-                                
-                                // Add sample data if collections are empty (only locally)
-                                if (!employees || employees.length === 0) {
-                                    initializeSampleDataLocal();
-                                }
-                            } else {
-                                throw new Error('Firebase initialization failed');
-                            }
-                        } catch (error) {
-                            console.error('Error with saved Firebase config:', error);
-                            // Fall back to demo mode if saved config fails
-                            loadDemoConfig();
-                            if (!employees || employees.length === 0) {
-                                initializeSampleDataLocal();
-                            }
-                        }
-                    } else {
-                        // No saved config or Firebase not available, fall back to demo mode
-                        console.log('Firebase not available or no saved config, using local storage mode');
-                        loadDemoConfig();
-                        if (!employees || employees.length === 0) {
-                            initializeSampleDataLocal();
-                        }
-                    }
-                }, 500); // Wait 500ms for Firebase to load
-                
-                // Set default dates safely
-                try {
-                    const today = new Date();
-                    const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
-                    
-                    const reportStartDate = document.getElementById('reportStartDate');
-                    const reportEndDate = document.getElementById('reportEndDate');
-                    const salaryStartDate = document.getElementById('salaryStartDate');
-                    const salaryEndDate = document.getElementById('salaryEndDate');
-                    
-                    if (reportStartDate) reportStartDate.value = firstDay.toISOString().split('T')[0];
-                    if (reportEndDate) reportEndDate.value = today.toISOString().split('T')[0];
-                    if (salaryStartDate) salaryStartDate.value = firstDay.toISOString().split('T')[0];
-                    if (salaryEndDate) salaryEndDate.value = today.toISOString().split('T')[0];
-                } catch (error) {
-                    console.error('Error setting default dates:', error);
-                }
-                
-                // Add keyboard shortcuts
-                document.addEventListener('keydown', function(e) {
-                    try {
-                        // Ctrl+R for refresh (prevent default browser refresh)
-                        if (e.ctrlKey && e.key === 'r') {
-                            e.preventDefault();
-                            refreshData();
-                        }
-                        
-                        // Escape to close modal
-                        if (e.key === 'Escape') {
-                            closeModal();
-                        }
-                        
-                        // Ctrl+N for new item (when in admin mode)
-                        if (e.ctrlKey && e.key === 'n' && currentUserRole === 'admin') {
-                            e.preventDefault();
-                            const activeTab = document.querySelector('.tab-btn.tab-active');
-                            if (activeTab) {
-                                const tabName = activeTab.getAttribute('data-tab');
-                                if (tabName && ['employees', 'stores', 'products'].includes(tabName)) {
-                                    openModal(tabName.slice(0, -1)); // Remove 's' from plural
-                                }
-                            }
-                        }
-                    } catch (error) {
-                        console.error('Error in keyboard shortcut handler:', error);
-                    }
-                });
-                
-                console.log('Eden Perfume System initialized successfully');
-            } catch (error) {
-                console.error('Critical error during initialization:', error);
-                alert('System initialization failed. Please refresh the page and try again.');
-            }
-        });
-
-        // Sample Data Initialization
-        async function initializeSampleData() {
-            // Check if data already exists
-            if (stores.length > 0 || products.length > 0 || employees.length > 0) {
-                return; // Data already exists, don't overwrite
-            }
-            
-            try {
-                console.log('Initializing sample data...');
-                
-                // Sample Stores
-                const sampleStores = [
-                    { name: "Eden Mall Branch", location: "Shopping Mall, Downtown", manager: "Sarah Johnson", phone: "+1-555-0101" },
-                    { name: "Eden City Center", location: "City Center Plaza", manager: "Mike Wilson", phone: "+1-555-0102" },
-                    { name: "Eden Airport", location: "International Airport", manager: "Lisa Chen", phone: "+1-555-0103" }
-                ];
-                
-                for (const store of sampleStores) {
-                    await saveStore(store);
-                }
-                
-                // Sample Products
-                const sampleProducts = [
-                    { name: "Eden Rose Perfume", price: 89.99 },
-                    { name: "Eden Lavender Mist", price: 79.99 },
-                    { name: "Eden Vanilla Dreams", price: 94.99 },
-                    { name: "Eden Citrus Fresh", price: 69.99 },
-                    { name: "Eden Midnight Oud", price: 129.99 },
-                    { name: "Eden Spring Blossom", price: 84.99 }
-                ];
-                
-                for (const product of sampleProducts) {
-                    await saveProduct(product);
-                }
-                
-                // Reload data to get IDs
-                await loadAllData();
-                
-                // Sample Employees
-                const sampleEmployees = [
-                    { 
-                        name: "John Smith", 
-                        username: "john.smith", 
-                        password: "john123", 
-                        storeId: stores[0]?.id, 
-                        salaryType: "commission", 
-                        baseSalary: 2000, 
-                        commissionRate: 0.05 
-                    },
-                    { 
-                        name: "Emma Davis", 
-                        username: "emma.davis", 
-                        password: "emma123", 
-                        storeId: stores[1]?.id, 
-                        salaryType: "qty_sold", 
-                        baseSalary: 1800, 
-                        commissionRate: 0 
-                    },
-                    { 
-                        name: "Alex Rodriguez", 
-                        username: "alex.rodriguez", 
-                        password: "alex123", 
-                        storeId: stores[2]?.id, 
-                        salaryType: "fixed", 
-                        baseSalary: 2500, 
-                        commissionRate: 0 
-                    }
-                ];
-                
-                for (const employee of sampleEmployees) {
-                    if (employee.storeId) { // Only add if store exists
-                        await saveEmployee(employee);
-                    }
-                }
-                
-                // Generate sample sales data for the last 30 days
-                await generateSampleSales();
-                
-                // Reload final data
-                await loadAllData();
-                
-                console.log('Sample data initialized successfully');
-            } catch (error) {
-                console.error('Error initializing sample data:', error);
-            }
-        }
-        
-        // Generate sample sales data
-        async function generateSampleSales() {
-            if (sales.length > 0) return; // Don't overwrite existing sales
-            
-            const today = new Date();
-            for (let i = 0; i < 30; i++) {
-                const saleDate = new Date(today);
-                saleDate.setDate(today.getDate() - i);
-                const dateString = saleDate.toISOString().split('T')[0];
-                
-                // Generate 1-5 random sales per day
-                const salesCount = Math.floor(Math.random() * 5) + 1;
-                for (let j = 0; j < salesCount; j++) {
-                    if (employees.length > 0 && products.length > 0) {
-                        const randomEmployee = employees[Math.floor(Math.random() * employees.length)];
-                        const randomProduct = products[Math.floor(Math.random() * products.length)];
-                        const quantity = Math.floor(Math.random() * 3) + 1;
-                        
-                        const sampleSale = {
-                            date: dateString,
-                            time: `${Math.floor(Math.random() * 12) + 9}:${Math.floor(Math.random() * 60).toString().padStart(2, '0')}`,
-                            employeeId: randomEmployee.id,
-                            storeId: randomEmployee.storeId,
-                            productId: randomProduct.id,
-                            quantity: quantity,
-                            amount: randomProduct.price * quantity
-                        };
-                        
-                        await saveSale(sampleSale);
-                    }
-                }
-            }
-        }
-        
-        function initializeSampleDataLocal() {
-            // Check if data already exists
-            if (stores.length > 0 || products.length > 0 || employees.length > 0) {
-                return; // Data already exists, don't overwrite
-            }
-            
-            // Sample Stores
-            stores = [
-                { id: "store1", name: "Eden Mall Branch", location: "Shopping Mall, Downtown", manager: "Sarah Johnson", phone: "+1-555-0101" },
-                { id: "store2", name: "Eden City Center", location: "City Center Plaza", manager: "Mike Wilson", phone: "+1-555-0102" },
-                { id: "store3", name: "Eden Airport", location: "International Airport", manager: "Lisa Chen", phone: "+1-555-0103" }
-            ];
-            
-            // Sample Products
-            products = [
-                { id: "product1", name: "Eden Rose Perfume", price: 89.99 },
-                { id: "product2", name: "Eden Lavender Mist", price: 79.99 },
-                { id: "product3", name: "Eden Vanilla Dreams", price: 94.99 },
-                { id: "product4", name: "Eden Citrus Fresh", price: 69.99 },
-                { id: "product5", name: "Eden Midnight Oud", price: 129.99 },
-                { id: "product6", name: "Eden Spring Blossom", price: 84.99 }
-            ];
-            
-            // Sample Employees
-            employees = [
-                { 
-                    id: "emp1",
-                    name: "John Smith", 
-                    username: "john.smith", 
-                    password: "john123", 
-                    storeId: "store1", 
-                    salaryType: "commission", 
-                    baseSalary: 2000, 
-                    commissionRate: 0.05 
-                },
-                { 
-                    id: "emp2",
-                    name: "Emma Davis", 
-                    username: "emma.davis", 
-                    password: "emma123", 
-                    storeId: "store2", 
-                    salaryType: "qty_sold", 
-                    baseSalary: 1800, 
-                    commissionRate: 0 
-                },
-                { 
-                    id: "emp3",
-                    name: "Alex Rodriguez", 
-                    username: "alex.rodriguez", 
-                    password: "alex123", 
-                    storeId: "store3", 
-                    salaryType: "fixed", 
-                    baseSalary: 2500, 
-                    commissionRate: 0 
-                }
-            ];
-            
-            // Sample Sales Data (last 30 days)
-            sales = [];
-            const today = new Date();
-            for (let i = 0; i < 30; i++) {
-                const saleDate = new Date(today);
-                saleDate.setDate(today.getDate() - i);
-                const dateString = saleDate.toISOString().split('T')[0];
-                
-                // Generate 1-5 random sales per day
-                const salesCount = Math.floor(Math.random() * 5) + 1;
-                for (let j = 0; j < salesCount; j++) {
-                    const randomEmployee = employees[Math.floor(Math.random() * employees.length)];
-                    const randomProduct = products[Math.floor(Math.random() * products.length)];
-                    const quantity = Math.floor(Math.random() * 3) + 1;
-                    
-                    sales.push({
-                        id: `sale_${i}_${j}`,
-                        date: dateString,
-                        time: `${Math.floor(Math.random() * 12) + 9}:${Math.floor(Math.random() * 60).toString().padStart(2, '0')}`,
-                        employeeId: randomEmployee.id,
-                        storeId: randomEmployee.storeId,
-                        productId: randomProduct.id,
-                        quantity: quantity,
-                        amount: randomProduct.price * quantity
-                    });
-                }
-            }
-            
-            saveLocalData();
-            console.log('Sample data initialized locally');
-        }
-
-        // Close modal when clicking outside
-        document.getElementById('modal').addEventListener('click', function(e) {
-            if (e.target === this) {
-                closeModal();
-            }
-        });
-
-        // Add click outside to close Firebase config modal
-        document.getElementById('firebaseConfigModal').addEventListener('click', function(e) {
-            if (e.target === this) {
-                // Don't allow closing config modal by clicking outside
-                // User must either configure Firebase or choose demo mode
-            }
-        });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96a6708007fef9ec',t:'MTc1NDM5ODQyOC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96a7362d315bf9e1',t:'MTc1NDQwNjUyNS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
