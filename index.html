@@ -4,7 +4,119 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Employee Management System</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.tailwindcss.com">
+function editSale(saleId) {
+    const sale = sales.find(s => s.id === saleId);
+    const content = `
+        <h3 class="text-lg font-bold mb-4">Edit Sale</h3>
+        <div class="space-y-4">
+            <input type="date" id="editSaleDate" value="${sale.date}" class="w-full p-2 border rounded">
+            <input type="text" id="editSaleEmployee" value="${sale.employeeId}" class="w-full p-2 border rounded" readonly>
+            <input type="text" id="editSaleStore" value="${sale.storeId}" class="w-full p-2 border rounded">
+            <input type="text" id="editSaleProduct" value="${sale.productId}" class="w-full p-2 border rounded">
+            <input type="number" id="editSaleQuantity" value="${sale.quantity}" class="w-full p-2 border rounded">
+            <input type="number" id="editSaleValue" value="${sale.value}" class="w-full p-2 border rounded">
+        </div>
+        <div class="flex justify-end space-x-2 mt-4">
+            <button onclick="closeModal()" class="px-4 py-2 text-gray-600 hover:text-gray-800">Cancel</button>
+            <button onclick="updateSale('${saleId}')" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Update Sale</button>
+        </div>
+    `;
+    showModal(content);
+}
+
+function updateSale(id) {
+    const date = document.getElementById('editSaleDate').value;
+    const employeeId = document.getElementById('editSaleEmployee').value;
+    const storeId = document.getElementById('editSaleStore').value;
+    const productId = document.getElementById('editSaleProduct').value;
+    const quantity = parseInt(document.getElementById('editSaleQuantity').value) || 0;
+    const value = parseFloat(document.getElementById('editSaleValue').value) || 0;
+
+    db.ref('sales').child(id).set({ date, employeeId, storeId, productId, quantity, value });
+    closeModal();
+}
+
+
+function deleteSale(id) {
+    if (confirm('Are you sure you want to delete this sale?')) {
+        db.ref('sales').child(id).remove();
+    }
+}
+
+
+let currentUser = null;
+let userIsAdmin = false;
+
+firebase.auth().onAuthStateChanged(user => {
+  if (user) {
+    currentUser = user;
+    document.getElementById('loginForm').style.display = 'none';
+    document.getElementById('logoutBtn').classList.remove('hidden');
+
+    // Check admin flag from DB (optional: add roles to Firebase)
+    db.ref('admins/' + user.uid).once('value').then(snapshot => {
+      userIsAdmin = snapshot.exists();
+    });
+  } else {
+    currentUser = null;
+    document.getElementById('loginForm').style.display = 'flex';
+    document.getElementById('logoutBtn').classList.add('hidden');
+  }
+});
+
+function login() {
+  const email = document.getElementById('loginEmail').value;
+  const password = document.getElementById('loginPassword').value;
+  firebase.auth().signInWithEmailAndPassword(email, password).catch(alert);
+}
+
+function logout() {
+  firebase.auth().signOut();
+}
+
+function register() {
+  const email = document.getElementById('loginEmail').value;
+  const password = document.getElementById('loginPassword').value;
+  firebase.auth().createUserWithEmailAndPassword(email, password).catch(alert);
+}
+
+// Override addEmployeeSale to include uid
+function addEmployeeSale() {
+  const date = document.getElementById('saleDate').value;
+  const storeId = document.getElementById('saleStore').value;
+  const productId = document.getElementById('saleProduct').value;
+  const quantity = parseInt(document.getElementById('saleQuantity').value) || 0;
+  const value = parseFloat(document.getElementById('saleValue').value) || 0;
+  const employeeId = document.getElementById('loggedInUser')?.value || '';
+
+  if (!currentUser) return alert("Login required");
+
+  const newSale = { date, storeId, productId, quantity, value, employeeId, uid: currentUser.uid };
+  db.ref('sales').push(newSale);
+  closeModal();
+}
+
+// Override renderEmployeeSalesTable to filter for non-admins
+function renderEmployeeSalesTable() {
+  const tbody = document.getElementById('empSalesTable');
+  const filtered = userIsAdmin ? sales : sales.filter(s => s.uid === currentUser?.uid);
+  tbody.innerHTML = filtered.map(sale => `
+    <tr class="border-b hover:bg-gray-50">
+        <td class="px-2 sm:px-4 py-2 text-xs sm:text-sm">${sale.date}</td>
+        <td class="px-2 sm:px-4 py-2 text-xs sm:text-sm hidden sm:table-cell">${sale.storeId}</td>
+        <td class="px-2 sm:px-4 py-2 text-xs sm:text-sm">${sale.productId}</td>
+        <td class="px-2 sm:px-4 py-2 text-xs sm:text-sm">${sale.quantity}</td>
+        <td class="px-2 sm:px-4 py-2 text-xs sm:text-sm">${sale.value}</td>
+        <td class="px-2 sm:px-4 py-2 text-xs sm:text-sm">
+            <button onclick="editSale('${sale.id}')" class="bg-blue-500 text-white px-2 py-1 rounded text-xs hover:bg-blue-600">Edit</button>
+            <button onclick="deleteSale('${sale.id}')" class="bg-red-500 text-white px-2 py-1 rounded text-xs hover:bg-red-600">Delete</button>
+        </td>
+    </tr>
+  `).join('');
+}
+
+</script>
 </head>
 <body class="bg-gray-100 min-h-screen">
     <!-- Login Screen -->
@@ -58,11 +170,11 @@
                 <div class="space-y-2 text-xs text-gray-700">
                     <div class="flex justify-between items-center bg-white/60 px-2 sm:px-3 py-2 rounded-lg">
                         <span class="font-medium">Admin:</span>
-                        <span class="font-mono text-xs">admin / admin123</span>
+                        <span class="font-mono text-xs"></span>
                     </div>
                     <div class="flex justify-between items-center bg-white/60 px-2 sm:px-3 py-2 rounded-lg">
                         <span class="font-medium">Employee:</span>
-                        <span class="font-mono text-xs">john / pass123</span>
+                        <span class="font-mono text-xs"></span>
                     </div>
                 </div>
             </div>
@@ -221,7 +333,102 @@
                             </tr>
                         </thead>
                         <tbody id="empSalesTable">
-                            <!-- Employee sales will be displayed here -->
+    <!-- Employee sales will be displayed here -->
+    <script>
+        function renderEmployeeSalesTable() {
+            const tbody = document.getElementById('empSalesTable');
+            tbody.innerHTML = sales.map(sale => `
+                <tr class="border-b hover:bg-gray-50">
+                    <td class="px-2 sm:px-4 py-2 text-xs sm:text-sm">${sale.date}</td>
+                    <td class="px-2 sm:px-4 py-2 text-xs sm:text-sm hidden sm:table-cell">${sale.storeId}</td>
+                    <td class="px-2 sm:px-4 py-2 text-xs sm:text-sm">${sale.productId}</td>
+                    <td class="px-2 sm:px-4 py-2 text-xs sm:text-sm">${sale.quantity}</td>
+                    <td class="px-2 sm:px-4 py-2 text-xs sm:text-sm">${sale.value}</td>
+                    <td class="px-2 sm:px-4 py-2 text-xs sm:text-sm">
+                        <button onclick="editSale('${sale.id}')" class="bg-blue-500 text-white px-2 py-1 rounded text-xs hover:bg-blue-600">Edit</button>
+                        <button onclick="deleteSale('${sale.id}')" class="bg-red-500 text-white px-2 py-1 rounded text-xs hover:bg-red-600">Delete</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+        db.ref('sales').on('value', snapshot => {
+            const data = snapshot.val() || {};
+            sales = Object.keys(data).map(key => ({ id: key, ...data[key] }));
+            renderEmployeeSalesTable();
+        });
+    
+let currentUser = null;
+let userIsAdmin = false;
+
+firebase.auth().onAuthStateChanged(user => {
+  if (user) {
+    currentUser = user;
+    document.getElementById('loginForm').style.display = 'none';
+    document.getElementById('logoutBtn').classList.remove('hidden');
+
+    // Check admin flag from DB (optional: add roles to Firebase)
+    db.ref('admins/' + user.uid).once('value').then(snapshot => {
+      userIsAdmin = snapshot.exists();
+    });
+  } else {
+    currentUser = null;
+    document.getElementById('loginForm').style.display = 'flex';
+    document.getElementById('logoutBtn').classList.add('hidden');
+  }
+});
+
+function login() {
+  const email = document.getElementById('loginEmail').value;
+  const password = document.getElementById('loginPassword').value;
+  firebase.auth().signInWithEmailAndPassword(email, password).catch(alert);
+}
+
+function logout() {
+  firebase.auth().signOut();
+}
+
+function register() {
+  const email = document.getElementById('loginEmail').value;
+  const password = document.getElementById('loginPassword').value;
+  firebase.auth().createUserWithEmailAndPassword(email, password).catch(alert);
+}
+
+// Override addEmployeeSale to include uid
+function addEmployeeSale() {
+  const date = document.getElementById('saleDate').value;
+  const storeId = document.getElementById('saleStore').value;
+  const productId = document.getElementById('saleProduct').value;
+  const quantity = parseInt(document.getElementById('saleQuantity').value) || 0;
+  const value = parseFloat(document.getElementById('saleValue').value) || 0;
+  const employeeId = document.getElementById('loggedInUser')?.value || '';
+
+  if (!currentUser) return alert("Login required");
+
+  const newSale = { date, storeId, productId, quantity, value, employeeId, uid: currentUser.uid };
+  db.ref('sales').push(newSale);
+  closeModal();
+}
+
+// Override renderEmployeeSalesTable to filter for non-admins
+function renderEmployeeSalesTable() {
+  const tbody = document.getElementById('empSalesTable');
+  const filtered = userIsAdmin ? sales : sales.filter(s => s.uid === currentUser?.uid);
+  tbody.innerHTML = filtered.map(sale => `
+    <tr class="border-b hover:bg-gray-50">
+        <td class="px-2 sm:px-4 py-2 text-xs sm:text-sm">${sale.date}</td>
+        <td class="px-2 sm:px-4 py-2 text-xs sm:text-sm hidden sm:table-cell">${sale.storeId}</td>
+        <td class="px-2 sm:px-4 py-2 text-xs sm:text-sm">${sale.productId}</td>
+        <td class="px-2 sm:px-4 py-2 text-xs sm:text-sm">${sale.quantity}</td>
+        <td class="px-2 sm:px-4 py-2 text-xs sm:text-sm">${sale.value}</td>
+        <td class="px-2 sm:px-4 py-2 text-xs sm:text-sm">
+            <button onclick="editSale('${sale.id}')" class="bg-blue-500 text-white px-2 py-1 rounded text-xs hover:bg-blue-600">Edit</button>
+            <button onclick="deleteSale('${sale.id}')" class="bg-red-500 text-white px-2 py-1 rounded text-xs hover:bg-red-600">Delete</button>
+        </td>
+    </tr>
+  `).join('');
+}
+
+</script>
                         </tbody>
                     </table>
                 </div>
@@ -554,42 +761,419 @@
         </div>
     </div>
 
-    <script>
+    
+<!-- Firebase App (the core Firebase SDK) -->
+<script src="https://www.gstatic.com/firebasejs/9.24.0/firebase-app-compat.js">
+function editSale(saleId) {
+    const sale = sales.find(s => s.id === saleId);
+    const content = `
+        <h3 class="text-lg font-bold mb-4">Edit Sale</h3>
+        <div class="space-y-4">
+            <input type="date" id="editSaleDate" value="${sale.date}" class="w-full p-2 border rounded">
+            <input type="text" id="editSaleEmployee" value="${sale.employeeId}" class="w-full p-2 border rounded" readonly>
+            <input type="text" id="editSaleStore" value="${sale.storeId}" class="w-full p-2 border rounded">
+            <input type="text" id="editSaleProduct" value="${sale.productId}" class="w-full p-2 border rounded">
+            <input type="number" id="editSaleQuantity" value="${sale.quantity}" class="w-full p-2 border rounded">
+            <input type="number" id="editSaleValue" value="${sale.value}" class="w-full p-2 border rounded">
+        </div>
+        <div class="flex justify-end space-x-2 mt-4">
+            <button onclick="closeModal()" class="px-4 py-2 text-gray-600 hover:text-gray-800">Cancel</button>
+            <button onclick="updateSale('${saleId}')" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Update Sale</button>
+        </div>
+    `;
+    showModal(content);
+}
+
+function updateSale(id) {
+    const date = document.getElementById('editSaleDate').value;
+    const employeeId = document.getElementById('editSaleEmployee').value;
+    const storeId = document.getElementById('editSaleStore').value;
+    const productId = document.getElementById('editSaleProduct').value;
+    const quantity = parseInt(document.getElementById('editSaleQuantity').value) || 0;
+    const value = parseFloat(document.getElementById('editSaleValue').value) || 0;
+
+    db.ref('sales').child(id).set({ date, employeeId, storeId, productId, quantity, value });
+    closeModal();
+}
+
+
+function deleteSale(id) {
+    if (confirm('Are you sure you want to delete this sale?')) {
+        db.ref('sales').child(id).remove();
+    }
+}
+
+
+let currentUser = null;
+let userIsAdmin = false;
+
+firebase.auth().onAuthStateChanged(user => {
+  if (user) {
+    currentUser = user;
+    document.getElementById('loginForm').style.display = 'none';
+    document.getElementById('logoutBtn').classList.remove('hidden');
+
+    // Check admin flag from DB (optional: add roles to Firebase)
+    db.ref('admins/' + user.uid).once('value').then(snapshot => {
+      userIsAdmin = snapshot.exists();
+    });
+  } else {
+    currentUser = null;
+    document.getElementById('loginForm').style.display = 'flex';
+    document.getElementById('logoutBtn').classList.add('hidden');
+  }
+});
+
+function login() {
+  const email = document.getElementById('loginEmail').value;
+  const password = document.getElementById('loginPassword').value;
+  firebase.auth().signInWithEmailAndPassword(email, password).catch(alert);
+}
+
+function logout() {
+  firebase.auth().signOut();
+}
+
+function register() {
+  const email = document.getElementById('loginEmail').value;
+  const password = document.getElementById('loginPassword').value;
+  firebase.auth().createUserWithEmailAndPassword(email, password).catch(alert);
+}
+
+// Override addEmployeeSale to include uid
+function addEmployeeSale() {
+  const date = document.getElementById('saleDate').value;
+  const storeId = document.getElementById('saleStore').value;
+  const productId = document.getElementById('saleProduct').value;
+  const quantity = parseInt(document.getElementById('saleQuantity').value) || 0;
+  const value = parseFloat(document.getElementById('saleValue').value) || 0;
+  const employeeId = document.getElementById('loggedInUser')?.value || '';
+
+  if (!currentUser) return alert("Login required");
+
+  const newSale = { date, storeId, productId, quantity, value, employeeId, uid: currentUser.uid };
+  db.ref('sales').push(newSale);
+  closeModal();
+}
+
+// Override renderEmployeeSalesTable to filter for non-admins
+function renderEmployeeSalesTable() {
+  const tbody = document.getElementById('empSalesTable');
+  const filtered = userIsAdmin ? sales : sales.filter(s => s.uid === currentUser?.uid);
+  tbody.innerHTML = filtered.map(sale => `
+    <tr class="border-b hover:bg-gray-50">
+        <td class="px-2 sm:px-4 py-2 text-xs sm:text-sm">${sale.date}</td>
+        <td class="px-2 sm:px-4 py-2 text-xs sm:text-sm hidden sm:table-cell">${sale.storeId}</td>
+        <td class="px-2 sm:px-4 py-2 text-xs sm:text-sm">${sale.productId}</td>
+        <td class="px-2 sm:px-4 py-2 text-xs sm:text-sm">${sale.quantity}</td>
+        <td class="px-2 sm:px-4 py-2 text-xs sm:text-sm">${sale.value}</td>
+        <td class="px-2 sm:px-4 py-2 text-xs sm:text-sm">
+            <button onclick="editSale('${sale.id}')" class="bg-blue-500 text-white px-2 py-1 rounded text-xs hover:bg-blue-600">Edit</button>
+            <button onclick="deleteSale('${sale.id}')" class="bg-red-500 text-white px-2 py-1 rounded text-xs hover:bg-red-600">Delete</button>
+        </td>
+    </tr>
+  `).join('');
+}
+
+</script>
+<script src="https://www.gstatic.com/firebasejs/9.24.0/firebase-database-compat.js">
+function editSale(saleId) {
+    const sale = sales.find(s => s.id === saleId);
+    const content = `
+        <h3 class="text-lg font-bold mb-4">Edit Sale</h3>
+        <div class="space-y-4">
+            <input type="date" id="editSaleDate" value="${sale.date}" class="w-full p-2 border rounded">
+            <input type="text" id="editSaleEmployee" value="${sale.employeeId}" class="w-full p-2 border rounded" readonly>
+            <input type="text" id="editSaleStore" value="${sale.storeId}" class="w-full p-2 border rounded">
+            <input type="text" id="editSaleProduct" value="${sale.productId}" class="w-full p-2 border rounded">
+            <input type="number" id="editSaleQuantity" value="${sale.quantity}" class="w-full p-2 border rounded">
+            <input type="number" id="editSaleValue" value="${sale.value}" class="w-full p-2 border rounded">
+        </div>
+        <div class="flex justify-end space-x-2 mt-4">
+            <button onclick="closeModal()" class="px-4 py-2 text-gray-600 hover:text-gray-800">Cancel</button>
+            <button onclick="updateSale('${saleId}')" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Update Sale</button>
+        </div>
+    `;
+    showModal(content);
+}
+
+function updateSale(id) {
+    const date = document.getElementById('editSaleDate').value;
+    const employeeId = document.getElementById('editSaleEmployee').value;
+    const storeId = document.getElementById('editSaleStore').value;
+    const productId = document.getElementById('editSaleProduct').value;
+    const quantity = parseInt(document.getElementById('editSaleQuantity').value) || 0;
+    const value = parseFloat(document.getElementById('editSaleValue').value) || 0;
+
+    db.ref('sales').child(id).set({ date, employeeId, storeId, productId, quantity, value });
+    closeModal();
+}
+
+
+function deleteSale(id) {
+    if (confirm('Are you sure you want to delete this sale?')) {
+        db.ref('sales').child(id).remove();
+    }
+}
+
+
+let currentUser = null;
+let userIsAdmin = false;
+
+firebase.auth().onAuthStateChanged(user => {
+  if (user) {
+    currentUser = user;
+    document.getElementById('loginForm').style.display = 'none';
+    document.getElementById('logoutBtn').classList.remove('hidden');
+
+    // Check admin flag from DB (optional: add roles to Firebase)
+    db.ref('admins/' + user.uid).once('value').then(snapshot => {
+      userIsAdmin = snapshot.exists();
+    });
+  } else {
+    currentUser = null;
+    document.getElementById('loginForm').style.display = 'flex';
+    document.getElementById('logoutBtn').classList.add('hidden');
+  }
+});
+
+function login() {
+  const email = document.getElementById('loginEmail').value;
+  const password = document.getElementById('loginPassword').value;
+  firebase.auth().signInWithEmailAndPassword(email, password).catch(alert);
+}
+
+function logout() {
+  firebase.auth().signOut();
+}
+
+function register() {
+  const email = document.getElementById('loginEmail').value;
+  const password = document.getElementById('loginPassword').value;
+  firebase.auth().createUserWithEmailAndPassword(email, password).catch(alert);
+}
+
+// Override addEmployeeSale to include uid
+function addEmployeeSale() {
+  const date = document.getElementById('saleDate').value;
+  const storeId = document.getElementById('saleStore').value;
+  const productId = document.getElementById('saleProduct').value;
+  const quantity = parseInt(document.getElementById('saleQuantity').value) || 0;
+  const value = parseFloat(document.getElementById('saleValue').value) || 0;
+  const employeeId = document.getElementById('loggedInUser')?.value || '';
+
+  if (!currentUser) return alert("Login required");
+
+  const newSale = { date, storeId, productId, quantity, value, employeeId, uid: currentUser.uid };
+  db.ref('sales').push(newSale);
+  closeModal();
+}
+
+// Override renderEmployeeSalesTable to filter for non-admins
+function renderEmployeeSalesTable() {
+  const tbody = document.getElementById('empSalesTable');
+  const filtered = userIsAdmin ? sales : sales.filter(s => s.uid === currentUser?.uid);
+  tbody.innerHTML = filtered.map(sale => `
+    <tr class="border-b hover:bg-gray-50">
+        <td class="px-2 sm:px-4 py-2 text-xs sm:text-sm">${sale.date}</td>
+        <td class="px-2 sm:px-4 py-2 text-xs sm:text-sm hidden sm:table-cell">${sale.storeId}</td>
+        <td class="px-2 sm:px-4 py-2 text-xs sm:text-sm">${sale.productId}</td>
+        <td class="px-2 sm:px-4 py-2 text-xs sm:text-sm">${sale.quantity}</td>
+        <td class="px-2 sm:px-4 py-2 text-xs sm:text-sm">${sale.value}</td>
+        <td class="px-2 sm:px-4 py-2 text-xs sm:text-sm">
+            <button onclick="editSale('${sale.id}')" class="bg-blue-500 text-white px-2 py-1 rounded text-xs hover:bg-blue-600">Edit</button>
+            <button onclick="deleteSale('${sale.id}')" class="bg-red-500 text-white px-2 py-1 rounded text-xs hover:bg-red-600">Delete</button>
+        </td>
+    </tr>
+  `).join('');
+}
+
+</script>
+
+<script>
+  // Your web app's Firebase configuration
+  const firebaseConfig = {
+    apiKey: "AIzaSyDnu3SG7XETx2GGH5cbiFyVzjRb2dmMKsA",
+    authDomain: "eden-sales-c2ad1.firebaseapp.com",
+    databaseURL: "https://eden-sales-c2ad1-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "eden-sales-c2ad1",
+    storageBucket: "eden-sales-c2ad1.firebasestorage.app",
+    messagingSenderId: "371277816773",
+    appId: "1:371277816773:web:f633d2c2b531ccdd57e1ac",
+    measurementId: "G-974QFJZ2CB"
+  };
+
+  // Initialize Firebase
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+
+function editSale(saleId) {
+    const sale = sales.find(s => s.id === saleId);
+    const content = `
+        <h3 class="text-lg font-bold mb-4">Edit Sale</h3>
+        <div class="space-y-4">
+            <input type="date" id="editSaleDate" value="${sale.date}" class="w-full p-2 border rounded">
+            <input type="text" id="editSaleEmployee" value="${sale.employeeId}" class="w-full p-2 border rounded" readonly>
+            <input type="text" id="editSaleStore" value="${sale.storeId}" class="w-full p-2 border rounded">
+            <input type="text" id="editSaleProduct" value="${sale.productId}" class="w-full p-2 border rounded">
+            <input type="number" id="editSaleQuantity" value="${sale.quantity}" class="w-full p-2 border rounded">
+            <input type="number" id="editSaleValue" value="${sale.value}" class="w-full p-2 border rounded">
+        </div>
+        <div class="flex justify-end space-x-2 mt-4">
+            <button onclick="closeModal()" class="px-4 py-2 text-gray-600 hover:text-gray-800">Cancel</button>
+            <button onclick="updateSale('${saleId}')" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Update Sale</button>
+        </div>
+    `;
+    showModal(content);
+}
+
+function updateSale(id) {
+    const date = document.getElementById('editSaleDate').value;
+    const employeeId = document.getElementById('editSaleEmployee').value;
+    const storeId = document.getElementById('editSaleStore').value;
+    const productId = document.getElementById('editSaleProduct').value;
+    const quantity = parseInt(document.getElementById('editSaleQuantity').value) || 0;
+    const value = parseFloat(document.getElementById('editSaleValue').value) || 0;
+
+    db.ref('sales').child(id).set({ date, employeeId, storeId, productId, quantity, value });
+    closeModal();
+}
+
+
+function deleteSale(id) {
+    if (confirm('Are you sure you want to delete this sale?')) {
+        db.ref('sales').child(id).remove();
+    }
+}
+
+
+let currentUser = null;
+let userIsAdmin = false;
+
+firebase.auth().onAuthStateChanged(user => {
+  if (user) {
+    currentUser = user;
+    document.getElementById('loginForm').style.display = 'none';
+    document.getElementById('logoutBtn').classList.remove('hidden');
+
+    // Check admin flag from DB (optional: add roles to Firebase)
+    db.ref('admins/' + user.uid).once('value').then(snapshot => {
+      userIsAdmin = snapshot.exists();
+    });
+  } else {
+    currentUser = null;
+    document.getElementById('loginForm').style.display = 'flex';
+    document.getElementById('logoutBtn').classList.add('hidden');
+  }
+});
+
+function login() {
+  const email = document.getElementById('loginEmail').value;
+  const password = document.getElementById('loginPassword').value;
+  firebase.auth().signInWithEmailAndPassword(email, password).catch(alert);
+}
+
+function logout() {
+  firebase.auth().signOut();
+}
+
+function register() {
+  const email = document.getElementById('loginEmail').value;
+  const password = document.getElementById('loginPassword').value;
+  firebase.auth().createUserWithEmailAndPassword(email, password).catch(alert);
+}
+
+// Override addEmployeeSale to include uid
+function addEmployeeSale() {
+  const date = document.getElementById('saleDate').value;
+  const storeId = document.getElementById('saleStore').value;
+  const productId = document.getElementById('saleProduct').value;
+  const quantity = parseInt(document.getElementById('saleQuantity').value) || 0;
+  const value = parseFloat(document.getElementById('saleValue').value) || 0;
+  const employeeId = document.getElementById('loggedInUser')?.value || '';
+
+  if (!currentUser) return alert("Login required");
+
+  const newSale = { date, storeId, productId, quantity, value, employeeId, uid: currentUser.uid };
+  db.ref('sales').push(newSale);
+  closeModal();
+}
+
+// Override renderEmployeeSalesTable to filter for non-admins
+function renderEmployeeSalesTable() {
+  const tbody = document.getElementById('empSalesTable');
+  const filtered = userIsAdmin ? sales : sales.filter(s => s.uid === currentUser?.uid);
+  tbody.innerHTML = filtered.map(sale => `
+    <tr class="border-b hover:bg-gray-50">
+        <td class="px-2 sm:px-4 py-2 text-xs sm:text-sm">${sale.date}</td>
+        <td class="px-2 sm:px-4 py-2 text-xs sm:text-sm hidden sm:table-cell">${sale.storeId}</td>
+        <td class="px-2 sm:px-4 py-2 text-xs sm:text-sm">${sale.productId}</td>
+        <td class="px-2 sm:px-4 py-2 text-xs sm:text-sm">${sale.quantity}</td>
+        <td class="px-2 sm:px-4 py-2 text-xs sm:text-sm">${sale.value}</td>
+        <td class="px-2 sm:px-4 py-2 text-xs sm:text-sm">
+            <button onclick="editSale('${sale.id}')" class="bg-blue-500 text-white px-2 py-1 rounded text-xs hover:bg-blue-600">Edit</button>
+            <button onclick="deleteSale('${sale.id}')" class="bg-red-500 text-white px-2 py-1 rounded text-xs hover:bg-red-600">Delete</button>
+        </td>
+    </tr>
+  `).join('');
+}
+
+</script>
+
+
+<script>
         // Data storage
-        let employees = [
-            { id: 1, name: 'John Smith', username: 'john', password: 'pass123', store: 'Eden Perfume Downtown', salaryType: 'fixed', salaryAmount: 3000, target: 0 },
-            { id: 2, name: 'Sarah Johnson', username: 'sarah', password: 'pass123', store: 'Eden Perfume Mall', salaryType: 'commission_sales', salaryAmount: 5, target: 0 },
-            { id: 3, name: 'Mike Wilson', username: 'mike', password: 'pass123', store: 'Eden Perfume Boutique', salaryType: 'target_based', salaryAmount: 15, target: 100 }
-        ];
+        let employees = [];
 
-        let stores = [
-            { id: 1, name: 'Eden Perfume Downtown', location: 'Downtown Plaza', manager: 'Alice Brown' },
-            { id: 2, name: 'Eden Perfume Mall', location: 'Westfield Shopping Center', manager: 'Bob Green' },
-            { id: 3, name: 'Eden Perfume Boutique', location: 'North Side District', manager: 'Carol White' }
-        ];
+        let stores = [];
 
-        let products = [
-            { id: 1, name: 'Chanel No. 5', category: 'Luxury', price: 129.99 },
-            { id: 2, name: 'Dior Sauvage', category: 'Men\'s Fragrance', price: 89.99 },
-            { id: 3, name: 'Tom Ford Black Orchid', category: 'Unisex', price: 159.99 },
-            { id: 4, name: 'Versace Bright Crystal', category: 'Women\'s Fragrance', price: 79.99 },
-            { id: 5, name: 'Creed Aventus', category: 'Luxury', price: 299.99 },
-            { id: 6, name: 'Yves Saint Laurent Libre', category: 'Women\'s Fragrance', price: 99.99 },
-            { id: 7, name: 'Giorgio Armani Acqua di Gio', category: 'Men\'s Fragrance', price: 69.99 },
-            { id: 8, name: 'Marc Jacobs Daisy', category: 'Women\'s Fragrance', price: 59.99 }
-        ];
+        let products = [];
 
-        let sales = [
-            { id: 1, date: '2024-01-15', employeeId: 1, storeId: 1, productId: 1, quantity: 1, value: 1299.99 },
-            { id: 2, date: '2024-01-16', employeeId: 2, storeId: 2, productId: 2, quantity: 2, value: 399.98 },
-            { id: 3, date: '2024-01-17', employeeId: 3, storeId: 3, productId: 3, quantity: 3, value: 149.97 },
-            { id: 4, date: '2024-01-18', employeeId: 1, storeId: 1, productId: 4, quantity: 1, value: 129.99 },
-            { id: 5, date: '2024-01-19', employeeId: 2, storeId: 2, productId: 5, quantity: 2, value: 179.98 }
-        ];
+        let sales = [];
 
         let currentTab = 'employees';
 
-        // Login function
+        
+function populateStoreDropdown() {
+    const storeSelect = document.getElementById('empStore');
+    storeSelect.innerHTML = '<option value="">Select Store</option>';
+    stores.forEach(store => {
+        const option = document.createElement('option');
+        option.value = store.name;
+        option.textContent = store.name;
+        storeSelect.appendChild(option);
+    });
+}
+
+
+
+// Firebase Realtime Sync
+db.ref('employees').on('value', snapshot => {
+  const data = snapshot.val() || {};
+  employees = Object.keys(data).map(key => ({ id: key, ...data[key] }));
+  loadEmployees();
+});
+
+db.ref('stores').on('value', snapshot => {
+  const data = snapshot.val() || {};
+  stores = Object.keys(data).map(key => ({ id: key, ...data[key] }));
+  loadStores?.();
+});
+
+db.ref('products').on('value', snapshot => {
+  const data = snapshot.val() || {};
+  products = Object.keys(data).map(key => ({ id: key, ...data[key] }));
+  loadProducts?.();
+});
+
+db.ref('sales').on('value', snapshot => {
+  const data = snapshot.val() || {};
+  sales = Object.keys(data).map(key => ({ id: key, ...data[key] }));
+  loadSales?.();
+});
+
+
+// Login function
         function login() {
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
@@ -729,13 +1313,22 @@
         }
 
         function showAddEmployee() {
+    populateStoreDropdown();
+
+    document.getElementById('empName').value = '';
+    document.getElementById('empUsername').value = '';
+    document.getElementById('empPassword').value = '';
+    document.getElementById('empStore').value = '';
+    document.getElementById('empSalaryAmount').value = '';
+    document.getElementById('empTarget').value = '';
+
             const content = `
                 <h3 class="text-lg font-bold mb-4">Add New Employee</h3>
                 <div class="space-y-4">
                     <input type="text" id="empName" placeholder="Employee Name" class="w-full p-2 border rounded">
                     <input type="text" id="empUsername" placeholder="Username" class="w-full p-2 border rounded">
                     <input type="password" id="empPassword" placeholder="Password" class="w-full p-2 border rounded">
-                    <input type="text" id="empStore" placeholder="Store Name" class="w-full p-2 border rounded">
+                    <select id="empStore" class="w-full p-2 border rounded"></select>
                     
                     <div class="bg-gray-50 p-4 rounded">
                         <h4 class="font-bold mb-2">Salary Configuration</h4>
@@ -808,9 +1401,8 @@
                 target
             };
 
-            employees.push(newEmployee);
-            closeModal();
-            loadEmployees();
+            db.ref('employees').push(newEmployee);
+    closeModal();
             alert('Employee added successfully!');
         }
 
@@ -860,17 +1452,15 @@
             const target = parseInt(document.getElementById('empTarget').value) || 0;
 
             const empIndex = employees.findIndex(e => e.id === id);
-            employees[empIndex] = { id, name, username, password, store, salaryType, salaryAmount, target };
-            
-            closeModal();
-            loadEmployees();
+            const empRef = db.ref('employees').child(id);
+    empRef.set({ name, username, password, store, salaryType, salaryAmount, target });
+    closeModal();
             alert('Employee updated successfully!');
         }
 
         function deleteEmployee(id) {
             if (confirm('Are you sure you want to delete this employee?')) {
-                employees = employees.filter(e => e.id !== id);
-                loadEmployees();
+                db.ref('employees').child(id).remove();
                 alert('Employee deleted successfully!');
             }
         }
@@ -921,7 +1511,7 @@
                 return;
             }
 
-            stores.push({ id: stores.length + 1, name, location, manager });
+            db.ref('stores').push({ name, location, manager });
             closeModal();
             loadStores();
             alert('Store added successfully!');
@@ -950,17 +1540,14 @@
             const manager = document.getElementById('storeManager').value;
 
             const storeIndex = stores.findIndex(s => s.id === id);
-            stores[storeIndex] = { id, name, location, manager };
-            
-            closeModal();
-            loadStores();
+            db.ref('stores').child(id).set({ name, location, manager });
+    closeModal();
             alert('Store updated successfully!');
         }
 
         function deleteStore(id) {
             if (confirm('Are you sure you want to delete this store?')) {
-                stores = stores.filter(s => s.id !== id);
-                loadStores();
+                db.ref('stores').child(id).remove();
                 alert('Store deleted successfully!');
             }
         }
@@ -1011,7 +1598,7 @@
                 return;
             }
 
-            products.push({ id: products.length + 1, name, category, price });
+            db.ref('products').push({ name, category, price });
             closeModal();
             loadProducts();
             alert('Product added successfully!');
@@ -1040,17 +1627,14 @@
             const price = parseFloat(document.getElementById('productPrice').value);
 
             const productIndex = products.findIndex(p => p.id === id);
-            products[productIndex] = { id, name, category, price };
-            
-            closeModal();
-            loadProducts();
+            db.ref('products').child(id).set({ name, category, price });
+    closeModal();
             alert('Product updated successfully!');
         }
 
         function deleteProduct(id) {
             if (confirm('Are you sure you want to delete this product?')) {
-                products = products.filter(p => p.id !== id);
-                loadProducts();
+                db.ref('products').child(id).remove();
                 alert('Product deleted successfully!');
             }
         }
@@ -1141,7 +1725,7 @@
 
             // Generate unique ID
             const newId = Math.max(...sales.map(s => s.id), 0) + 1;
-            sales.push({ id: newId, date, employeeId, storeId, productId, quantity, value });
+            db.ref('sales').push({ id: newId, date, employeeId, storeId, productId, quantity, value });
             closeModal();
             loadSales();
             
@@ -1746,6 +2330,7 @@
         }
 
         function addEmployeeSale() {
+    const user = firebase.auth?.currentUser;
             if (!currentEmployee) {
                 alert('Error: Employee not found!');
                 return;
@@ -1976,6 +2561,230 @@
                 document.getElementById('salesToDate').value = todayStr;
             }
         });
-    </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96945faa73bef9db',t:'MTc1NDIwODk5NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+    
+function editSale(saleId) {
+    const sale = sales.find(s => s.id === saleId);
+    const content = `
+        <h3 class="text-lg font-bold mb-4">Edit Sale</h3>
+        <div class="space-y-4">
+            <input type="date" id="editSaleDate" value="${sale.date}" class="w-full p-2 border rounded">
+            <input type="text" id="editSaleEmployee" value="${sale.employeeId}" class="w-full p-2 border rounded" readonly>
+            <input type="text" id="editSaleStore" value="${sale.storeId}" class="w-full p-2 border rounded">
+            <input type="text" id="editSaleProduct" value="${sale.productId}" class="w-full p-2 border rounded">
+            <input type="number" id="editSaleQuantity" value="${sale.quantity}" class="w-full p-2 border rounded">
+            <input type="number" id="editSaleValue" value="${sale.value}" class="w-full p-2 border rounded">
+        </div>
+        <div class="flex justify-end space-x-2 mt-4">
+            <button onclick="closeModal()" class="px-4 py-2 text-gray-600 hover:text-gray-800">Cancel</button>
+            <button onclick="updateSale('${saleId}')" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Update Sale</button>
+        </div>
+    `;
+    showModal(content);
+}
+
+function updateSale(id) {
+    const date = document.getElementById('editSaleDate').value;
+    const employeeId = document.getElementById('editSaleEmployee').value;
+    const storeId = document.getElementById('editSaleStore').value;
+    const productId = document.getElementById('editSaleProduct').value;
+    const quantity = parseInt(document.getElementById('editSaleQuantity').value) || 0;
+    const value = parseFloat(document.getElementById('editSaleValue').value) || 0;
+
+    db.ref('sales').child(id).set({ date, employeeId, storeId, productId, quantity, value });
+    closeModal();
+}
+
+
+function deleteSale(id) {
+    if (confirm('Are you sure you want to delete this sale?')) {
+        db.ref('sales').child(id).remove();
+    }
+}
+
+
+let currentUser = null;
+let userIsAdmin = false;
+
+firebase.auth().onAuthStateChanged(user => {
+  if (user) {
+    currentUser = user;
+    document.getElementById('loginForm').style.display = 'none';
+    document.getElementById('logoutBtn').classList.remove('hidden');
+
+    // Check admin flag from DB (optional: add roles to Firebase)
+    db.ref('admins/' + user.uid).once('value').then(snapshot => {
+      userIsAdmin = snapshot.exists();
+    });
+  } else {
+    currentUser = null;
+    document.getElementById('loginForm').style.display = 'flex';
+    document.getElementById('logoutBtn').classList.add('hidden');
+  }
+});
+
+function login() {
+  const email = document.getElementById('loginEmail').value;
+  const password = document.getElementById('loginPassword').value;
+  firebase.auth().signInWithEmailAndPassword(email, password).catch(alert);
+}
+
+function logout() {
+  firebase.auth().signOut();
+}
+
+function register() {
+  const email = document.getElementById('loginEmail').value;
+  const password = document.getElementById('loginPassword').value;
+  firebase.auth().createUserWithEmailAndPassword(email, password).catch(alert);
+}
+
+// Override addEmployeeSale to include uid
+function addEmployeeSale() {
+  const date = document.getElementById('saleDate').value;
+  const storeId = document.getElementById('saleStore').value;
+  const productId = document.getElementById('saleProduct').value;
+  const quantity = parseInt(document.getElementById('saleQuantity').value) || 0;
+  const value = parseFloat(document.getElementById('saleValue').value) || 0;
+  const employeeId = document.getElementById('loggedInUser')?.value || '';
+
+  if (!currentUser) return alert("Login required");
+
+  const newSale = { date, storeId, productId, quantity, value, employeeId, uid: currentUser.uid };
+  db.ref('sales').push(newSale);
+  closeModal();
+}
+
+// Override renderEmployeeSalesTable to filter for non-admins
+function renderEmployeeSalesTable() {
+  const tbody = document.getElementById('empSalesTable');
+  const filtered = userIsAdmin ? sales : sales.filter(s => s.uid === currentUser?.uid);
+  tbody.innerHTML = filtered.map(sale => `
+    <tr class="border-b hover:bg-gray-50">
+        <td class="px-2 sm:px-4 py-2 text-xs sm:text-sm">${sale.date}</td>
+        <td class="px-2 sm:px-4 py-2 text-xs sm:text-sm hidden sm:table-cell">${sale.storeId}</td>
+        <td class="px-2 sm:px-4 py-2 text-xs sm:text-sm">${sale.productId}</td>
+        <td class="px-2 sm:px-4 py-2 text-xs sm:text-sm">${sale.quantity}</td>
+        <td class="px-2 sm:px-4 py-2 text-xs sm:text-sm">${sale.value}</td>
+        <td class="px-2 sm:px-4 py-2 text-xs sm:text-sm">
+            <button onclick="editSale('${sale.id}')" class="bg-blue-500 text-white px-2 py-1 rounded text-xs hover:bg-blue-600">Edit</button>
+            <button onclick="deleteSale('${sale.id}')" class="bg-red-500 text-white px-2 py-1 rounded text-xs hover:bg-red-600">Delete</button>
+        </td>
+    </tr>
+  `).join('');
+}
+
+</script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96945faa73bef9db',t:'MTc1NDIwODk5NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();
+function editSale(saleId) {
+    const sale = sales.find(s => s.id === saleId);
+    const content = `
+        <h3 class="text-lg font-bold mb-4">Edit Sale</h3>
+        <div class="space-y-4">
+            <input type="date" id="editSaleDate" value="${sale.date}" class="w-full p-2 border rounded">
+            <input type="text" id="editSaleEmployee" value="${sale.employeeId}" class="w-full p-2 border rounded" readonly>
+            <input type="text" id="editSaleStore" value="${sale.storeId}" class="w-full p-2 border rounded">
+            <input type="text" id="editSaleProduct" value="${sale.productId}" class="w-full p-2 border rounded">
+            <input type="number" id="editSaleQuantity" value="${sale.quantity}" class="w-full p-2 border rounded">
+            <input type="number" id="editSaleValue" value="${sale.value}" class="w-full p-2 border rounded">
+        </div>
+        <div class="flex justify-end space-x-2 mt-4">
+            <button onclick="closeModal()" class="px-4 py-2 text-gray-600 hover:text-gray-800">Cancel</button>
+            <button onclick="updateSale('${saleId}')" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Update Sale</button>
+        </div>
+    `;
+    showModal(content);
+}
+
+function updateSale(id) {
+    const date = document.getElementById('editSaleDate').value;
+    const employeeId = document.getElementById('editSaleEmployee').value;
+    const storeId = document.getElementById('editSaleStore').value;
+    const productId = document.getElementById('editSaleProduct').value;
+    const quantity = parseInt(document.getElementById('editSaleQuantity').value) || 0;
+    const value = parseFloat(document.getElementById('editSaleValue').value) || 0;
+
+    db.ref('sales').child(id).set({ date, employeeId, storeId, productId, quantity, value });
+    closeModal();
+}
+
+
+function deleteSale(id) {
+    if (confirm('Are you sure you want to delete this sale?')) {
+        db.ref('sales').child(id).remove();
+    }
+}
+
+
+let currentUser = null;
+let userIsAdmin = false;
+
+firebase.auth().onAuthStateChanged(user => {
+  if (user) {
+    currentUser = user;
+    document.getElementById('loginForm').style.display = 'none';
+    document.getElementById('logoutBtn').classList.remove('hidden');
+
+    // Check admin flag from DB (optional: add roles to Firebase)
+    db.ref('admins/' + user.uid).once('value').then(snapshot => {
+      userIsAdmin = snapshot.exists();
+    });
+  } else {
+    currentUser = null;
+    document.getElementById('loginForm').style.display = 'flex';
+    document.getElementById('logoutBtn').classList.add('hidden');
+  }
+});
+
+function login() {
+  const email = document.getElementById('loginEmail').value;
+  const password = document.getElementById('loginPassword').value;
+  firebase.auth().signInWithEmailAndPassword(email, password).catch(alert);
+}
+
+function logout() {
+  firebase.auth().signOut();
+}
+
+function register() {
+  const email = document.getElementById('loginEmail').value;
+  const password = document.getElementById('loginPassword').value;
+  firebase.auth().createUserWithEmailAndPassword(email, password).catch(alert);
+}
+
+// Override addEmployeeSale to include uid
+function addEmployeeSale() {
+  const date = document.getElementById('saleDate').value;
+  const storeId = document.getElementById('saleStore').value;
+  const productId = document.getElementById('saleProduct').value;
+  const quantity = parseInt(document.getElementById('saleQuantity').value) || 0;
+  const value = parseFloat(document.getElementById('saleValue').value) || 0;
+  const employeeId = document.getElementById('loggedInUser')?.value || '';
+
+  if (!currentUser) return alert("Login required");
+
+  const newSale = { date, storeId, productId, quantity, value, employeeId, uid: currentUser.uid };
+  db.ref('sales').push(newSale);
+  closeModal();
+}
+
+// Override renderEmployeeSalesTable to filter for non-admins
+function renderEmployeeSalesTable() {
+  const tbody = document.getElementById('empSalesTable');
+  const filtered = userIsAdmin ? sales : sales.filter(s => s.uid === currentUser?.uid);
+  tbody.innerHTML = filtered.map(sale => `
+    <tr class="border-b hover:bg-gray-50">
+        <td class="px-2 sm:px-4 py-2 text-xs sm:text-sm">${sale.date}</td>
+        <td class="px-2 sm:px-4 py-2 text-xs sm:text-sm hidden sm:table-cell">${sale.storeId}</td>
+        <td class="px-2 sm:px-4 py-2 text-xs sm:text-sm">${sale.productId}</td>
+        <td class="px-2 sm:px-4 py-2 text-xs sm:text-sm">${sale.quantity}</td>
+        <td class="px-2 sm:px-4 py-2 text-xs sm:text-sm">${sale.value}</td>
+        <td class="px-2 sm:px-4 py-2 text-xs sm:text-sm">
+            <button onclick="editSale('${sale.id}')" class="bg-blue-500 text-white px-2 py-1 rounded text-xs hover:bg-blue-600">Edit</button>
+            <button onclick="deleteSale('${sale.id}')" class="bg-red-500 text-white px-2 py-1 rounded text-xs hover:bg-red-600">Delete</button>
+        </td>
+    </tr>
+  `).join('');
+}
+
+</script></body>
 </html>
