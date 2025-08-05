@@ -605,17 +605,9 @@
                     <div class="text-xs opacity-70" id="employeeSyncStatus">📱 Local Mode</div>
                 </div>
                 
-                <!-- Mobile Action Buttons -->
-                <div class="mobile-action-buttons sm:flex-row sm:space-x-2 sm:space-y-0">
-                    <button onclick="refreshData()" class="bg-blue-600 mobile-button hover:bg-blue-700 transition text-sm flex-1">
-                        🔄 Refresh
-                    </button>
-                    <button onclick="quickAddSale()" class="bg-green-600 mobile-button hover:bg-green-700 transition text-sm flex-1">
-                        ➕ Quick Sale
-                    </button>
-                    <button onclick="viewTodaysSummary()" class="bg-purple-600 mobile-button hover:bg-purple-700 transition text-sm flex-1">
-                        📊 Summary
-                    </button>
+                <!-- Simple Status Bar -->
+                <div class="text-center text-sm opacity-80">
+                    Ready to record sales
                 </div>
             </div>
         </nav>
@@ -654,7 +646,7 @@
                 <div class="bg-white mobile-card p-4">
                     <div class="flex items-center justify-between">
                         <div>
-                            <p class="text-gray-600 text-sm">Estimated Salary</p>
+                            <p class="text-gray-600 text-sm">Today's Salary</p>
                             <p class="text-xl sm:text-2xl font-bold text-purple-600" id="estimatedSalary">$0</p>
                         </div>
                         <div class="w-10 h-10 sm:w-12 sm:h-12 bg-purple-100 rounded-full flex items-center justify-center">
@@ -667,61 +659,53 @@
                 </div>
             </div>
 
-            <!-- Quick Sale Entry -->
+            <!-- Simple Sale Entry -->
             <div class="bg-white mobile-card p-4 mb-6">
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-lg font-semibold">💰 Quick Sale Entry</h3>
-                    <div class="text-sm text-gray-500" id="currentDateTime"></div>
-                </div>
+                <h3 class="text-lg font-semibold mb-4 text-center">📝 Record New Sale</h3>
                 
                 <form id="addSaleForm" class="space-y-4">
-                    <!-- Product Selection - Large and Prominent -->
+                    <!-- Store Selection -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">🧴 Select Product</label>
-                        <select id="saleProduct" class="mobile-input text-lg font-medium" required style="min-height: 50px;">
-                            <option value="">Choose a product...</option>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">🏪 Store</label>
+                        <select id="saleStore" class="mobile-input" required style="min-height: 50px;">
+                            <option value="">Select Store</option>
                         </select>
                     </div>
                     
-                    <!-- Quantity Input - Large and Easy to Use -->
-                    <div class="grid grid-cols-3 gap-3 items-end">
-                        <div class="col-span-2">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">📦 Quantity</label>
-                            <input type="number" id="saleQuantity" min="1" value="1" class="mobile-input text-xl text-center font-bold" required style="min-height: 50px;">
-                        </div>
-                        <div class="flex flex-col space-y-1">
-                            <button type="button" onclick="adjustQuantity(1)" class="bg-green-500 text-white rounded-lg py-2 text-lg font-bold hover:bg-green-600 transition">+</button>
-                            <button type="button" onclick="adjustQuantity(-1)" class="bg-red-500 text-white rounded-lg py-2 text-lg font-bold hover:bg-red-600 transition">-</button>
+                    <!-- Product Selection -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">🧴 Product</label>
+                        <select id="saleProduct" class="mobile-input" required style="min-height: 50px;">
+                            <option value="">Choose product...</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Quantity Input -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">📦 Quantity</label>
+                        <div class="flex items-center space-x-2">
+                            <button type="button" onclick="adjustQuantity(-1)" class="bg-red-500 text-white w-12 h-12 rounded-lg text-xl font-bold hover:bg-red-600 transition">-</button>
+                            <input type="number" id="saleQuantity" min="1" value="1" class="mobile-input text-center text-xl font-bold flex-1" required style="min-height: 50px;">
+                            <button type="button" onclick="adjustQuantity(1)" class="bg-green-500 text-white w-12 h-12 rounded-lg text-xl font-bold hover:bg-green-600 transition">+</button>
                         </div>
                     </div>
                     
-                    <!-- Sale Summary -->
-                    <div class="bg-gray-50 rounded-lg p-4">
-                        <div class="flex justify-between items-center mb-2">
-                            <span class="text-gray-600">Product Price:</span>
-                            <span class="font-semibold" id="productPrice">$0.00</span>
-                        </div>
-                        <div class="flex justify-between items-center mb-2">
-                            <span class="text-gray-600">Quantity:</span>
-                            <span class="font-semibold" id="displayQuantity">1</span>
-                        </div>
-                        <hr class="my-2">
-                        <div class="flex justify-between items-center">
-                            <span class="text-lg font-semibold">Total Amount:</span>
-                            <span class="text-xl font-bold text-green-600" id="totalAmount">$0.00</span>
-                        </div>
+                    <!-- Total Display -->
+                    <div class="bg-green-50 border border-green-200 rounded-lg p-4 text-center">
+                        <p class="text-sm text-gray-600 mb-1">Total Amount</p>
+                        <p class="text-2xl font-bold text-green-600" id="totalAmount">$0.00</p>
                     </div>
                     
-                    <!-- Submit Button - Large and Prominent -->
-                    <button type="submit" class="w-full gradient-bg text-white text-lg font-bold py-4 rounded-lg hover:opacity-90 transition" style="min-height: 60px;">
-                        ✅ Record Sale
+                    <!-- Save Button -->
+                    <button type="submit" class="w-full bg-blue-600 text-white text-lg font-bold py-4 rounded-lg hover:bg-blue-700 transition" style="min-height: 60px;">
+                        💾 Save Sale
                     </button>
                 </form>
             </div>
 
             <!-- Today's Sales -->
             <div class="bg-white mobile-card p-4">
-                <h3 class="text-lg font-semibold mb-4">Today's Sales</h3>
+                <h3 class="text-lg font-semibold mb-4 text-center">📊 Today's Sales - <span id="currentDate"></span></h3>
                 <div class="mobile-table-container">
                     <table class="mobile-table w-full">
                         <thead>
@@ -3356,9 +3340,7 @@
             
             // Update current date
             updateCurrentDate('employeeCurrentDate');
-            
-            // Update current date and time for sale form
-            updateCurrentDateTime();
+            updateCurrentDate('currentDate');
             
             // Populate dropdowns
             populateProductDropdown();
@@ -3373,9 +3355,6 @@
             // Update stats and sales table
             updateEmployeeStats();
             updateTodaysSalesTable();
-            
-            // Start real-time clock update
-            setInterval(updateCurrentDateTime, 60000); // Update every minute
         }
 
         function populateProductDropdown() {
@@ -3524,35 +3503,25 @@
                 const totalSales = todaysSales.reduce((sum, sale) => sum + (sale.amount || 0), 0);
                 const bottlesSold = todaysSales.reduce((sum, sale) => sum + (sale.quantity || 0), 0);
                 
-                // Calculate estimated salary based on salary type
-                let estimatedSalary = currentUser.baseSalary || 0;
-                const monthSales = sales.filter(sale => {
-                    if (!sale || !sale.date) return false;
-                    try {
-                        const saleDate = new Date(sale.date);
-                        const currentDate = new Date();
-                        return saleDate.getMonth() === currentDate.getMonth() && 
-                               saleDate.getFullYear() === currentDate.getFullYear() &&
-                               sale.employeeId === currentUser.id;
-                    } catch (error) {
-                        return false;
-                    }
-                });
-                
-                const monthlyQuantity = monthSales.reduce((sum, sale) => sum + (sale.quantity || 0), 0);
-                const monthlySalesAmount = monthSales.reduce((sum, sale) => sum + (sale.amount || 0), 0);
-                const uniqueDays = [...new Set(monthSales.map(sale => sale.date).filter(date => date))].length;
+                // Calculate today's salary based on salary type
+                let todaySalary = 0;
                 
                 switch(currentUser.salaryType) {
+                    case 'fixed':
+                        // Daily portion of monthly salary
+                        todaySalary = (currentUser.baseSalary || 0) / 30;
+                        break;
                     case 'commission':
-                        estimatedSalary += monthlySalesAmount * (currentUser.commissionRate || 0.1);
+                        todaySalary = totalSales * (currentUser.commissionRate || 0.1);
                         break;
                     case 'qty_sold':
-                        estimatedSalary += monthlyQuantity * 5; // $5 per item
+                        todaySalary = bottlesSold * 5; // $5 per bottle
                         break;
                     case 'days_present':
-                        estimatedSalary += uniqueDays * 50; // $50 per day
+                        todaySalary = todaysSales.length > 0 ? 50 : 0; // $50 if worked today
                         break;
+                    default:
+                        todaySalary = (currentUser.baseSalary || 0) / 30;
                 }
                 
                 // Safe DOM element updates with null checks
@@ -3567,7 +3536,7 @@
                     bottlesSoldEl.textContent = bottlesSold.toString();
                 }
                 if (estimatedSalaryEl) {
-                    estimatedSalaryEl.textContent = `$${estimatedSalary.toFixed(2)}`;
+                    estimatedSalaryEl.textContent = `$${todaySalary.toFixed(2)}`;
                 }
             } catch (error) {
                 console.error('Error in updateEmployeeStats:', error);
@@ -3641,7 +3610,14 @@
             
             const productId = document.getElementById('saleProduct').value;
             const quantity = parseInt(document.getElementById('saleQuantity').value);
-            const storeId = currentUser.storeId; // Use employee's assigned store
+            const storeId = document.getElementById('saleStore').value;
+            
+            if (!storeId) {
+                alert('Please select a store');
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+                return;
+            }
             
             if (!productId) {
                 alert('Please select a product');
@@ -3681,6 +3657,7 @@
                 // Reset form to default state
                 document.getElementById('saleQuantity').value = '1';
                 document.getElementById('saleProduct').value = '';
+                document.getElementById('saleStore').value = '';
                 updateSaleSummary();
                 
                 // Reload data and update displays
@@ -4294,5 +4271,5 @@
             document.getElementById(elementId).textContent = dateString;
         }
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96a7844163d7f9d9',t:'MTc1NDQwOTcyMy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96a7940772f2de53',t:'MTc1NDQxMDM2OS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
