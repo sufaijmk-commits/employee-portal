@@ -7,9 +7,9 @@
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌸</text></svg>">
     <!-- Tailwind CSS will be configured manually -->
     
-    <!-- Firebase SDK with error handling -->
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js" onerror="console.log('Firebase App SDK failed to load')"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js" onerror="console.log('Firebase Firestore SDK failed to load')"></script>
+    <!-- Firebase SDK with better error handling -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js" onerror="handleFirebaseLoadError('app')"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js" onerror="handleFirebaseLoadError('firestore')"></script>
     
     <style>
         /* Manual Tailwind CSS Configuration */
@@ -976,6 +976,12 @@
     </div>
 
     <script>
+        // Firebase loading error handler
+        function handleFirebaseLoadError(component) {
+            console.warn(`Firebase ${component} failed to load - falling back to local mode`);
+            window.firebaseLoadError = true;
+        }
+
         // Global Variables
         let db = null;
         let isFirebaseMode = false;
@@ -1009,13 +1015,17 @@
         // Firebase Configuration
         function initializeFirebase(config) {
             try {
-                // Check if Firebase is available
-                if (typeof firebase === 'undefined') {
-                    console.warn('Firebase SDK not loaded, falling back to local mode');
+                // Check if Firebase is available and loaded properly
+                if (typeof firebase === 'undefined' || window.firebaseLoadError) {
+                    console.warn('Firebase SDK not available, falling back to local mode');
                     return false;
                 }
                 
-                firebase.initializeApp(config);
+                // Check if Firebase is already initialized
+                if (firebase.apps.length === 0) {
+                    firebase.initializeApp(config);
+                }
+                
                 db = firebase.firestore();
                 isFirebaseMode = true;
                 syncStatus = 'connected';
@@ -1211,7 +1221,10 @@
                 case 'update':
                     const firebaseId = data.firebaseId || data.id;
                     if (firebaseId && firebaseId.toString().length > 10) {
-                        await db.collection(type + 's').doc(firebaseId).update(data);
+                        await db.collection(type + 's').doc(firebaseId).update({
+                            ...data,
+                            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                        });
                     }
                     break;
                     
@@ -1320,6 +1333,14 @@
                 
                 // Ensure arrays are valid
                 initializeArrays();
+                
+                console.log('Local data loaded:', {
+                    employees: employees.length,
+                    stores: stores.length,
+                    products: products.length,
+                    collections: collections.length,
+                    sales: sales.length
+                });
             } catch (error) {
                 console.error('Error loading local data:', error);
                 // Reset to empty arrays if parsing fails
@@ -1332,12 +1353,22 @@
         }
 
         function saveLocalData() {
-            if (!isFirebaseMode) {
+            try {
                 localStorage.setItem('eden_employees', JSON.stringify(employees));
                 localStorage.setItem('eden_stores', JSON.stringify(stores));
                 localStorage.setItem('eden_products', JSON.stringify(products));
                 localStorage.setItem('eden_collections', JSON.stringify(collections));
                 localStorage.setItem('eden_sales', JSON.stringify(sales));
+                
+                console.log('Local data saved:', {
+                    employees: employees.length,
+                    stores: stores.length,
+                    products: products.length,
+                    collections: collections.length,
+                    sales: sales.length
+                });
+            } catch (error) {
+                console.error('Error saving local data:', error);
             }
         }
 
@@ -3884,44 +3915,47 @@
                 // Initialize sync status
                 updateSyncStatus();
                 
-                // Check if Firebase config exists in localStorage
-                const savedConfig = localStorage.getItem('firebaseConfig');
-                
-                if (savedConfig && typeof firebase !== 'undefined') {
-                    try {
-                        const firebaseConfig = JSON.parse(savedConfig);
-                        
-                        // Try to initialize Firebase with saved config
-                        if (initializeFirebase(firebaseConfig)) {
-                            const configModal = document.getElementById('firebaseConfigModal');
-                            const loginScreen = document.getElementById('loginScreen');
+                // Wait a moment for Firebase SDK to load
+                setTimeout(() => {
+                    // Check if Firebase config exists in localStorage
+                    const savedConfig = localStorage.getItem('firebaseConfig');
+                    
+                    if (savedConfig && typeof firebase !== 'undefined' && !window.firebaseLoadError) {
+                        try {
+                            const firebaseConfig = JSON.parse(savedConfig);
                             
-                            if (configModal) configModal.classList.add('hidden');
-                            if (loginScreen) loginScreen.classList.remove('hidden');
-                            
-                            // Add sample data if collections are empty (only locally)
+                            // Try to initialize Firebase with saved config
+                            if (initializeFirebase(firebaseConfig)) {
+                                const configModal = document.getElementById('firebaseConfigModal');
+                                const loginScreen = document.getElementById('loginScreen');
+                                
+                                if (configModal) configModal.classList.add('hidden');
+                                if (loginScreen) loginScreen.classList.remove('hidden');
+                                
+                                // Add sample data if collections are empty (only locally)
+                                if (!employees || employees.length === 0) {
+                                    initializeSampleDataLocal();
+                                }
+                            } else {
+                                throw new Error('Firebase initialization failed');
+                            }
+                        } catch (error) {
+                            console.error('Error with saved Firebase config:', error);
+                            // Fall back to demo mode if saved config fails
+                            loadDemoConfig();
                             if (!employees || employees.length === 0) {
                                 initializeSampleDataLocal();
                             }
-                        } else {
-                            throw new Error('Firebase initialization failed');
                         }
-                    } catch (error) {
-                        console.error('Error with saved Firebase config:', error);
-                        // Fall back to demo mode if saved config fails
+                    } else {
+                        // No saved config or Firebase not available, fall back to demo mode
+                        console.log('Firebase not available or no saved config, using local storage mode');
                         loadDemoConfig();
                         if (!employees || employees.length === 0) {
                             initializeSampleDataLocal();
                         }
                     }
-                } else {
-                    // No saved config or Firebase not available, fall back to demo mode
-                    console.log('Firebase not available or no saved config, using local storage mode');
-                    loadDemoConfig();
-                    if (!employees || employees.length === 0) {
-                        initializeSampleDataLocal();
-                    }
-                }
+                }, 500); // Wait 500ms for Firebase to load
                 
                 // Set default dates safely
                 try {
@@ -4203,5 +4237,5 @@
             }
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96a664f3d5e9f9d7',t:'MTc1NDM5Nzk1NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96a6708007fef9ec',t:'MTc1NDM5ODQyOC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
