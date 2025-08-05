@@ -1878,7 +1878,353 @@
         }
 
         function generateSalesReport() {
-            alert('Sales Report generation coming soon!');
+            try {
+                const startDate = document.getElementById('reportStartDate').value;
+                const endDate = document.getElementById('reportEndDate').value;
+                const reportType = document.getElementById('reportType').value;
+                const filterValue = document.getElementById('reportFilter').value;
+                
+                if (!startDate || !endDate) {
+                    alert('Please select both start and end dates');
+                    return;
+                }
+                
+                if (new Date(startDate) > new Date(endDate)) {
+                    alert('Start date cannot be after end date');
+                    return;
+                }
+                
+                // Filter sales by date range
+                let filteredSales = sales.filter(sale => {
+                    if (!sale || !sale.date) return false;
+                    const saleDate = new Date(sale.date);
+                    const start = new Date(startDate);
+                    const end = new Date(endDate);
+                    return saleDate >= start && saleDate <= end;
+                });
+                
+                // Apply additional filters based on report type
+                if (filterValue) {
+                    switch(reportType) {
+                        case 'store':
+                            filteredSales = filteredSales.filter(sale => sale.storeId === filterValue);
+                            break;
+                        case 'staff':
+                            filteredSales = filteredSales.filter(sale => sale.employeeId === filterValue);
+                            break;
+                        case 'product':
+                            filteredSales = filteredSales.filter(sale => sale.productId === filterValue);
+                            break;
+                    }
+                }
+                
+                // Generate report based on type
+                let reportData = [];
+                
+                switch(reportType) {
+                    case 'daily':
+                        reportData = generateDailyReport(filteredSales);
+                        break;
+                    case 'monthly':
+                        reportData = generateMonthlyReport(filteredSales);
+                        break;
+                    case 'store':
+                        reportData = generateStoreWiseReport(filteredSales);
+                        break;
+                    case 'staff':
+                        reportData = generateStaffWiseReport(filteredSales);
+                        break;
+                    case 'product':
+                        reportData = generateProductWiseReport(filteredSales);
+                        break;
+                    default: // 'all'
+                        reportData = filteredSales.map(sale => ({
+                            date: sale.date,
+                            time: sale.time || '',
+                            employee: getEmployeeName(sale.employeeId),
+                            store: getStoreName(sale.storeId),
+                            product: getProductName(sale.productId),
+                            quantity: sale.quantity || 0,
+                            amount: sale.amount || 0
+                        }));
+                }
+                
+                displaySalesReport(reportData, reportType);
+                
+            } catch (error) {
+                console.error('Error generating sales report:', error);
+                alert('Error generating report: ' + error.message);
+            }
+        }
+        
+        function generateDailyReport(sales) {
+            const dailyData = {};
+            
+            sales.forEach(sale => {
+                const date = sale.date;
+                if (!dailyData[date]) {
+                    dailyData[date] = {
+                        date: date,
+                        totalSales: 0,
+                        totalQuantity: 0,
+                        totalAmount: 0,
+                        transactions: 0
+                    };
+                }
+                
+                dailyData[date].totalSales += 1;
+                dailyData[date].totalQuantity += sale.quantity || 0;
+                dailyData[date].totalAmount += sale.amount || 0;
+                dailyData[date].transactions += 1;
+            });
+            
+            return Object.values(dailyData).sort((a, b) => new Date(a.date) - new Date(b.date));
+        }
+        
+        function generateMonthlyReport(sales) {
+            const monthlyData = {};
+            
+            sales.forEach(sale => {
+                const date = new Date(sale.date);
+                const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+                const monthName = date.toLocaleDateString('en-US', { year: 'numeric', month: 'long' });
+                
+                if (!monthlyData[monthKey]) {
+                    monthlyData[monthKey] = {
+                        month: monthName,
+                        totalSales: 0,
+                        totalQuantity: 0,
+                        totalAmount: 0,
+                        transactions: 0
+                    };
+                }
+                
+                monthlyData[monthKey].totalSales += 1;
+                monthlyData[monthKey].totalQuantity += sale.quantity || 0;
+                monthlyData[monthKey].totalAmount += sale.amount || 0;
+                monthlyData[monthKey].transactions += 1;
+            });
+            
+            return Object.values(monthlyData).sort((a, b) => a.month.localeCompare(b.month));
+        }
+        
+        function generateStoreWiseReport(sales) {
+            const storeData = {};
+            
+            sales.forEach(sale => {
+                const storeId = sale.storeId;
+                const storeName = getStoreName(storeId);
+                
+                if (!storeData[storeId]) {
+                    storeData[storeId] = {
+                        store: storeName,
+                        totalSales: 0,
+                        totalQuantity: 0,
+                        totalAmount: 0,
+                        transactions: 0
+                    };
+                }
+                
+                storeData[storeId].totalSales += 1;
+                storeData[storeId].totalQuantity += sale.quantity || 0;
+                storeData[storeId].totalAmount += sale.amount || 0;
+                storeData[storeId].transactions += 1;
+            });
+            
+            return Object.values(storeData).sort((a, b) => b.totalAmount - a.totalAmount);
+        }
+        
+        function generateStaffWiseReport(sales) {
+            const staffData = {};
+            
+            sales.forEach(sale => {
+                const employeeId = sale.employeeId;
+                const employeeName = getEmployeeName(employeeId);
+                
+                if (!staffData[employeeId]) {
+                    staffData[employeeId] = {
+                        employee: employeeName,
+                        store: getStoreName(sale.storeId),
+                        totalSales: 0,
+                        totalQuantity: 0,
+                        totalAmount: 0,
+                        transactions: 0
+                    };
+                }
+                
+                staffData[employeeId].totalSales += 1;
+                staffData[employeeId].totalQuantity += sale.quantity || 0;
+                staffData[employeeId].totalAmount += sale.amount || 0;
+                staffData[employeeId].transactions += 1;
+            });
+            
+            return Object.values(staffData).sort((a, b) => b.totalAmount - a.totalAmount);
+        }
+        
+        function generateProductWiseReport(sales) {
+            const productData = {};
+            
+            sales.forEach(sale => {
+                const productId = sale.productId;
+                const productName = getProductName(productId);
+                const product = getProduct(productId);
+                
+                if (!productData[productId]) {
+                    productData[productId] = {
+                        product: productName,
+                        price: product ? product.price : 0,
+                        totalQuantity: 0,
+                        totalAmount: 0,
+                        transactions: 0
+                    };
+                }
+                
+                productData[productId].totalQuantity += sale.quantity || 0;
+                productData[productId].totalAmount += sale.amount || 0;
+                productData[productId].transactions += 1;
+            });
+            
+            return Object.values(productData).sort((a, b) => b.totalAmount - a.totalAmount);
+        }
+        
+        function displaySalesReport(reportData, reportType) {
+            const tbody = document.getElementById('salesReportTable');
+            const header = document.getElementById('salesReportHeader');
+            
+            if (reportData.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center py-8 text-gray-500">No sales data found for the selected criteria</td></tr>';
+                return;
+            }
+            
+            // Update header based on report type
+            let headerHTML = '';
+            let bodyHTML = '';
+            
+            switch(reportType) {
+                case 'daily':
+                    headerHTML = `
+                        <th class="text-left py-4 px-6">Date</th>
+                        <th class="text-left py-4 px-6">Transactions</th>
+                        <th class="text-left py-4 px-6">Total Quantity</th>
+                        <th class="text-left py-4 px-6">Total Amount</th>
+                        <th class="text-left py-4 px-6">Avg per Transaction</th>
+                    `;
+                    bodyHTML = reportData.map(row => `
+                        <tr class="border-b hover:bg-gray-50">
+                            <td class="py-4 px-6">${new Date(row.date).toLocaleDateString()}</td>
+                            <td class="py-4 px-6">${row.transactions}</td>
+                            <td class="py-4 px-6">${row.totalQuantity}</td>
+                            <td class="py-4 px-6">$${row.totalAmount.toFixed(2)}</td>
+                            <td class="py-4 px-6">$${(row.totalAmount / row.transactions).toFixed(2)}</td>
+                        </tr>
+                    `).join('');
+                    break;
+                    
+                case 'monthly':
+                    headerHTML = `
+                        <th class="text-left py-4 px-6">Month</th>
+                        <th class="text-left py-4 px-6">Transactions</th>
+                        <th class="text-left py-4 px-6">Total Quantity</th>
+                        <th class="text-left py-4 px-6">Total Amount</th>
+                        <th class="text-left py-4 px-6">Avg per Transaction</th>
+                    `;
+                    bodyHTML = reportData.map(row => `
+                        <tr class="border-b hover:bg-gray-50">
+                            <td class="py-4 px-6">${row.month}</td>
+                            <td class="py-4 px-6">${row.transactions}</td>
+                            <td class="py-4 px-6">${row.totalQuantity}</td>
+                            <td class="py-4 px-6">$${row.totalAmount.toFixed(2)}</td>
+                            <td class="py-4 px-6">$${(row.totalAmount / row.transactions).toFixed(2)}</td>
+                        </tr>
+                    `).join('');
+                    break;
+                    
+                case 'store':
+                    headerHTML = `
+                        <th class="text-left py-4 px-6">Store</th>
+                        <th class="text-left py-4 px-6">Transactions</th>
+                        <th class="text-left py-4 px-6">Total Quantity</th>
+                        <th class="text-left py-4 px-6">Total Amount</th>
+                        <th class="text-left py-4 px-6">Avg per Transaction</th>
+                    `;
+                    bodyHTML = reportData.map(row => `
+                        <tr class="border-b hover:bg-gray-50">
+                            <td class="py-4 px-6">${row.store}</td>
+                            <td class="py-4 px-6">${row.transactions}</td>
+                            <td class="py-4 px-6">${row.totalQuantity}</td>
+                            <td class="py-4 px-6">$${row.totalAmount.toFixed(2)}</td>
+                            <td class="py-4 px-6">$${(row.totalAmount / row.transactions).toFixed(2)}</td>
+                        </tr>
+                    `).join('');
+                    break;
+                    
+                case 'staff':
+                    headerHTML = `
+                        <th class="text-left py-4 px-6">Employee</th>
+                        <th class="text-left py-4 px-6">Store</th>
+                        <th class="text-left py-4 px-6">Transactions</th>
+                        <th class="text-left py-4 px-6">Total Quantity</th>
+                        <th class="text-left py-4 px-6">Total Amount</th>
+                    `;
+                    bodyHTML = reportData.map(row => `
+                        <tr class="border-b hover:bg-gray-50">
+                            <td class="py-4 px-6">${row.employee}</td>
+                            <td class="py-4 px-6">${row.store}</td>
+                            <td class="py-4 px-6">${row.transactions}</td>
+                            <td class="py-4 px-6">${row.totalQuantity}</td>
+                            <td class="py-4 px-6">$${row.totalAmount.toFixed(2)}</td>
+                        </tr>
+                    `).join('');
+                    break;
+                    
+                case 'product':
+                    headerHTML = `
+                        <th class="text-left py-4 px-6">Product</th>
+                        <th class="text-left py-4 px-6">Unit Price</th>
+                        <th class="text-left py-4 px-6">Quantity Sold</th>
+                        <th class="text-left py-4 px-6">Total Amount</th>
+                        <th class="text-left py-4 px-6">Transactions</th>
+                    `;
+                    bodyHTML = reportData.map(row => `
+                        <tr class="border-b hover:bg-gray-50">
+                            <td class="py-4 px-6">${row.product}</td>
+                            <td class="py-4 px-6">$${row.price.toFixed(2)}</td>
+                            <td class="py-4 px-6">${row.totalQuantity}</td>
+                            <td class="py-4 px-6">$${row.totalAmount.toFixed(2)}</td>
+                            <td class="py-4 px-6">${row.transactions}</td>
+                        </tr>
+                    `).join('');
+                    break;
+                    
+                default: // 'all'
+                    headerHTML = `
+                        <th class="text-left py-4 px-6">Date</th>
+                        <th class="text-left py-4 px-6">Time</th>
+                        <th class="text-left py-4 px-6">Employee</th>
+                        <th class="text-left py-4 px-6">Store</th>
+                        <th class="text-left py-4 px-6">Product</th>
+                        <th class="text-left py-4 px-6">Quantity</th>
+                        <th class="text-left py-4 px-6">Amount</th>
+                    `;
+                    bodyHTML = reportData.map(row => `
+                        <tr class="border-b hover:bg-gray-50">
+                            <td class="py-4 px-6">${new Date(row.date).toLocaleDateString()}</td>
+                            <td class="py-4 px-6">${row.time}</td>
+                            <td class="py-4 px-6">${row.employee}</td>
+                            <td class="py-4 px-6">${row.store}</td>
+                            <td class="py-4 px-6">${row.product}</td>
+                            <td class="py-4 px-6">${row.quantity}</td>
+                            <td class="py-4 px-6">$${row.amount.toFixed(2)}</td>
+                        </tr>
+                    `).join('');
+            }
+            
+            header.innerHTML = headerHTML;
+            tbody.innerHTML = bodyHTML;
+            
+            // Store report data for export functions
+            window.currentReportData = reportData;
+            window.currentReportType = reportType;
         }
 
         function generateSalaryReport() {
@@ -1909,6 +2255,51 @@
                 });
             }
         }
+        
+        function updateReportFilter() {
+            const reportType = document.getElementById('reportType').value;
+            const filterSelect = document.getElementById('reportFilter');
+            
+            filterSelect.innerHTML = '<option value="">All</option>';
+            
+            switch(reportType) {
+                case 'store':
+                    stores.forEach(store => {
+                        const option = document.createElement('option');
+                        option.value = store.id;
+                        option.textContent = store.name;
+                        filterSelect.appendChild(option);
+                    });
+                    break;
+                case 'staff':
+                    employees.forEach(emp => {
+                        const option = document.createElement('option');
+                        option.value = emp.id;
+                        option.textContent = emp.name;
+                        filterSelect.appendChild(option);
+                    });
+                    break;
+                case 'product':
+                    products.forEach(product => {
+                        const option = document.createElement('option');
+                        option.value = product.id;
+                        option.textContent = product.name;
+                        filterSelect.appendChild(option);
+                    });
+                    break;
+                default:
+                    // For daily, monthly, and all reports, no additional filter needed
+                    filterSelect.innerHTML = '<option value="">All</option>';
+            }
+        }
+        
+        // Add event listener for report type change
+        document.addEventListener('DOMContentLoaded', function() {
+            const reportTypeSelect = document.getElementById('reportType');
+            if (reportTypeSelect) {
+                reportTypeSelect.addEventListener('change', updateReportFilter);
+            }
+        });
 
         // Login System
         document.getElementById('loginForm').addEventListener('submit', async function(e) {
@@ -2313,7 +2704,12 @@
                     break;
                 case 'sales':
                     // Initialize filter dropdown
-                    document.getElementById('reportType').dispatchEvent(new Event('change'));
+                    updateReportFilter();
+                    // Set default dates
+                    const today = new Date();
+                    const lastMonth = new Date(today.getFullYear(), today.getMonth() - 1, today.getDate());
+                    document.getElementById('reportStartDate').value = lastMonth.toISOString().split('T')[0];
+                    document.getElementById('reportEndDate').value = today.toISOString().split('T')[0];
                     break;
                 case 'salary':
                     populateEmployeeDropdown();
@@ -2827,5 +3223,5 @@
             document.getElementById(elementId).textContent = dateString;
         }
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96a7362d315bf9e1',t:'MTc1NDQwNjUyNS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96a745810410f9d7',t:'MTc1NDQwNzE1My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
