@@ -613,48 +613,53 @@
         </nav>
 
         <div class="mobile-container">
-            <!-- Stats Cards -->
-            <div class="mobile-stats-grid mb-6">
-                <div class="bg-white mobile-card p-4">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-gray-600 text-sm">Total Sales Today</p>
-                            <p class="text-xl sm:text-2xl font-bold text-green-600" id="totalSalesToday">$0</p>
+            <!-- Dashboard Metrics - Three Column Headings -->
+            <div class="bg-white mobile-card p-6 mb-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+                    <!-- Total Sales Column -->
+                    <div class="border-r border-gray-200 last:border-r-0">
+                        <div class="mb-3">
+                            <div class="w-16 h-16 mx-auto bg-green-100 rounded-full flex items-center justify-center mb-3">
+                                <svg class="w-8 h-8 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z"/>
+                                </svg>
+                            </div>
+                            <h2 class="text-2xl font-bold text-gray-800 mb-1">TOTAL SALES</h2>
+                            <p class="text-sm text-gray-500 uppercase tracking-wide">Today's Revenue</p>
                         </div>
-                        <div class="w-10 h-10 sm:w-12 sm:h-12 bg-green-100 rounded-full flex items-center justify-center">
-                            <svg class="w-5 h-5 sm:w-6 sm:h-6 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-                                <path d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z"/>
-                            </svg>
-                        </div>
+                        <div class="text-4xl font-bold text-green-600" id="totalSalesToday">$0.00</div>
+                        <p class="text-sm text-gray-500 mt-2">💰 Revenue Generated</p>
                     </div>
-                </div>
 
-                <div class="bg-white mobile-card p-4">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-gray-600 text-sm">Bottles Sold</p>
-                            <p class="text-xl sm:text-2xl font-bold text-blue-600" id="bottlesSold">0</p>
+                    <!-- Quantity Sold Column -->
+                    <div class="border-r border-gray-200 last:border-r-0">
+                        <div class="mb-3">
+                            <div class="w-16 h-16 mx-auto bg-blue-100 rounded-full flex items-center justify-center mb-3">
+                                <svg class="w-8 h-8 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"/>
+                                </svg>
+                            </div>
+                            <h2 class="text-2xl font-bold text-gray-800 mb-1">QUANTITY SOLD</h2>
+                            <p class="text-sm text-gray-500 uppercase tracking-wide">Units Moved</p>
                         </div>
-                        <div class="w-10 h-10 sm:w-12 sm:h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                            <svg class="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
-                                <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"/>
-                            </svg>
-                        </div>
+                        <div class="text-4xl font-bold text-blue-600" id="bottlesSold">0</div>
+                        <p class="text-sm text-gray-500 mt-2">🧴 Bottles Sold</p>
                     </div>
-                </div>
 
-                <div class="bg-white mobile-card p-4">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-gray-600 text-sm">Today's Salary</p>
-                            <p class="text-xl sm:text-2xl font-bold text-purple-600" id="estimatedSalary">$0</p>
+                    <!-- Today's Salary Column -->
+                    <div>
+                        <div class="mb-3">
+                            <div class="w-16 h-16 mx-auto bg-purple-100 rounded-full flex items-center justify-center mb-3">
+                                <svg class="w-8 h-8 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z"/>
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clip-rule="evenodd"/>
+                                </svg>
+                            </div>
+                            <h2 class="text-2xl font-bold text-gray-800 mb-1">TODAY'S SALARY</h2>
+                            <p class="text-sm text-gray-500 uppercase tracking-wide">Earnings</p>
                         </div>
-                        <div class="w-10 h-10 sm:w-12 sm:h-12 bg-purple-100 rounded-full flex items-center justify-center">
-                            <svg class="w-5 h-5 sm:w-6 sm:h-6 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
-                                <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z"/>
-                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clip-rule="evenodd"/>
-                            </svg>
-                        </div>
+                        <div class="text-4xl font-bold text-purple-600" id="estimatedSalary">$0.00</div>
+                        <p class="text-sm text-gray-500 mt-2">💵 Daily Earnings</p>
                     </div>
                 </div>
             </div>
@@ -1334,7 +1339,7 @@
             loadLocalData();
         }
 
-        // Sync Status Management
+        // Enhanced Sync Status Management
         function updateSyncStatus() {
             const statusElements = ['syncStatus', 'employeeSyncStatus', 'adminSyncStatus'];
             let statusText = '';
@@ -1346,7 +1351,7 @@
                     statusColor = 'text-blue-600';
                     break;
                 case 'synced':
-                    statusText = '✅ Synced';
+                    statusText = '✅ Real-time Sync';
                     statusColor = 'text-green-600';
                     break;
                 case 'pending':
@@ -1370,16 +1375,37 @@
                 }
             });
             
-            // Update last sync time if available
-            if (lastSyncTime && syncStatus === 'synced') {
+            // Update last sync time if available and show real-time indicator
+            if (lastSyncTime && syncStatus === 'synced' && isFirebaseMode) {
                 const timeStr = new Date(lastSyncTime).toLocaleTimeString();
                 statusElements.forEach(elementId => {
                     const element = document.getElementById(elementId);
                     if (element) {
-                        element.textContent = `✅ Synced ${timeStr}`;
+                        element.innerHTML = `<span class="text-green-600">🔄 Live</span> <span class="text-xs">${timeStr}</span>`;
                     }
                 });
             }
+        }
+        
+        // Show immediate sync feedback
+        function showSyncFeedback(type, action) {
+            const statusElements = ['syncStatus', 'employeeSyncStatus', 'adminSyncStatus'];
+            const feedbackText = `⚡ ${action} ${type}...`;
+            
+            statusElements.forEach(elementId => {
+                const element = document.getElementById(elementId);
+                if (element) {
+                    const originalContent = element.innerHTML;
+                    element.innerHTML = `<span class="text-blue-600">${feedbackText}</span>`;
+                    
+                    // Restore original status after 2 seconds
+                    setTimeout(() => {
+                        if (element.innerHTML.includes(feedbackText)) {
+                            element.innerHTML = originalContent;
+                        }
+                    }, 2000);
+                }
+            });
         }
 
         // Queue item for sync
@@ -3882,13 +3908,15 @@
             }).join('');
         }
 
-        // Local-First Data Saving
+        // Local-First Data Saving with Immediate Sync
         async function saveEmployee(employee) {
             // Always save locally first
             const isNew = !employee.id;
             if (isNew) {
                 employee.id = Date.now().toString();
+                employee.createdAt = new Date().toISOString();
             }
+            employee.updatedAt = new Date().toISOString();
             
             const index = employees.findIndex(emp => emp.id === employee.id);
             if (index >= 0) {
@@ -3898,9 +3926,54 @@
             }
             saveLocalData();
             
-            // Queue for Firebase sync if connected
+            // Immediate Firebase sync if connected
             if (isFirebaseMode) {
-                queueForSync(isNew ? 'create' : 'update', 'employee', employee);
+                try {
+                    showSyncFeedback('employee', isNew ? 'Creating' : 'Updating');
+                    console.log('Immediately syncing employee to Firebase:', employee);
+                    await syncEmployeeToFirebase(employee, isNew);
+                    console.log('Employee synced successfully to Firebase');
+                    
+                    // Update sync status
+                    syncStatus = 'synced';
+                    lastSyncTime = new Date().toISOString();
+                    updateSyncStatus();
+                } catch (error) {
+                    console.error('Immediate sync failed, queuing for retry:', error);
+                    syncStatus = 'error';
+                    updateSyncStatus();
+                    queueForSync(isNew ? 'create' : 'update', 'employee', employee);
+                }
+            }
+        }
+        
+        // Immediate Firebase sync function for employees
+        async function syncEmployeeToFirebase(employee, isNew) {
+            if (!db) throw new Error('Firebase not connected');
+            
+            const employeeData = {
+                ...employee,
+                localId: employee.id,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            };
+            
+            if (isNew) {
+                employeeData.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+            }
+            
+            if (employee.firebaseId && !isNew) {
+                // Update existing document
+                await db.collection('employees').doc(employee.firebaseId).update(employeeData);
+            } else {
+                // Create new document
+                const docRef = await db.collection('employees').add(employeeData);
+                
+                // Update local data with Firebase ID
+                const localEmployee = employees.find(emp => emp.id === employee.id);
+                if (localEmployee) {
+                    localEmployee.firebaseId = docRef.id;
+                    saveLocalData();
+                }
             }
         }
 
@@ -3909,7 +3982,9 @@
             const isNew = !store.id;
             if (isNew) {
                 store.id = Date.now().toString();
+                store.createdAt = new Date().toISOString();
             }
+            store.updatedAt = new Date().toISOString();
             
             const index = stores.findIndex(s => s.id === store.id);
             if (index >= 0) {
@@ -3919,9 +3994,17 @@
             }
             saveLocalData();
             
-            // Queue for Firebase sync if connected
+            // Immediate Firebase sync if connected
             if (isFirebaseMode) {
-                queueForSync(isNew ? 'create' : 'update', 'store', store);
+                try {
+                    showSyncFeedback('store', isNew ? 'Creating' : 'Updating');
+                    await syncItemToFirebase('stores', store, isNew);
+                } catch (error) {
+                    console.error('Immediate sync failed, queuing for retry:', error);
+                    syncStatus = 'error';
+                    updateSyncStatus();
+                    queueForSync(isNew ? 'create' : 'update', 'store', store);
+                }
             }
         }
 
@@ -3930,7 +4013,9 @@
             const isNew = !product.id;
             if (isNew) {
                 product.id = Date.now().toString();
+                product.createdAt = new Date().toISOString();
             }
+            product.updatedAt = new Date().toISOString();
             
             const index = products.findIndex(p => p.id === product.id);
             if (index >= 0) {
@@ -3940,9 +4025,17 @@
             }
             saveLocalData();
             
-            // Queue for Firebase sync if connected
+            // Immediate Firebase sync if connected
             if (isFirebaseMode) {
-                queueForSync(isNew ? 'create' : 'update', 'product', product);
+                try {
+                    showSyncFeedback('product', isNew ? 'Creating' : 'Updating');
+                    await syncItemToFirebase('products', product, isNew);
+                } catch (error) {
+                    console.error('Immediate sync failed, queuing for retry:', error);
+                    syncStatus = 'error';
+                    updateSyncStatus();
+                    queueForSync(isNew ? 'create' : 'update', 'product', product);
+                }
             }
         }
 
@@ -3951,7 +4044,9 @@
             const isNew = !collection.id;
             if (isNew) {
                 collection.id = Date.now().toString();
+                collection.createdAt = new Date().toISOString();
             }
+            collection.updatedAt = new Date().toISOString();
             
             const index = collections.findIndex(c => c.id === collection.id);
             if (index >= 0) {
@@ -3961,9 +4056,17 @@
             }
             saveLocalData();
             
-            // Queue for Firebase sync if connected
+            // Immediate Firebase sync if connected
             if (isFirebaseMode) {
-                queueForSync(isNew ? 'create' : 'update', 'collection', collection);
+                try {
+                    showSyncFeedback('collection', isNew ? 'Creating' : 'Updating');
+                    await syncItemToFirebase('collections', collection, isNew);
+                } catch (error) {
+                    console.error('Immediate sync failed, queuing for retry:', error);
+                    syncStatus = 'error';
+                    updateSyncStatus();
+                    queueForSync(isNew ? 'create' : 'update', 'collection', collection);
+                }
             }
         }
 
@@ -3972,7 +4075,9 @@
             const isNew = !sale.id;
             if (isNew) {
                 sale.id = Date.now().toString();
+                sale.createdAt = new Date().toISOString();
             }
+            sale.updatedAt = new Date().toISOString();
             
             const index = sales.findIndex(s => s.id === sale.id);
             if (index >= 0) {
@@ -3982,9 +4087,65 @@
             }
             saveLocalData();
             
-            // Queue for Firebase sync if connected
+            // Immediate Firebase sync if connected
             if (isFirebaseMode) {
-                queueForSync(isNew ? 'create' : 'update', 'sale', sale);
+                try {
+                    showSyncFeedback('sale', isNew ? 'Recording' : 'Updating');
+                    await syncItemToFirebase('sales', sale, isNew);
+                } catch (error) {
+                    console.error('Immediate sync failed, queuing for retry:', error);
+                    syncStatus = 'error';
+                    updateSyncStatus();
+                    queueForSync(isNew ? 'create' : 'update', 'sale', sale);
+                }
+            }
+        }
+        
+        // Generic immediate sync function for all data types
+        async function syncItemToFirebase(collectionName, item, isNew) {
+            if (!db) throw new Error('Firebase not connected');
+            
+            const itemData = {
+                ...item,
+                localId: item.id,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            };
+            
+            if (isNew) {
+                itemData.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+            }
+            
+            if (item.firebaseId && !isNew) {
+                // Update existing document
+                await db.collection(collectionName).doc(item.firebaseId).update(itemData);
+            } else {
+                // Create new document
+                const docRef = await db.collection(collectionName).add(itemData);
+                
+                // Update local data with Firebase ID
+                const localArray = getCollectionByName(collectionName);
+                const localItem = localArray.find(i => i.id === item.id);
+                if (localItem) {
+                    localItem.firebaseId = docRef.id;
+                    saveLocalData();
+                }
+            }
+            
+            // Update sync status after successful sync
+            syncStatus = 'synced';
+            lastSyncTime = new Date().toISOString();
+            updateSyncStatus();
+        }
+        
+        // Helper function to get collection array by name
+        function getCollectionByName(collectionName) {
+            switch (collectionName) {
+                case 'employees': return employees;
+                case 'stores': return stores;
+                case 'products': return products;
+                case 'collections': return collections;
+                case 'sales': return sales;
+                default: return [];
             }
         }
 
@@ -4271,5 +4432,5 @@
             document.getElementById(elementId).textContent = dateString;
         }
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96a7940772f2de53',t:'MTc1NDQxMDM2OS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96a7aea0c612f9f8',t:'MTc1NDQxMTQ1OS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
