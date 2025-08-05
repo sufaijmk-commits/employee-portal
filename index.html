@@ -792,7 +792,7 @@
             const salaryAmount = parseFloat(document.getElementById('empSalaryAmount').value) || 0;
             const target = parseInt(document.getElementById('empTarget').value) || 0;
 
-            if (!name || !username || !password || !store) {
+            if (!name.trim() || !username.trim() || !password.trim() || !store.trim()) {
                 alert('Please fill all required fields!');
                 return;
             }
