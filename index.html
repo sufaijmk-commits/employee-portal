@@ -4,11 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Eden Perfume - Sales Management System</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌸</text></svg>">
     <!-- Tailwind CSS will be configured manually -->
     
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <!-- Firebase SDK with error handling -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js" onerror="console.log('Firebase App SDK failed to load')"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js" onerror="console.log('Firebase Firestore SDK failed to load')"></script>
     
     <style>
         /* Manual Tailwind CSS Configuration */
@@ -1008,6 +1009,12 @@
         // Firebase Configuration
         function initializeFirebase(config) {
             try {
+                // Check if Firebase is available
+                if (typeof firebase === 'undefined') {
+                    console.warn('Firebase SDK not loaded, falling back to local mode');
+                    return false;
+                }
+                
                 firebase.initializeApp(config);
                 db = firebase.firestore();
                 isFirebaseMode = true;
@@ -1020,7 +1027,7 @@
                 return true;
             } catch (error) {
                 console.error('Firebase initialization error:', error);
-                alert('Failed to connect to Firebase: ' + error.message);
+                alert('Failed to connect to Firebase: ' + error.message + '\n\nFalling back to local storage mode.');
                 return false;
             }
         }
@@ -3880,7 +3887,7 @@
                 // Check if Firebase config exists in localStorage
                 const savedConfig = localStorage.getItem('firebaseConfig');
                 
-                if (savedConfig) {
+                if (savedConfig && typeof firebase !== 'undefined') {
                     try {
                         const firebaseConfig = JSON.parse(savedConfig);
                         
@@ -3908,7 +3915,8 @@
                         }
                     }
                 } else {
-                    // No saved config, fall back to demo mode
+                    // No saved config or Firebase not available, fall back to demo mode
+                    console.log('Firebase not available or no saved config, using local storage mode');
                     loadDemoConfig();
                     if (!employees || employees.length === 0) {
                         initializeSampleDataLocal();
@@ -4195,5 +4203,5 @@
             }
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96a654c4a3f4f9cb',t:'MTc1NDM5NzI5Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96a664f3d5e9f9d7',t:'MTc1NDM5Nzk1NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
