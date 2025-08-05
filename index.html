@@ -122,6 +122,17 @@ function renderEmployeeSalesTable() {
   `).join('');
 }
 
+
+// Auto-create demo admin account if it doesn't exist
+firebase.auth().signInWithEmailAndPassword('admin@example.com', 'admin123')
+  .catch(() => {
+    firebase.auth().createUserWithEmailAndPassword('admin@example.com', 'admin123')
+      .then(cred => {
+        db.ref('admins/' + cred.user.uid).set(true);
+        firebase.auth().signOut();
+      });
+  });
+
 </script>
 </head>
 <body class="bg-gray-100 min-h-screen">
@@ -439,6 +450,17 @@ function renderEmployeeSalesTable() {
     </tr>
   `).join('');
 }
+
+
+// Auto-create demo admin account if it doesn't exist
+firebase.auth().signInWithEmailAndPassword('admin@example.com', 'admin123')
+  .catch(() => {
+    firebase.auth().createUserWithEmailAndPassword('admin@example.com', 'admin123')
+      .then(cred => {
+        db.ref('admins/' + cred.user.uid).set(true);
+        firebase.auth().signOut();
+      });
+  });
 
 </script>
                         </tbody>
@@ -893,6 +915,17 @@ function renderEmployeeSalesTable() {
   `).join('');
 }
 
+
+// Auto-create demo admin account if it doesn't exist
+firebase.auth().signInWithEmailAndPassword('admin@example.com', 'admin123')
+  .catch(() => {
+    firebase.auth().createUserWithEmailAndPassword('admin@example.com', 'admin123')
+      .then(cred => {
+        db.ref('admins/' + cred.user.uid).set(true);
+        firebase.auth().signOut();
+      });
+  });
+
 </script>
 <script src="https://www.gstatic.com/firebasejs/9.24.0/firebase-database-compat.js">
 function editSale(saleId) {
@@ -1011,6 +1044,17 @@ function renderEmployeeSalesTable() {
     </tr>
   `).join('');
 }
+
+
+// Auto-create demo admin account if it doesn't exist
+firebase.auth().signInWithEmailAndPassword('admin@example.com', 'admin123')
+  .catch(() => {
+    firebase.auth().createUserWithEmailAndPassword('admin@example.com', 'admin123')
+      .then(cred => {
+        db.ref('admins/' + cred.user.uid).set(true);
+        firebase.auth().signOut();
+      });
+  });
 
 </script>
 
@@ -1147,6 +1191,17 @@ function renderEmployeeSalesTable() {
     </tr>
   `).join('');
 }
+
+
+// Auto-create demo admin account if it doesn't exist
+firebase.auth().signInWithEmailAndPassword('admin@example.com', 'admin123')
+  .catch(() => {
+    firebase.auth().createUserWithEmailAndPassword('admin@example.com', 'admin123')
+      .then(cred => {
+        db.ref('admins/' + cred.user.uid).set(true);
+        firebase.auth().signOut();
+      });
+  });
 
 </script>
 
@@ -2709,6 +2764,17 @@ function renderEmployeeSalesTable() {
   `).join('');
 }
 
+
+// Auto-create demo admin account if it doesn't exist
+firebase.auth().signInWithEmailAndPassword('admin@example.com', 'admin123')
+  .catch(() => {
+    firebase.auth().createUserWithEmailAndPassword('admin@example.com', 'admin123')
+      .then(cred => {
+        db.ref('admins/' + cred.user.uid).set(true);
+        firebase.auth().signOut();
+      });
+  });
+
 </script>
 <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96945faa73bef9db',t:'MTc1NDIwODk5NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();
 function editSale(saleId) {
@@ -2827,6 +2893,17 @@ function renderEmployeeSalesTable() {
     </tr>
   `).join('');
 }
+
+
+// Auto-create demo admin account if it doesn't exist
+firebase.auth().signInWithEmailAndPassword('admin@example.com', 'admin123')
+  .catch(() => {
+    firebase.auth().createUserWithEmailAndPassword('admin@example.com', 'admin123')
+      .then(cred => {
+        db.ref('admins/' + cred.user.uid).set(true);
+        firebase.auth().signOut();
+      });
+  });
 
 </script></body>
 </html>
