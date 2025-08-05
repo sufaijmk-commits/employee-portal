@@ -482,13 +482,17 @@
             </div>
             <div class="p-6">
                 <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
-                    <h4 class="font-semibold text-yellow-800 mb-2">📋 How to get your Firebase config:</h4>
+                    <h4 class="font-semibold text-yellow-800 mb-2">📋 How to set up Firebase for Eden Perfume:</h4>
                     <ol class="text-sm text-yellow-700 space-y-1">
-                        <li>1. Go to Firebase Console → Project Settings</li>
-                        <li>2. Scroll down to "Your apps" section</li>
-                        <li>3. Click on your web app or create one</li>
-                        <li>4. Copy the config object values</li>
+                        <li><strong>1. Create Firebase Project:</strong> Go to <a href="https://console.firebase.google.com" target="_blank" class="text-blue-600 underline">Firebase Console</a> → Create Project</li>
+                        <li><strong>2. Enable Firestore:</strong> Go to Firestore Database → Create database → Start in test mode</li>
+                        <li><strong>3. Get Web App Config:</strong> Project Settings → Your apps → Add web app → Copy config values</li>
+                        <li><strong>4. Set Security Rules:</strong> Firestore → Rules → Use: <code class="bg-gray-200 px-1 rounded">allow read, write: if true;</code></li>
+                        <li><strong>5. Enter Config Below:</strong> Paste the values from your Firebase config object</li>
                     </ol>
+                    <div class="mt-3 p-2 bg-blue-50 rounded text-xs">
+                        <strong>💡 Tip:</strong> For production, update Firestore security rules to restrict access appropriately.
+                    </div>
                 </div>
                 
                 <form id="firebaseConfigForm" class="space-y-4">
@@ -613,53 +617,43 @@
         </nav>
 
         <div class="mobile-container">
-            <!-- Dashboard Metrics - Three Column Headings -->
-            <div class="bg-white mobile-card p-6 mb-6">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
-                    <!-- Total Sales Column -->
-                    <div class="border-r border-gray-200 last:border-r-0">
-                        <div class="mb-3">
-                            <div class="w-16 h-16 mx-auto bg-green-100 rounded-full flex items-center justify-center mb-3">
-                                <svg class="w-8 h-8 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-                                    <path d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z"/>
-                                </svg>
+            <!-- Compact Horizontal Stats -->
+            <div class="bg-white mobile-card p-3 mb-4">
+                <div class="grid grid-cols-3 gap-2 text-center">
+                    <!-- Total Sales -->
+                    <div class="bg-green-50 rounded-lg p-2">
+                        <div class="flex items-center justify-center mb-1">
+                            <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-1">
+                                <span class="text-green-600 text-xs">💰</span>
                             </div>
-                            <h2 class="text-2xl font-bold text-gray-800 mb-1">TOTAL SALES</h2>
-                            <p class="text-sm text-gray-500 uppercase tracking-wide">Today's Revenue</p>
+                            <span class="text-xs font-medium text-green-800">SALES</span>
                         </div>
-                        <div class="text-4xl font-bold text-green-600" id="totalSalesToday">$0.00</div>
-                        <p class="text-sm text-gray-500 mt-2">💰 Revenue Generated</p>
+                        <div class="text-lg font-bold text-green-600" id="totalSalesToday">$0.00</div>
+                        <p class="text-xs text-green-600">Revenue</p>
                     </div>
 
-                    <!-- Quantity Sold Column -->
-                    <div class="border-r border-gray-200 last:border-r-0">
-                        <div class="mb-3">
-                            <div class="w-16 h-16 mx-auto bg-blue-100 rounded-full flex items-center justify-center mb-3">
-                                <svg class="w-8 h-8 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
-                                    <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"/>
-                                </svg>
+                    <!-- Quantity Sold -->
+                    <div class="bg-blue-50 rounded-lg p-2">
+                        <div class="flex items-center justify-center mb-1">
+                            <div class="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center mr-1">
+                                <span class="text-blue-600 text-xs">🧴</span>
                             </div>
-                            <h2 class="text-2xl font-bold text-gray-800 mb-1">QUANTITY SOLD</h2>
-                            <p class="text-sm text-gray-500 uppercase tracking-wide">Units Moved</p>
+                            <span class="text-xs font-medium text-blue-800">QTY</span>
                         </div>
-                        <div class="text-4xl font-bold text-blue-600" id="bottlesSold">0</div>
-                        <p class="text-sm text-gray-500 mt-2">🧴 Bottles Sold</p>
+                        <div class="text-lg font-bold text-blue-600" id="bottlesSold">0</div>
+                        <p class="text-xs text-blue-600">Bottles</p>
                     </div>
 
-                    <!-- Today's Salary Column -->
-                    <div>
-                        <div class="mb-3">
-                            <div class="w-16 h-16 mx-auto bg-purple-100 rounded-full flex items-center justify-center mb-3">
-                                <svg class="w-8 h-8 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
-                                    <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z"/>
-                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clip-rule="evenodd"/>
-                                </svg>
+                    <!-- Today's Salary -->
+                    <div class="bg-purple-50 rounded-lg p-2">
+                        <div class="flex items-center justify-center mb-1">
+                            <div class="w-6 h-6 bg-purple-100 rounded-full flex items-center justify-center mr-1">
+                                <span class="text-purple-600 text-xs">💵</span>
                             </div>
-                            <h2 class="text-2xl font-bold text-gray-800 mb-1">TODAY'S SALARY</h2>
-                            <p class="text-sm text-gray-500 uppercase tracking-wide">Earnings</p>
+                            <span class="text-xs font-medium text-purple-800">SALARY</span>
                         </div>
-                        <div class="text-4xl font-bold text-purple-600" id="estimatedSalary">$0.00</div>
-                        <p class="text-sm text-gray-500 mt-2">💵 Daily Earnings</p>
+                        <div class="text-lg font-bold text-purple-600" id="estimatedSalary">$0.00</div>
+                        <p class="text-xs text-purple-600">Today</p>
                     </div>
                 </div>
             </div>
@@ -1215,6 +1209,11 @@
         // Firebase Configuration
         async function initializeFirebase(config) {
             try {
+                console.log('🔥 Initializing Firebase with config:', {
+                    projectId: config.projectId,
+                    authDomain: config.authDomain
+                });
+                
                 // Check if Firebase is available and loaded properly
                 if (typeof firebase === 'undefined' || window.firebaseLoadError) {
                     console.warn('Firebase SDK not available, falling back to local mode');
@@ -1226,36 +1225,62 @@
                     throw new Error('Invalid Firebase configuration');
                 }
                 
+                // Validate required fields
+                const requiredFields = ['apiKey', 'authDomain', 'projectId', 'storageBucket', 'messagingSenderId', 'appId'];
+                const missingFields = requiredFields.filter(field => !config[field]);
+                if (missingFields.length > 0) {
+                    throw new Error(`Missing required fields: ${missingFields.join(', ')}`);
+                }
+                
                 // Check if Firebase is already initialized
                 if (firebase.apps.length > 0) {
-                    // Delete existing app to reinitialize with new config
+                    console.log('🔄 Reinitializing Firebase app...');
                     await firebase.app().delete();
                 }
                 
                 // Initialize Firebase with new config
+                console.log('🚀 Creating Firebase app...');
                 const app = firebase.initializeApp(config);
                 db = firebase.firestore();
+                
+                console.log('🔗 Testing Firestore connection...');
                 
                 // Test the connection by trying to access Firestore
                 await db.enableNetwork();
                 
-                // Try to read from a test collection to verify connection
+                // Create a test document to verify write permissions
                 try {
-                    await db.collection('test').limit(1).get();
+                    const testRef = db.collection('_connection_test').doc('test');
+                    await testRef.set({
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                        test: true
+                    });
+                    console.log('✅ Firestore write test successful');
+                    
+                    // Clean up test document
+                    await testRef.delete();
+                    console.log('🧹 Test document cleaned up');
                 } catch (testError) {
-                    console.warn('Firestore test read failed, but connection established:', testError.message);
+                    console.warn('⚠️ Firestore write test failed:', testError.message);
+                    // Continue anyway - read-only access might still work
                 }
                 
                 isFirebaseMode = true;
                 syncStatus = 'connected';
                 updateSyncStatus();
-                document.getElementById('dbMode').textContent = '🔥 Firebase Connected';
+                
+                const dbModeEl = document.getElementById('dbMode');
+                if (dbModeEl) {
+                    dbModeEl.textContent = '🔥 Firebase Connected';
+                }
+                
+                console.log('🎉 Firebase initialization successful!');
                 
                 // Start background sync
                 startBackgroundSync();
                 return true;
             } catch (error) {
-                console.error('Firebase initialization error:', error);
+                console.error('❌ Firebase initialization error:', error);
                 isFirebaseMode = false;
                 db = null;
                 syncStatus = 'offline';
@@ -1267,7 +1292,9 @@
                     errorMessage += 'Invalid API key. Please check your Firebase configuration.';
                 } else if (error.code === 'auth/project-not-found') {
                     errorMessage += 'Project not found. Please check your Project ID.';
-                } else if (error.message.includes('network')) {
+                } else if (error.code === 'permission-denied') {
+                    errorMessage += 'Permission denied. Please check your Firestore security rules.';
+                } else if (error.message.includes('network') || error.message.includes('fetch')) {
                     errorMessage += 'Network error. Please check your internet connection.';
                 } else {
                     errorMessage += error.message;
@@ -1445,7 +1472,8 @@
                 return;
             }
             
-            console.log('Starting sync process with', syncQueue.length, 'items');
+            console.log('🔄 Starting sync process with', syncQueue.length, 'items');
+            console.log('Firebase connection status:', db ? 'Connected' : 'Not connected');
             
             isSyncing = true;
             syncStatus = 'connected';
@@ -1453,21 +1481,38 @@
             
             const itemsToProcess = [...syncQueue];
             const processedItems = [];
+            let successCount = 0;
+            let errorCount = 0;
             
             for (const item of itemsToProcess) {
                 try {
-                    console.log('Processing sync item:', item);
+                    console.log('📤 Processing sync item:', {
+                        type: item.type,
+                        action: item.action,
+                        id: item.data?.id,
+                        attempts: item.attempts || 0
+                    });
+                    
                     await processSyncItem(item);
                     processedItems.push(item);
-                    console.log('Successfully processed sync item:', item.type, item.action);
+                    successCount++;
+                    
+                    console.log('✅ Successfully synced:', item.type, item.action);
                 } catch (error) {
-                    console.error('Sync error for item:', item, error);
+                    console.error('❌ Sync error for item:', {
+                        type: item.type,
+                        action: item.action,
+                        error: error.message,
+                        attempts: item.attempts || 0
+                    });
+                    
                     item.attempts = (item.attempts || 0) + 1;
+                    errorCount++;
                     
                     // Remove item if too many attempts
                     if (item.attempts >= 3) {
                         processedItems.push(item);
-                        console.error('Removing item after 3 failed attempts:', item);
+                        console.error('🗑️ Removing item after 3 failed attempts:', item.type, item.action);
                     }
                 }
             }
@@ -1476,7 +1521,12 @@
             syncQueue = syncQueue.filter(item => !processedItems.includes(item));
             localStorage.setItem('eden_sync_queue', JSON.stringify(syncQueue));
             
-            console.log('Sync completed. Remaining queue items:', syncQueue.length);
+            console.log('🏁 Sync completed:', {
+                processed: processedItems.length,
+                successful: successCount,
+                errors: errorCount,
+                remaining: syncQueue.length
+            });
             
             isSyncing = false;
             syncStatus = syncQueue.length > 0 ? 'pending' : 'synced';
@@ -2043,32 +2093,14 @@
             saveLoader.classList.add('hidden');
         });
 
-        // Default Firebase Configuration (Replace with your actual config)
-        const DEFAULT_FIREBASE_CONFIG = {
-            apiKey: "AIzaSyBvOkBH0LbH6Nt5fXlWlxYKtEhGm4jKpQs",
-            authDomain: "eden-perfume-default.firebaseapp.com",
-            projectId: "eden-perfume-default",
-            storageBucket: "eden-perfume-default.appspot.com",
-            messagingSenderId: "123456789012",
-            appId: "1:123456789012:web:abcdef123456789012345678"
-        };
+        // Firebase configuration will be provided by user through the setup modal
 
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', async function() {
-            // Try to connect with default Firebase config first
-            try {
-                console.log('Attempting to connect with default Firebase configuration...');
-                if (await initializeFirebase(DEFAULT_FIREBASE_CONFIG)) {
-                    document.getElementById('firebaseConfigModal').classList.add('hidden');
-                    document.getElementById('loginScreen').classList.remove('hidden');
-                    await loadAllData();
-                    return;
-                }
-            } catch (error) {
-                console.warn('Default Firebase connection failed, falling back to local mode:', error.message);
-            }
+            // Always show Firebase config modal first - no default config
+            console.log('Starting application - checking for saved Firebase configuration...');
             
-            // If default config fails, check for saved custom config
+            // Check for saved custom config
             const savedConfig = localStorage.getItem('firebaseConfig');
             if (savedConfig) {
                 try {
@@ -2087,9 +2119,9 @@
                 }
             }
             
-            // If both default and saved configs fail, start in local mode
-            console.log('Starting in local storage mode');
-            loadDemoConfig();
+            // Show Firebase configuration modal
+            console.log('No valid Firebase configuration found - showing setup modal');
+            document.getElementById('firebaseConfigModal').classList.remove('hidden');
         });
 
         // Placeholder functions for missing functionality
@@ -4432,5 +4464,5 @@
             document.getElementById(elementId).textContent = dateString;
         }
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96a7aea0c612f9f8',t:'MTc1NDQxMTQ1OS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96a7c13a871df9ee',t:'MTc1NDQxMjIyMC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
