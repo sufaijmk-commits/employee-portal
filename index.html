@@ -667,35 +667,55 @@
                 </div>
             </div>
 
-            <!-- Add Sale Form -->
+            <!-- Quick Sale Entry -->
             <div class="bg-white mobile-card p-4 mb-6">
-                <h3 class="text-lg font-semibold mb-4">Add New Sale</h3>
-                <form id="addSaleForm" class="mobile-form-grid">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold">💰 Quick Sale Entry</h3>
+                    <div class="text-sm text-gray-500" id="currentDateTime"></div>
+                </div>
+                
+                <form id="addSaleForm" class="space-y-4">
+                    <!-- Product Selection - Large and Prominent -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Date</label>
-                        <input type="date" id="saleDate" class="mobile-input" required>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Store</label>
-                        <select id="saleStore" class="mobile-input" required>
-                            <option value="">Select Store</option>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">🧴 Select Product</label>
+                        <select id="saleProduct" class="mobile-input text-lg font-medium" required style="min-height: 50px;">
+                            <option value="">Choose a product...</option>
                         </select>
                     </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Product</label>
-                        <select id="saleProduct" class="mobile-input" required>
-                            <option value="">Select Product</option>
-                        </select>
+                    
+                    <!-- Quantity Input - Large and Easy to Use -->
+                    <div class="grid grid-cols-3 gap-3 items-end">
+                        <div class="col-span-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">📦 Quantity</label>
+                            <input type="number" id="saleQuantity" min="1" value="1" class="mobile-input text-xl text-center font-bold" required style="min-height: 50px;">
+                        </div>
+                        <div class="flex flex-col space-y-1">
+                            <button type="button" onclick="adjustQuantity(1)" class="bg-green-500 text-white rounded-lg py-2 text-lg font-bold hover:bg-green-600 transition">+</button>
+                            <button type="button" onclick="adjustQuantity(-1)" class="bg-red-500 text-white rounded-lg py-2 text-lg font-bold hover:bg-red-600 transition">-</button>
+                        </div>
                     </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Quantity</label>
-                        <input type="number" id="saleQuantity" min="1" class="mobile-input" placeholder="1" required>
+                    
+                    <!-- Sale Summary -->
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-gray-600">Product Price:</span>
+                            <span class="font-semibold" id="productPrice">$0.00</span>
+                        </div>
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-gray-600">Quantity:</span>
+                            <span class="font-semibold" id="displayQuantity">1</span>
+                        </div>
+                        <hr class="my-2">
+                        <div class="flex justify-between items-center">
+                            <span class="text-lg font-semibold">Total Amount:</span>
+                            <span class="text-xl font-bold text-green-600" id="totalAmount">$0.00</span>
+                        </div>
                     </div>
-                    <div class="sm:col-span-2 md:col-span-1">
-                        <button type="submit" class="w-full gradient-bg text-white mobile-button hover:opacity-90 transition">
-                            Add Sale
-                        </button>
-                    </div>
+                    
+                    <!-- Submit Button - Large and Prominent -->
+                    <button type="submit" class="w-full gradient-bg text-white text-lg font-bold py-4 rounded-lg hover:opacity-90 transition" style="min-height: 60px;">
+                        ✅ Record Sale
+                    </button>
                 </form>
             </div>
 
@@ -2013,23 +2033,38 @@
             saveLoader.classList.add('hidden');
         });
 
+        // Default Firebase Configuration (Replace with your actual config)
+        const DEFAULT_FIREBASE_CONFIG = {
+            apiKey: "AIzaSyBvOkBH0LbH6Nt5fXlWlxYKtEhGm4jKpQs",
+            authDomain: "eden-perfume-default.firebaseapp.com",
+            projectId: "eden-perfume-default",
+            storageBucket: "eden-perfume-default.appspot.com",
+            messagingSenderId: "123456789012",
+            appId: "1:123456789012:web:abcdef123456789012345678"
+        };
+
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', async function() {
-            // Check if Firebase config exists
+            // Try to connect with default Firebase config first
+            try {
+                console.log('Attempting to connect with default Firebase configuration...');
+                if (await initializeFirebase(DEFAULT_FIREBASE_CONFIG)) {
+                    document.getElementById('firebaseConfigModal').classList.add('hidden');
+                    document.getElementById('loginScreen').classList.remove('hidden');
+                    await loadAllData();
+                    return;
+                }
+            } catch (error) {
+                console.warn('Default Firebase connection failed, falling back to local mode:', error.message);
+            }
+            
+            // If default config fails, check for saved custom config
             const savedConfig = localStorage.getItem('firebaseConfig');
             if (savedConfig) {
                 try {
                     const config = JSON.parse(savedConfig);
+                    console.log('Attempting to connect with saved Firebase configuration...');
                     
-                    // Pre-fill the form with saved config
-                    document.getElementById('apiKey').value = config.apiKey || '';
-                    document.getElementById('authDomain').value = config.authDomain || '';
-                    document.getElementById('projectId').value = config.projectId || '';
-                    document.getElementById('storageBucket').value = config.storageBucket || '';
-                    document.getElementById('messagingSenderId').value = config.messagingSenderId || '';
-                    document.getElementById('appId').value = config.appId || '';
-                    
-                    // Try to auto-connect
                     if (await initializeFirebase(config)) {
                         document.getElementById('firebaseConfigModal').classList.add('hidden');
                         document.getElementById('loginScreen').classList.remove('hidden');
@@ -2038,13 +2073,13 @@
                     }
                 } catch (error) {
                     console.error('Error loading saved Firebase config:', error);
-                    // Clear invalid config
                     localStorage.removeItem('firebaseConfig');
                 }
             }
             
-            // Show Firebase config modal if no saved config or connection failed
-            document.getElementById('firebaseConfigModal').classList.remove('hidden');
+            // If both default and saved configs fail, start in local mode
+            console.log('Starting in local storage mode');
+            loadDemoConfig();
         });
 
         // Placeholder functions for missing functionality
@@ -3322,16 +3357,25 @@
             // Update current date
             updateCurrentDate('employeeCurrentDate');
             
-            // Set today's date in the form
-            document.getElementById('saleDate').value = getTodayString();
+            // Update current date and time for sale form
+            updateCurrentDateTime();
             
             // Populate dropdowns
             populateProductDropdown();
             populateStoreDropdown();
             
+            // Add quantity input event listener
+            const quantityInput = document.getElementById('saleQuantity');
+            if (quantityInput) {
+                quantityInput.addEventListener('input', updateSaleSummary);
+            }
+            
             // Update stats and sales table
             updateEmployeeStats();
             updateTodaysSalesTable();
+            
+            // Start real-time clock update
+            setInterval(updateCurrentDateTime, 60000); // Update every minute
         }
 
         function populateProductDropdown() {
@@ -3342,7 +3386,7 @@
                     return;
                 }
                 
-                select.innerHTML = '<option value="">Select Product</option>';
+                select.innerHTML = '<option value="">Choose a product...</option>';
                 
                 if (!products || !Array.isArray(products)) {
                     console.error('Products array is not valid');
@@ -3359,8 +3403,71 @@
                         console.error('Error creating product option:', error);
                     }
                 });
+                
+                // Add event listener for product selection
+                select.addEventListener('change', updateSaleSummary);
             } catch (error) {
                 console.error('Error in populateProductDropdown:', error);
+            }
+        }
+
+        // Quantity adjustment functions
+        function adjustQuantity(change) {
+            const quantityInput = document.getElementById('saleQuantity');
+            const currentQuantity = parseInt(quantityInput.value) || 1;
+            const newQuantity = Math.max(1, currentQuantity + change);
+            quantityInput.value = newQuantity;
+            updateSaleSummary();
+        }
+
+        // Update sale summary display
+        function updateSaleSummary() {
+            try {
+                const productSelect = document.getElementById('saleProduct');
+                const quantityInput = document.getElementById('saleQuantity');
+                const productPriceEl = document.getElementById('productPrice');
+                const displayQuantityEl = document.getElementById('displayQuantity');
+                const totalAmountEl = document.getElementById('totalAmount');
+                
+                const selectedProductId = productSelect.value;
+                const quantity = parseInt(quantityInput.value) || 1;
+                
+                if (selectedProductId) {
+                    const product = getProduct(selectedProductId);
+                    if (product) {
+                        const price = product.price || 0;
+                        const total = price * quantity;
+                        
+                        productPriceEl.textContent = `$${price.toFixed(2)}`;
+                        displayQuantityEl.textContent = quantity.toString();
+                        totalAmountEl.textContent = `$${total.toFixed(2)}`;
+                        return;
+                    }
+                }
+                
+                // Reset if no product selected
+                productPriceEl.textContent = '$0.00';
+                displayQuantityEl.textContent = quantity.toString();
+                totalAmountEl.textContent = '$0.00';
+                
+            } catch (error) {
+                console.error('Error updating sale summary:', error);
+            }
+        }
+
+        // Update current date and time
+        function updateCurrentDateTime() {
+            const now = new Date();
+            const dateTimeString = now.toLocaleString('en-US', {
+                weekday: 'short',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            const element = document.getElementById('currentDateTime');
+            if (element) {
+                element.textContent = dateTimeString;
             }
         }
 
@@ -3529,23 +3636,22 @@
             
             const submitBtn = e.target.querySelector('button[type="submit"]');
             const originalText = submitBtn.textContent;
-            submitBtn.textContent = 'Adding...';
+            submitBtn.textContent = '⏳ Recording...';
             submitBtn.disabled = true;
             
-            const date = document.getElementById('saleDate').value;
             const productId = document.getElementById('saleProduct').value;
             const quantity = parseInt(document.getElementById('saleQuantity').value);
-            const storeId = document.getElementById('saleStore') ? document.getElementById('saleStore').value : currentUser.storeId;
+            const storeId = currentUser.storeId; // Use employee's assigned store
             
-            if (!date || !productId || !quantity || !storeId) {
-                alert('Please fill in all fields');
+            if (!productId) {
+                alert('Please select a product');
                 submitBtn.textContent = originalText;
                 submitBtn.disabled = false;
                 return;
             }
             
-            if (quantity <= 0) {
-                alert('Quantity must be greater than 0');
+            if (!quantity || quantity <= 0) {
+                alert('Please enter a valid quantity');
                 submitBtn.textContent = originalText;
                 submitBtn.disabled = false;
                 return;
@@ -3560,7 +3666,7 @@
             }
             
             const newSale = {
-                date: date,
+                date: getTodayString(),
                 time: getCurrentTime(),
                 employeeId: currentUser.id,
                 storeId: storeId,
@@ -3572,24 +3678,30 @@
             try {
                 await saveSale(newSale);
                 
-                // Reset form
-                document.getElementById('saleQuantity').value = '';
+                // Reset form to default state
+                document.getElementById('saleQuantity').value = '1';
                 document.getElementById('saleProduct').value = '';
-                if (document.getElementById('saleStore')) {
-                    document.getElementById('saleStore').value = currentUser.storeId || '';
-                }
+                updateSaleSummary();
                 
                 // Reload data and update displays
                 updateEmployeeStats();
                 updateTodaysSalesTable();
                 
-                alert('Sale added successfully!');
+                // Show success message
+                submitBtn.textContent = '✅ Success!';
+                submitBtn.style.backgroundColor = '#10b981';
+                
+                setTimeout(() => {
+                    submitBtn.textContent = originalText;
+                    submitBtn.style.backgroundColor = '';
+                    submitBtn.disabled = false;
+                }, 2000);
+                
             } catch (error) {
-                alert('Error adding sale: ' + error.message);
+                alert('Error recording sale: ' + error.message);
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
             }
-            
-            submitBtn.textContent = originalText;
-            submitBtn.disabled = false;
         });
 
         async function deleteSale(saleId) {
@@ -4182,5 +4294,5 @@
             document.getElementById(elementId).textContent = dateString;
         }
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96a76eff62f0f9ee',t:'MTc1NDQwODg1Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96a7844163d7f9d9',t:'MTc1NDQwOTcyMy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
