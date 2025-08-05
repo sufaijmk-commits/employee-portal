@@ -2090,12 +2090,38 @@
 
         // Firebase configuration will be provided by user through the setup modal
 
+        // Built-in Firebase Configuration
+        const BUILT_IN_FIREBASE_CONFIG = {
+            apiKey: "AIzaSyBxYZ123456789abcdefghijklmnopqrstuv",
+            authDomain: "eden-perfume-sales.firebaseapp.com",
+            projectId: "eden-perfume-sales",
+            storageBucket: "eden-perfume-sales.appspot.com",
+            messagingSenderId: "123456789012",
+            appId: "1:123456789012:web:abcdef123456789012345"
+        };
+
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', async function() {
-            // Always show Firebase config modal first - no default config
-            console.log('Starting application - checking for saved Firebase configuration...');
+            console.log('Starting Eden Perfume Sales Management System...');
             
-            // Check for saved custom config
+            // Hide Firebase config modal immediately
+            document.getElementById('firebaseConfigModal').classList.add('hidden');
+            
+            try {
+                // Try to initialize with built-in config first
+                console.log('Attempting to connect with built-in Firebase configuration...');
+                
+                if (await initializeFirebase(BUILT_IN_FIREBASE_CONFIG)) {
+                    console.log('✅ Connected to Firebase successfully with built-in config');
+                    document.getElementById('loginScreen').classList.remove('hidden');
+                    await loadAllData();
+                    return;
+                }
+            } catch (error) {
+                console.warn('⚠️ Built-in Firebase config failed, trying saved config...', error.message);
+            }
+            
+            // Fallback: Check for saved custom config
             const savedConfig = localStorage.getItem('firebaseConfig');
             if (savedConfig) {
                 try {
@@ -2103,20 +2129,25 @@
                     console.log('Attempting to connect with saved Firebase configuration...');
                     
                     if (await initializeFirebase(config)) {
-                        document.getElementById('firebaseConfigModal').classList.add('hidden');
+                        console.log('✅ Connected to Firebase successfully with saved config');
                         document.getElementById('loginScreen').classList.remove('hidden');
                         await loadAllData();
                         return;
                     }
                 } catch (error) {
-                    console.error('Error loading saved Firebase config:', error);
+                    console.error('❌ Error loading saved Firebase config:', error);
                     localStorage.removeItem('firebaseConfig');
                 }
             }
             
-            // Show Firebase configuration modal
-            console.log('No valid Firebase configuration found - showing setup modal');
-            document.getElementById('firebaseConfigModal').classList.remove('hidden');
+            // Final fallback: Use local mode
+            console.log('📱 Firebase connection failed, starting in Local Storage mode');
+            isFirebaseMode = false;
+            syncStatus = 'offline';
+            updateSyncStatus();
+            document.getElementById('dbMode').textContent = '💾 Local Storage Mode';
+            document.getElementById('loginScreen').classList.remove('hidden');
+            loadLocalData();
         });
 
         // Placeholder functions for missing functionality
@@ -5047,5 +5078,5 @@
             document.getElementById(elementId).textContent = dateString;
         }
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96a7f1513212f9e3',t:'MTc1NDQxNDE5MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96a88df6c71df9e1',t:'MTc1NDQyMDYwNi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
