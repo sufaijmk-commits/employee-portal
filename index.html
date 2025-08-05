@@ -653,78 +653,46 @@
                 </div>
             </div>
 
-            <!-- Premium Sale Entry -->
-            <div class="bg-white mobile-card p-6 mb-6 border border-gray-100 shadow-lg">
-                <div class="text-center mb-6">
-                    <div class="w-16 h-16 mx-auto mb-3 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-                        <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"/>
-                        </svg>
-                    </div>
-                    <h3 class="text-xl font-bold text-gray-800">Record New Sale</h3>
-                    <p class="text-sm text-gray-500">Complete the form below to record a new sale transaction</p>
-                </div>
+            <!-- Compact Sale Entry -->
+            <div class="bg-white mobile-card p-3 mb-4">
+                <h3 class="text-lg font-bold text-gray-800 mb-3 text-center">Record New Sale</h3>
                 
-                <form id="addSaleForm" class="space-y-6">
+                <form id="addSaleForm" class="space-y-3">
                     <!-- Store Selection -->
-                    <div class="space-y-2">
-                        <label class="flex items-center text-sm font-semibold text-gray-700">
-                            <div class="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center mr-2">
-                                <span class="text-blue-600 text-xs">🏪</span>
-                            </div>
-                            Store Location
-                        </label>
-                        <select id="saleStore" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-0 transition-colors bg-gray-50 hover:bg-white" required style="min-height: 52px;">
-                            <option value="">Select your store location</option>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Store</label>
+                        <select id="saleStore" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:border-blue-500" required>
+                            <option value="">Select store</option>
                         </select>
                     </div>
                     
                     <!-- Product Selection -->
-                    <div class="space-y-2">
-                        <label class="flex items-center text-sm font-semibold text-gray-700">
-                            <div class="w-6 h-6 bg-purple-100 rounded-full flex items-center justify-center mr-2">
-                                <span class="text-purple-600 text-xs">🧴</span>
-                            </div>
-                            Product Selection
-                        </label>
-                        <select id="saleProduct" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:ring-0 transition-colors bg-gray-50 hover:bg-white" required style="min-height: 52px;">
-                            <option value="">Choose a product to sell</option>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Product</label>
+                        <select id="saleProduct" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:border-blue-500" required>
+                            <option value="">Choose product</option>
                         </select>
                     </div>
                     
                     <!-- Quantity Input -->
-                    <div class="space-y-2">
-                        <label class="flex items-center text-sm font-semibold text-gray-700">
-                            <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-2">
-                                <span class="text-green-600 text-xs">📦</span>
-                            </div>
-                            Quantity
-                        </label>
-                        <div class="flex items-center space-x-3 bg-gray-50 p-2 rounded-xl border-2 border-gray-200">
-                            <button type="button" onclick="adjustQuantity(-1)" class="w-12 h-12 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg text-xl font-bold hover:from-red-600 hover:to-red-700 transition-all shadow-md hover:shadow-lg transform hover:scale-105">-</button>
-                            <input type="number" id="saleQuantity" min="1" value="1" class="flex-1 text-center text-2xl font-bold bg-white border-2 border-gray-200 rounded-lg py-3 focus:border-green-500 focus:ring-0 transition-colors" required style="min-height: 52px;">
-                            <button type="button" onclick="adjustQuantity(1)" class="w-12 h-12 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg text-xl font-bold hover:from-green-600 hover:to-green-700 transition-all shadow-md hover:shadow-lg transform hover:scale-105">+</button>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Quantity</label>
+                        <div class="flex items-center space-x-2">
+                            <button type="button" onclick="adjustQuantity(-1)" class="w-8 h-8 bg-red-500 text-white rounded text-lg font-bold hover:bg-red-600">-</button>
+                            <input type="number" id="saleQuantity" min="1" value="1" class="flex-1 text-center text-lg font-bold border border-gray-300 rounded py-2" required>
+                            <button type="button" onclick="adjustQuantity(1)" class="w-8 h-8 bg-green-500 text-white rounded text-lg font-bold hover:bg-green-600">+</button>
                         </div>
                     </div>
                     
                     <!-- Total Display -->
-                    <div class="bg-gradient-to-r from-blue-50 to-purple-50 border-2 border-blue-200 rounded-xl p-6 text-center">
-                        <div class="flex items-center justify-center mb-2">
-                            <div class="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mr-2">
-                                <span class="text-white text-sm">💰</span>
-                            </div>
-                            <p class="text-sm font-semibold text-gray-600">Total Amount</p>
-                        </div>
-                        <p class="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent" id="totalAmount">0.00 DH</p>
+                    <div class="bg-gray-50 border rounded-lg p-3 text-center">
+                        <p class="text-sm text-gray-600">Total Amount</p>
+                        <p class="text-2xl font-bold text-blue-600" id="totalAmount">0.00 DH</p>
                     </div>
                     
                     <!-- Save Button -->
-                    <button type="submit" class="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white text-lg font-bold py-4 rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg hover:shadow-xl transform hover:scale-[1.02] flex items-center justify-center space-x-2" style="min-height: 60px;">
-                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M7.707 10.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V6a1 1 0 10-2 0v5.586l-1.293-1.293z"/>
-                            <path d="M5 4a2 2 0 012-2h6a2 2 0 012 2v14l-5-2.5L5 18V4z"/>
-                        </svg>
-                        <span>Record Sale Transaction</span>
+                    <button type="submit" class="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700">
+                        Record Sale
                     </button>
                 </form>
             </div>
@@ -5079,5 +5047,5 @@
             document.getElementById(elementId).textContent = dateString;
         }
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96a7e87f5428f9ee',t:'MTc1NDQxMzgyOS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96a7f1513212f9e3',t:'MTc1NDQxNDE5MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
