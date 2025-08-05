@@ -54,7 +54,7 @@ firebase.auth().onAuthStateChanged(user => {
     document.getElementById('loginForm').style.display = 'none';
     document.getElementById('logoutBtn').classList.remove('hidden');
 
-    // Check admin flag from DB (optional: add roles to Firebase)
+    // Optional: Check admin role from database
     db.ref('admins/' + user.uid).once('value').then(snapshot => {
       userIsAdmin = snapshot.exists();
     });
@@ -68,17 +68,23 @@ firebase.auth().onAuthStateChanged(user => {
 function login() {
   const email = document.getElementById('loginEmail').value;
   const password = document.getElementById('loginPassword').value;
-  firebase.auth().signInWithEmailAndPassword(email, password).catch(alert);
+  firebase.auth().signInWithEmailAndPassword(email, password)
+    .then(() => alert("Login successful"))
+    .catch(error => alert("Login failed: " + error.message));
 }
 
 function logout() {
-  firebase.auth().signOut();
+  firebase.auth().signOut().then(() => {
+    alert("Logged out.");
+  });
 }
 
 function register() {
   const email = document.getElementById('loginEmail').value;
   const password = document.getElementById('loginPassword').value;
-  firebase.auth().createUserWithEmailAndPassword(email, password).catch(alert);
+  firebase.auth().createUserWithEmailAndPassword(email, password)
+    .then(() => alert("Registration successful! You can now log in."))
+    .catch(error => alert("Registration failed: " + error.message));
 }
 
 // Override addEmployeeSale to include uid
@@ -366,7 +372,7 @@ firebase.auth().onAuthStateChanged(user => {
     document.getElementById('loginForm').style.display = 'none';
     document.getElementById('logoutBtn').classList.remove('hidden');
 
-    // Check admin flag from DB (optional: add roles to Firebase)
+    // Optional: Check admin role from database
     db.ref('admins/' + user.uid).once('value').then(snapshot => {
       userIsAdmin = snapshot.exists();
     });
@@ -380,17 +386,23 @@ firebase.auth().onAuthStateChanged(user => {
 function login() {
   const email = document.getElementById('loginEmail').value;
   const password = document.getElementById('loginPassword').value;
-  firebase.auth().signInWithEmailAndPassword(email, password).catch(alert);
+  firebase.auth().signInWithEmailAndPassword(email, password)
+    .then(() => alert("Login successful"))
+    .catch(error => alert("Login failed: " + error.message));
 }
 
 function logout() {
-  firebase.auth().signOut();
+  firebase.auth().signOut().then(() => {
+    alert("Logged out.");
+  });
 }
 
 function register() {
   const email = document.getElementById('loginEmail').value;
   const password = document.getElementById('loginPassword').value;
-  firebase.auth().createUserWithEmailAndPassword(email, password).catch(alert);
+  firebase.auth().createUserWithEmailAndPassword(email, password)
+    .then(() => alert("Registration successful! You can now log in."))
+    .catch(error => alert("Registration failed: " + error.message));
 }
 
 // Override addEmployeeSale to include uid
@@ -813,7 +825,7 @@ firebase.auth().onAuthStateChanged(user => {
     document.getElementById('loginForm').style.display = 'none';
     document.getElementById('logoutBtn').classList.remove('hidden');
 
-    // Check admin flag from DB (optional: add roles to Firebase)
+    // Optional: Check admin role from database
     db.ref('admins/' + user.uid).once('value').then(snapshot => {
       userIsAdmin = snapshot.exists();
     });
@@ -827,17 +839,23 @@ firebase.auth().onAuthStateChanged(user => {
 function login() {
   const email = document.getElementById('loginEmail').value;
   const password = document.getElementById('loginPassword').value;
-  firebase.auth().signInWithEmailAndPassword(email, password).catch(alert);
+  firebase.auth().signInWithEmailAndPassword(email, password)
+    .then(() => alert("Login successful"))
+    .catch(error => alert("Login failed: " + error.message));
 }
 
 function logout() {
-  firebase.auth().signOut();
+  firebase.auth().signOut().then(() => {
+    alert("Logged out.");
+  });
 }
 
 function register() {
   const email = document.getElementById('loginEmail').value;
   const password = document.getElementById('loginPassword').value;
-  firebase.auth().createUserWithEmailAndPassword(email, password).catch(alert);
+  firebase.auth().createUserWithEmailAndPassword(email, password)
+    .then(() => alert("Registration successful! You can now log in."))
+    .catch(error => alert("Registration failed: " + error.message));
 }
 
 // Override addEmployeeSale to include uid
@@ -926,7 +944,7 @@ firebase.auth().onAuthStateChanged(user => {
     document.getElementById('loginForm').style.display = 'none';
     document.getElementById('logoutBtn').classList.remove('hidden');
 
-    // Check admin flag from DB (optional: add roles to Firebase)
+    // Optional: Check admin role from database
     db.ref('admins/' + user.uid).once('value').then(snapshot => {
       userIsAdmin = snapshot.exists();
     });
@@ -940,17 +958,23 @@ firebase.auth().onAuthStateChanged(user => {
 function login() {
   const email = document.getElementById('loginEmail').value;
   const password = document.getElementById('loginPassword').value;
-  firebase.auth().signInWithEmailAndPassword(email, password).catch(alert);
+  firebase.auth().signInWithEmailAndPassword(email, password)
+    .then(() => alert("Login successful"))
+    .catch(error => alert("Login failed: " + error.message));
 }
 
 function logout() {
-  firebase.auth().signOut();
+  firebase.auth().signOut().then(() => {
+    alert("Logged out.");
+  });
 }
 
 function register() {
   const email = document.getElementById('loginEmail').value;
   const password = document.getElementById('loginPassword').value;
-  firebase.auth().createUserWithEmailAndPassword(email, password).catch(alert);
+  firebase.auth().createUserWithEmailAndPassword(email, password)
+    .then(() => alert("Registration successful! You can now log in."))
+    .catch(error => alert("Registration failed: " + error.message));
 }
 
 // Override addEmployeeSale to include uid
@@ -1056,7 +1080,7 @@ firebase.auth().onAuthStateChanged(user => {
     document.getElementById('loginForm').style.display = 'none';
     document.getElementById('logoutBtn').classList.remove('hidden');
 
-    // Check admin flag from DB (optional: add roles to Firebase)
+    // Optional: Check admin role from database
     db.ref('admins/' + user.uid).once('value').then(snapshot => {
       userIsAdmin = snapshot.exists();
     });
@@ -1070,17 +1094,23 @@ firebase.auth().onAuthStateChanged(user => {
 function login() {
   const email = document.getElementById('loginEmail').value;
   const password = document.getElementById('loginPassword').value;
-  firebase.auth().signInWithEmailAndPassword(email, password).catch(alert);
+  firebase.auth().signInWithEmailAndPassword(email, password)
+    .then(() => alert("Login successful"))
+    .catch(error => alert("Login failed: " + error.message));
 }
 
 function logout() {
-  firebase.auth().signOut();
+  firebase.auth().signOut().then(() => {
+    alert("Logged out.");
+  });
 }
 
 function register() {
   const email = document.getElementById('loginEmail').value;
   const password = document.getElementById('loginPassword').value;
-  firebase.auth().createUserWithEmailAndPassword(email, password).catch(alert);
+  firebase.auth().createUserWithEmailAndPassword(email, password)
+    .then(() => alert("Registration successful! You can now log in."))
+    .catch(error => alert("Registration failed: " + error.message));
 }
 
 // Override addEmployeeSale to include uid
@@ -2611,7 +2641,7 @@ firebase.auth().onAuthStateChanged(user => {
     document.getElementById('loginForm').style.display = 'none';
     document.getElementById('logoutBtn').classList.remove('hidden');
 
-    // Check admin flag from DB (optional: add roles to Firebase)
+    // Optional: Check admin role from database
     db.ref('admins/' + user.uid).once('value').then(snapshot => {
       userIsAdmin = snapshot.exists();
     });
@@ -2625,17 +2655,23 @@ firebase.auth().onAuthStateChanged(user => {
 function login() {
   const email = document.getElementById('loginEmail').value;
   const password = document.getElementById('loginPassword').value;
-  firebase.auth().signInWithEmailAndPassword(email, password).catch(alert);
+  firebase.auth().signInWithEmailAndPassword(email, password)
+    .then(() => alert("Login successful"))
+    .catch(error => alert("Login failed: " + error.message));
 }
 
 function logout() {
-  firebase.auth().signOut();
+  firebase.auth().signOut().then(() => {
+    alert("Logged out.");
+  });
 }
 
 function register() {
   const email = document.getElementById('loginEmail').value;
   const password = document.getElementById('loginPassword').value;
-  firebase.auth().createUserWithEmailAndPassword(email, password).catch(alert);
+  firebase.auth().createUserWithEmailAndPassword(email, password)
+    .then(() => alert("Registration successful! You can now log in."))
+    .catch(error => alert("Registration failed: " + error.message));
 }
 
 // Override addEmployeeSale to include uid
@@ -2724,7 +2760,7 @@ firebase.auth().onAuthStateChanged(user => {
     document.getElementById('loginForm').style.display = 'none';
     document.getElementById('logoutBtn').classList.remove('hidden');
 
-    // Check admin flag from DB (optional: add roles to Firebase)
+    // Optional: Check admin role from database
     db.ref('admins/' + user.uid).once('value').then(snapshot => {
       userIsAdmin = snapshot.exists();
     });
@@ -2738,17 +2774,23 @@ firebase.auth().onAuthStateChanged(user => {
 function login() {
   const email = document.getElementById('loginEmail').value;
   const password = document.getElementById('loginPassword').value;
-  firebase.auth().signInWithEmailAndPassword(email, password).catch(alert);
+  firebase.auth().signInWithEmailAndPassword(email, password)
+    .then(() => alert("Login successful"))
+    .catch(error => alert("Login failed: " + error.message));
 }
 
 function logout() {
-  firebase.auth().signOut();
+  firebase.auth().signOut().then(() => {
+    alert("Logged out.");
+  });
 }
 
 function register() {
   const email = document.getElementById('loginEmail').value;
   const password = document.getElementById('loginPassword').value;
-  firebase.auth().createUserWithEmailAndPassword(email, password).catch(alert);
+  firebase.auth().createUserWithEmailAndPassword(email, password)
+    .then(() => alert("Registration successful! You can now log in."))
+    .catch(error => alert("Registration failed: " + error.message));
 }
 
 // Override addEmployeeSale to include uid
