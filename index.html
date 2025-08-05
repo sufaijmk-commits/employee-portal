@@ -196,19 +196,28 @@
         
         /* Form Elements */
         input, select, textarea {
-            border: 1px solid #d1d5db;
+            border: 2px solid #d1d5db;
             border-radius: 0.5rem;
-            padding: 0.5rem 0.75rem;
-            font-size: 0.875rem;
+            padding: 0.75rem;
+            font-size: 1rem;
             line-height: 1.25rem;
             width: 100%;
             background-color: #ffffff;
+            min-height: 44px; /* iOS touch target minimum */
         }
         
         input:focus, select:focus, textarea:focus {
             outline: none;
             border-color: #a855f7;
-            box-shadow: 0 0 0 2px rgba(168, 85, 247, 0.2);
+            box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.1);
+        }
+        
+        /* Mobile form adjustments */
+        @media (max-width: 640px) {
+            input, select, textarea {
+                font-size: 16px; /* Prevents zoom on iOS */
+                padding: 0.875rem;
+            }
         }
         
         button {
@@ -247,16 +256,177 @@
             background-color: #f9fafb;
         }
         
-        /* Responsive Design */
+        /* Mobile-First Responsive Design */
+        
+        /* Mobile Base Styles */
+        .mobile-container {
+            padding: 0.75rem;
+        }
+        
+        .mobile-card {
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 1rem;
+        }
+        
+        .mobile-button {
+            min-height: 44px; /* iOS touch target minimum */
+            padding: 0.75rem 1rem;
+            font-size: 1rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+        }
+        
+        .mobile-input {
+            min-height: 44px;
+            padding: 0.75rem;
+            font-size: 1rem;
+            border-radius: 0.5rem;
+            border: 2px solid #d1d5db;
+        }
+        
+        .mobile-input:focus {
+            border-color: #a855f7;
+            box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.1);
+        }
+        
+        .mobile-nav {
+            position: sticky;
+            top: 0;
+            z-index: 40;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .mobile-tab-scroll {
+            overflow-x: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        
+        .mobile-tab-scroll::-webkit-scrollbar {
+            display: none;
+        }
+        
+        .mobile-table-container {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .mobile-table {
+            min-width: 600px;
+        }
+        
+        .mobile-stats-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+        
+        .mobile-form-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+        
+        .mobile-action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .mobile-modal {
+            margin: 1rem;
+            max-height: calc(100vh - 2rem);
+            overflow-y: auto;
+        }
+        
+        /* Touch-friendly spacing */
+        .touch-target {
+            min-height: 44px;
+            min-width: 44px;
+        }
+        
+        /* Tablet Styles */
+        @media (min-width: 640px) {
+            .sm\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .sm\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+            .sm\:flex-row { flex-direction: row; }
+            .sm\:space-x-2 > * + * { margin-left: 0.5rem; margin-top: 0; }
+            .sm\:space-y-0 > * + * { margin-top: 0; }
+            
+            .mobile-container {
+                padding: 1rem;
+            }
+            
+            .mobile-stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .mobile-form-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .mobile-action-buttons {
+                flex-direction: row;
+                flex-wrap: wrap;
+            }
+        }
+        
         @media (min-width: 768px) {
             .md\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
             .md\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+            .md\:grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
             .md\:grid-cols-5 { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+            .md\:flex-row { flex-direction: row; }
+            .md\:space-x-3 > * + * { margin-left: 0.75rem; margin-top: 0; }
+            .md\:space-y-0 > * + * { margin-top: 0; }
+            
+            .mobile-container {
+                padding: 1.5rem;
+            }
+            
+            .mobile-stats-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            
+            .mobile-form-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            
+            .mobile-modal {
+                margin: 2rem auto;
+                max-width: 28rem;
+            }
         }
         
         @media (min-width: 1024px) {
             .lg\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
             .lg\:grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+            .lg\:grid-cols-5 { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+            
+            .mobile-container {
+                padding: 2rem;
+            }
+            
+            .mobile-form-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+        
+        /* Mobile-specific utilities */
+        .hide-mobile { display: block; }
+        .show-mobile { display: none; }
+        
+        @media (max-width: 640px) {
+            .hide-mobile { display: none; }
+            .show-mobile { display: block; }
+            
+            /* Compact mobile styles */
+            .text-xs-mobile { font-size: 0.75rem; }
+            .text-sm-mobile { font-size: 0.875rem; }
+            .p-2-mobile { padding: 0.5rem; }
+            .px-2-mobile { padding-left: 0.5rem; padding-right: 0.5rem; }
+            .py-1-mobile { padding-top: 0.25rem; padding-bottom: 0.25rem; }
         }
         
         /* Custom Component Styles */
@@ -409,77 +579,86 @@
 
     <!-- Employee Portal -->
     <div id="employeePortal" class="hidden min-h-screen bg-gray-50">
-        <nav class="gradient-bg text-white p-4">
-            <div class="flex justify-between items-center">
-                <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
-                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"/>
-                        </svg>
+        <nav class="mobile-nav gradient-bg text-white">
+            <!-- Mobile Header -->
+            <div class="mobile-container">
+                <div class="flex justify-between items-center mb-3">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h2 class="font-semibold text-lg" id="employeeName">Employee</h2>
+                            <p class="text-sm opacity-80" id="employeeStore">Store</p>
+                        </div>
                     </div>
-                    <div>
-                        <h2 class="font-semibold" id="employeeName">Employee</h2>
-                        <p class="text-sm opacity-80" id="employeeStore">Store</p>
-                    </div>
+                    <button onclick="logout()" class="bg-white bg-opacity-20 mobile-button text-sm touch-target">
+                        Logout
+                    </button>
                 </div>
-                <div class="flex items-center space-x-2">
-                    <div class="text-sm opacity-80" id="employeeCurrentDate"></div>
+                
+                <!-- Mobile Status Bar -->
+                <div class="flex justify-between items-center text-sm mb-3">
+                    <div class="opacity-80" id="employeeCurrentDate"></div>
                     <div class="text-xs opacity-70" id="employeeSyncStatus">📱 Local Mode</div>
-                    <button onclick="refreshData()" class="bg-blue-600 px-3 py-2 rounded-lg hover:bg-blue-700 transition font-semibold text-sm">
+                </div>
+                
+                <!-- Mobile Action Buttons -->
+                <div class="mobile-action-buttons sm:flex-row sm:space-x-2 sm:space-y-0">
+                    <button onclick="refreshData()" class="bg-blue-600 mobile-button hover:bg-blue-700 transition text-sm flex-1">
                         🔄 Refresh
                     </button>
-                    <button onclick="quickAddSale()" class="bg-green-600 px-3 py-2 rounded-lg hover:bg-green-700 transition font-semibold text-sm">
+                    <button onclick="quickAddSale()" class="bg-green-600 mobile-button hover:bg-green-700 transition text-sm flex-1">
                         ➕ Quick Sale
                     </button>
-                    <button onclick="viewTodaysSummary()" class="bg-purple-600 px-3 py-2 rounded-lg hover:bg-purple-700 transition font-semibold text-sm">
+                    <button onclick="viewTodaysSummary()" class="bg-purple-600 mobile-button hover:bg-purple-700 transition text-sm flex-1">
                         📊 Summary
-                    </button>
-                    <button onclick="logout()" class="bg-white bg-opacity-20 px-3 py-2 rounded-lg hover:bg-opacity-30 transition text-sm">
-                        Logout
                     </button>
                 </div>
             </div>
         </nav>
 
-        <div class="p-6">
+        <div class="mobile-container">
             <!-- Stats Cards -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <div class="bg-white rounded-xl card-shadow p-6">
+            <div class="mobile-stats-grid mb-6">
+                <div class="bg-white mobile-card p-4">
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-gray-600 text-sm">Total Sales Today</p>
-                            <p class="text-2xl font-bold text-green-600" id="totalSalesToday">$0</p>
+                            <p class="text-xl sm:text-2xl font-bold text-green-600" id="totalSalesToday">$0</p>
                         </div>
-                        <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                            <svg class="w-6 h-6 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                        <div class="w-10 h-10 sm:w-12 sm:h-12 bg-green-100 rounded-full flex items-center justify-center">
+                            <svg class="w-5 h-5 sm:w-6 sm:h-6 text-green-600" fill="currentColor" viewBox="0 0 20 20">
                                 <path d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z"/>
                             </svg>
                         </div>
                     </div>
                 </div>
 
-                <div class="bg-white rounded-xl card-shadow p-6">
+                <div class="bg-white mobile-card p-4">
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-gray-600 text-sm">Bottles Sold</p>
-                            <p class="text-2xl font-bold text-blue-600" id="bottlesSold">0</p>
+                            <p class="text-xl sm:text-2xl font-bold text-blue-600" id="bottlesSold">0</p>
                         </div>
-                        <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                            <svg class="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                        <div class="w-10 h-10 sm:w-12 sm:h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                            <svg class="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
                                 <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"/>
                             </svg>
                         </div>
                     </div>
                 </div>
 
-                <div class="bg-white rounded-xl card-shadow p-6">
+                <div class="bg-white mobile-card p-4">
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-gray-600 text-sm">Estimated Salary</p>
-                            <p class="text-2xl font-bold text-purple-600" id="estimatedSalary">$0</p>
+                            <p class="text-xl sm:text-2xl font-bold text-purple-600" id="estimatedSalary">$0</p>
                         </div>
-                        <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
-                            <svg class="w-6 h-6 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
+                        <div class="w-10 h-10 sm:w-12 sm:h-12 bg-purple-100 rounded-full flex items-center justify-center">
+                            <svg class="w-5 h-5 sm:w-6 sm:h-6 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
                                 <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z"/>
                                 <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clip-rule="evenodd"/>
                             </svg>
@@ -489,31 +668,31 @@
             </div>
 
             <!-- Add Sale Form -->
-            <div class="bg-white rounded-xl card-shadow p-6 mb-8">
-                <h3 class="text-xl font-semibold mb-6">Add New Sale</h3>
-                <form id="addSaleForm" class="grid grid-cols-1 md:grid-cols-5 gap-4">
+            <div class="bg-white mobile-card p-4 mb-6">
+                <h3 class="text-lg font-semibold mb-4">Add New Sale</h3>
+                <form id="addSaleForm" class="mobile-form-grid">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Date</label>
-                        <input type="date" id="saleDate" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" required>
+                        <input type="date" id="saleDate" class="mobile-input" required>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Store</label>
-                        <select id="saleStore" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" required>
+                        <select id="saleStore" class="mobile-input" required>
                             <option value="">Select Store</option>
                         </select>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Product</label>
-                        <select id="saleProduct" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" required>
+                        <select id="saleProduct" class="mobile-input" required>
                             <option value="">Select Product</option>
                         </select>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Quantity</label>
-                        <input type="number" id="saleQuantity" min="1" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="1" required>
+                        <input type="number" id="saleQuantity" min="1" class="mobile-input" placeholder="1" required>
                     </div>
-                    <div class="flex items-end">
-                        <button type="submit" class="w-full gradient-bg text-white py-2 rounded-lg font-semibold hover:opacity-90 transition">
+                    <div class="sm:col-span-2 md:col-span-1">
+                        <button type="submit" class="w-full gradient-bg text-white mobile-button hover:opacity-90 transition">
                             Add Sale
                         </button>
                     </div>
@@ -521,23 +700,23 @@
             </div>
 
             <!-- Today's Sales -->
-            <div class="bg-white rounded-xl card-shadow p-6">
-                <h3 class="text-xl font-semibold mb-6">Today's Sales</h3>
-                <div class="overflow-x-auto">
-                    <table class="w-full">
+            <div class="bg-white mobile-card p-4">
+                <h3 class="text-lg font-semibold mb-4">Today's Sales</h3>
+                <div class="mobile-table-container">
+                    <table class="mobile-table w-full">
                         <thead>
                             <tr class="border-b">
-                                <th class="text-left py-3 px-4">Time</th>
-                                <th class="text-left py-3 px-4">Store</th>
-                                <th class="text-left py-3 px-4">Product</th>
-                                <th class="text-left py-3 px-4">Quantity</th>
-                                <th class="text-left py-3 px-4">Amount</th>
-                                <th class="text-left py-3 px-4">Actions</th>
+                                <th class="text-left py-2 px-2 text-sm">Time</th>
+                                <th class="text-left py-2 px-2 text-sm hide-mobile">Store</th>
+                                <th class="text-left py-2 px-2 text-sm">Product</th>
+                                <th class="text-left py-2 px-2 text-sm">Qty</th>
+                                <th class="text-left py-2 px-2 text-sm">Amount</th>
+                                <th class="text-left py-2 px-2 text-sm">Actions</th>
                             </tr>
                         </thead>
                         <tbody id="todaysSalesTable">
                             <tr>
-                                <td colspan="5" class="text-center py-8 text-gray-500">No sales recorded today</td>
+                                <td colspan="6" class="text-center py-8 text-gray-500 text-sm">No sales recorded today</td>
                             </tr>
                         </tbody>
                     </table>
@@ -548,112 +727,127 @@
 
     <!-- Admin Dashboard -->
     <div id="dashboard" class="hidden min-h-screen bg-gray-50">
-        <nav class="gradient-bg text-white p-4">
-            <div class="flex justify-between items-center">
-                <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
-                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                        </svg>
+        <nav class="mobile-nav gradient-bg text-white">
+            <div class="mobile-container">
+                <!-- Mobile Header -->
+                <div class="flex justify-between items-center mb-3">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h2 class="font-semibold text-lg">Eden Perfume Admin</h2>
+                            <p class="text-sm opacity-80">Management Dashboard</p>
+                        </div>
                     </div>
-                    <div>
-                        <h2 class="font-semibold">Eden Perfume Admin</h2>
-                        <p class="text-sm opacity-80">Management Dashboard</p>
-                    </div>
-                </div>
-                <div class="flex items-center space-x-2">
-                    <div class="text-sm opacity-80" id="adminCurrentDate"></div>
-                    <div class="text-xs opacity-70" id="adminSyncStatus">📱 Local Mode</div>
-                    <button onclick="refreshData()" class="bg-blue-600 px-3 py-2 rounded-lg hover:bg-blue-700 transition font-semibold text-sm">
-                        🔄 Refresh
-                    </button>
-                    <button onclick="forceSyncNow()" class="bg-orange-600 px-3 py-2 rounded-lg hover:bg-orange-700 transition font-semibold text-sm">
-                        🔄 Sync Now
-                    </button>
-                    <button onclick="resetFirebaseConfig()" class="bg-red-600 px-3 py-2 rounded-lg hover:bg-red-700 transition font-semibold text-sm">
-                        🔥 Setup Firebase
-                    </button>
-                    <button onclick="viewTodaysSummary()" class="bg-purple-600 px-3 py-2 rounded-lg hover:bg-purple-700 transition font-semibold text-sm">
-                        📊 Today's Summary
-                    </button>
-                    <button onclick="backupData()" class="bg-yellow-600 px-3 py-2 rounded-lg hover:bg-yellow-700 transition font-semibold text-sm">
-                        💾 Backup
-                    </button>
-                    <button onclick="downloadAllMasterData()" class="bg-green-600 px-3 py-2 rounded-lg hover:bg-green-700 transition font-semibold text-sm">
-                        📥 Download All
-                    </button>
-                    <button onclick="logout()" class="bg-white bg-opacity-20 px-3 py-2 rounded-lg hover:bg-opacity-30 transition text-sm">
+                    <button onclick="logout()" class="bg-white bg-opacity-20 mobile-button text-sm touch-target">
                         Logout
                     </button>
+                </div>
+                
+                <!-- Mobile Status Bar -->
+                <div class="flex justify-between items-center text-sm mb-3">
+                    <div class="opacity-80" id="adminCurrentDate"></div>
+                    <div class="text-xs opacity-70" id="adminSyncStatus">📱 Local Mode</div>
+                </div>
+                
+                <!-- Mobile Action Buttons - Scrollable -->
+                <div class="mobile-tab-scroll">
+                    <div class="flex space-x-2 pb-2" style="min-width: max-content;">
+                        <button onclick="refreshData()" class="bg-blue-600 mobile-button hover:bg-blue-700 transition text-sm whitespace-nowrap">
+                            🔄 Refresh
+                        </button>
+                        <button onclick="forceSyncNow()" class="bg-orange-600 mobile-button hover:bg-orange-700 transition text-sm whitespace-nowrap">
+                            🔄 Sync
+                        </button>
+                        <button onclick="resetFirebaseConfig()" class="bg-red-600 mobile-button hover:bg-red-700 transition text-sm whitespace-nowrap">
+                            🔥 Firebase
+                        </button>
+                        <button onclick="viewTodaysSummary()" class="bg-purple-600 mobile-button hover:bg-purple-700 transition text-sm whitespace-nowrap">
+                            📊 Summary
+                        </button>
+                        <button onclick="backupData()" class="bg-yellow-600 mobile-button hover:bg-yellow-700 transition text-sm whitespace-nowrap">
+                            💾 Backup
+                        </button>
+                        <button onclick="downloadAllMasterData()" class="bg-green-600 mobile-button hover:bg-green-700 transition text-sm whitespace-nowrap">
+                            📥 Download
+                        </button>
+                    </div>
                 </div>
             </div>
         </nav>
 
         <!-- Tab Navigation -->
         <div class="bg-white border-b">
-            <div class="flex space-x-0 overflow-x-auto">
-                <button onclick="switchTab('employees')" class="tab-btn px-6 py-4 font-medium whitespace-nowrap border-b-2 border-transparent hover:border-purple-500 transition" data-tab="employees">
-                    Employees
-                </button>
-                <button onclick="switchTab('stores')" class="tab-btn px-6 py-4 font-medium whitespace-nowrap border-b-2 border-transparent hover:border-purple-500 transition" data-tab="stores">
-                    Stores
-                </button>
-                <button onclick="switchTab('products')" class="tab-btn px-6 py-4 font-medium whitespace-nowrap border-b-2 border-transparent hover:border-purple-500 transition" data-tab="products">
-                    Products
-                </button>
-                <button onclick="switchTab('collections')" class="tab-btn px-6 py-4 font-medium whitespace-nowrap border-b-2 border-transparent hover:border-purple-500 transition" data-tab="collections">
-                    Collections
-                </button>
-                <button onclick="switchTab('database')" class="tab-btn px-6 py-4 font-medium whitespace-nowrap border-b-2 border-transparent hover:border-purple-500 transition" data-tab="database">
-                    Database Manager
-                </button>
-                <button onclick="switchTab('sales')" class="tab-btn px-6 py-4 font-medium whitespace-nowrap border-b-2 border-transparent hover:border-purple-500 transition" data-tab="sales">
-                    Sales Reports
-                </button>
-                <button onclick="switchTab('salary')" class="tab-btn px-6 py-4 font-medium whitespace-nowrap border-b-2 border-transparent hover:border-purple-500 transition" data-tab="salary">
-                    Salary Reports
-                </button>
+            <div class="mobile-tab-scroll">
+                <div class="flex space-x-0" style="min-width: max-content;">
+                    <button onclick="switchTab('employees')" class="tab-btn px-4 py-3 font-medium whitespace-nowrap border-b-2 border-transparent hover:border-purple-500 transition text-sm touch-target" data-tab="employees">
+                        👥 Employees
+                    </button>
+                    <button onclick="switchTab('stores')" class="tab-btn px-4 py-3 font-medium whitespace-nowrap border-b-2 border-transparent hover:border-purple-500 transition text-sm touch-target" data-tab="stores">
+                        🏪 Stores
+                    </button>
+                    <button onclick="switchTab('products')" class="tab-btn px-4 py-3 font-medium whitespace-nowrap border-b-2 border-transparent hover:border-purple-500 transition text-sm touch-target" data-tab="products">
+                        🧴 Products
+                    </button>
+                    <button onclick="switchTab('collections')" class="tab-btn px-4 py-3 font-medium whitespace-nowrap border-b-2 border-transparent hover:border-purple-500 transition text-sm touch-target" data-tab="collections">
+                        📦 Collections
+                    </button>
+                    <button onclick="switchTab('database')" class="tab-btn px-4 py-3 font-medium whitespace-nowrap border-b-2 border-transparent hover:border-purple-500 transition text-sm touch-target" data-tab="database">
+                        🗄️ Database
+                    </button>
+                    <button onclick="switchTab('sales')" class="tab-btn px-4 py-3 font-medium whitespace-nowrap border-b-2 border-transparent hover:border-purple-500 transition text-sm touch-target" data-tab="sales">
+                        📊 Sales
+                    </button>
+                    <button onclick="switchTab('salary')" class="tab-btn px-4 py-3 font-medium whitespace-nowrap border-b-2 border-transparent hover:border-purple-500 transition text-sm touch-target" data-tab="salary">
+                        💰 Salary
+                    </button>
+                </div>
             </div>
         </div>
 
         <!-- Tab Content -->
-        <div class="p-6">
+        <div class="mobile-container">
             <!-- Employees Tab -->
             <div id="employees-tab" class="tab-content">
-                <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-2xl font-bold">Employee Management</h2>
-                    <div class="flex space-x-2">
-                        <button onclick="restoreData()" class="bg-orange-600 text-white px-3 py-2 rounded-lg font-semibold hover:bg-orange-700 transition text-sm">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-3">
+                    <h2 class="text-xl font-bold">Employee Management</h2>
+                    <div class="mobile-action-buttons sm:flex-row sm:space-x-2 sm:space-y-0 w-full sm:w-auto">
+                        <button onclick="restoreData()" class="bg-orange-600 text-white mobile-button hover:bg-orange-700 transition text-sm">
                             📤 Restore
                         </button>
-                        <button onclick="clearAllData()" class="bg-red-600 text-white px-3 py-2 rounded-lg font-semibold hover:bg-red-700 transition text-sm">
+                        <button onclick="clearAllData()" class="bg-red-600 text-white mobile-button hover:bg-red-700 transition text-sm">
                             🗑️ Clear All
                         </button>
-                        <button onclick="openModal('employee')" class="gradient-bg text-white px-4 py-2 rounded-lg font-semibold hover:opacity-90 transition">
+                        <button onclick="openModal('employee')" class="gradient-bg text-white mobile-button hover:opacity-90 transition">
                             ➕ Add Employee
                         </button>
                     </div>
                 </div>
-                <div class="bg-white rounded-xl card-shadow overflow-hidden">
-                    <table class="w-full">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="text-left py-4 px-6">Name</th>
-                                <th class="text-left py-4 px-6">Username</th>
-                                <th class="text-left py-4 px-6">Store</th>
-                                <th class="text-left py-4 px-6">Salary Type</th>
-                                <th class="text-left py-4 px-6">Base Salary</th>
-                                <th class="text-left py-4 px-6">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="employeesTable">
-                            <tr>
-                                <td colspan="6" class="text-center py-8 text-gray-500">
-                                    No employees found. Click "Add Employee" to create your first employee.
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <div class="bg-white mobile-card overflow-hidden">
+                    <div class="mobile-table-container">
+                        <table class="mobile-table w-full">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="text-left py-3 px-3 text-sm">Name</th>
+                                    <th class="text-left py-3 px-3 text-sm hide-mobile">Username</th>
+                                    <th class="text-left py-3 px-3 text-sm">Store</th>
+                                    <th class="text-left py-3 px-3 text-sm hide-mobile">Salary Type</th>
+                                    <th class="text-left py-3 px-3 text-sm">Salary</th>
+                                    <th class="text-left py-3 px-3 text-sm">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="employeesTable">
+                                <tr>
+                                    <td colspan="6" class="text-center py-8 text-gray-500 text-sm">
+                                        No employees found. Click "Add Employee" to create your first employee.
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 
@@ -949,20 +1143,20 @@
 
     <!-- Modal -->
     <div id="modal" class="hidden fixed inset-0 modal-backdrop z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-xl card-shadow w-full max-w-md fade-in">
-            <div class="p-6 border-b">
-                <h3 id="modalTitle" class="text-xl font-semibold">Add Item</h3>
+        <div class="bg-white rounded-xl card-shadow mobile-modal w-full fade-in">
+            <div class="p-4 border-b">
+                <h3 id="modalTitle" class="text-lg font-semibold">Add Item</h3>
             </div>
-            <div class="p-6">
+            <div class="p-4">
                 <form id="modalForm">
                     <div id="modalFields" class="space-y-4">
                         <!-- Dynamic fields will be inserted here -->
                     </div>
-                    <div class="flex space-x-3 mt-6">
-                        <button type="button" onclick="closeModal()" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition">
+                    <div class="mobile-action-buttons sm:flex-row sm:space-x-3 sm:space-y-0 mt-6">
+                        <button type="button" onclick="closeModal()" class="flex-1 mobile-button border border-gray-300 hover:bg-gray-50 transition bg-white text-gray-700">
                             Cancel
                         </button>
-                        <button type="submit" class="flex-1 gradient-bg text-white px-4 py-2 rounded-lg font-semibold hover:opacity-90 transition">
+                        <button type="submit" class="flex-1 gradient-bg text-white mobile-button hover:opacity-90 transition">
                             <span id="saveBtnText">Save</span>
                             <div id="saveLoader" class="loading hidden ml-2"></div>
                         </button>
@@ -3307,14 +3501,14 @@
                     
                     return `
                         <tr class="border-b hover:bg-gray-50">
-                            <td class="py-3 px-4">${saleTime}</td>
-                            <td class="py-3 px-4">${storeName}</td>
-                            <td class="py-3 px-4">${productName}</td>
-                            <td class="py-3 px-4">${quantity}</td>
-                            <td class="py-3 px-4">$${amount.toFixed(2)}</td>
-                            <td class="py-3 px-4">
-                                <button onclick="deleteSale('${saleId}')" class="text-red-600 hover:text-red-800 text-sm">
-                                    Delete
+                            <td class="py-2 px-2 text-sm">${saleTime}</td>
+                            <td class="py-2 px-2 text-sm hide-mobile">${storeName}</td>
+                            <td class="py-2 px-2 text-sm">${productName}</td>
+                            <td class="py-2 px-2 text-sm">${quantity}</td>
+                            <td class="py-2 px-2 text-sm">$${amount.toFixed(2)}</td>
+                            <td class="py-2 px-2 text-sm">
+                                <button onclick="deleteSale('${saleId}')" class="text-red-600 hover:text-red-800 text-xs mobile-button p-1">
+                                    🗑️
                                 </button>
                             </td>
                         </tr>
@@ -3505,14 +3699,16 @@
                     
                     return `
                         <tr class="border-b hover:bg-gray-50">
-                            <td class="py-4 px-6">${empName}</td>
-                            <td class="py-4 px-6">${empUsername}</td>
-                            <td class="py-4 px-6">${storeName}</td>
-                            <td class="py-4 px-6 capitalize">${salaryType}</td>
-                            <td class="py-4 px-6">$${baseSalary}</td>
-                            <td class="py-4 px-6">
-                                <button onclick="editItem('employee', '${empId}')" class="text-blue-600 hover:text-blue-800 mr-3">Edit</button>
-                                <button onclick="deleteItem('employee', '${empId}')" class="text-red-600 hover:text-red-800">Delete</button>
+                            <td class="py-3 px-3 text-sm">${empName}</td>
+                            <td class="py-3 px-3 text-sm hide-mobile">${empUsername}</td>
+                            <td class="py-3 px-3 text-sm">${storeName}</td>
+                            <td class="py-3 px-3 text-sm capitalize hide-mobile">${salaryType}</td>
+                            <td class="py-3 px-3 text-sm">$${baseSalary}</td>
+                            <td class="py-3 px-3 text-sm">
+                                <div class="flex space-x-1">
+                                    <button onclick="editItem('employee', '${empId}')" class="text-blue-600 hover:text-blue-800 text-xs mobile-button p-1">✏️</button>
+                                    <button onclick="deleteItem('employee', '${empId}')" class="text-red-600 hover:text-red-800 text-xs mobile-button p-1">🗑️</button>
+                                </div>
                             </td>
                         </tr>
                     `;
@@ -3986,5 +4182,5 @@
             document.getElementById(elementId).textContent = dateString;
         }
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96a7603407e5f9e7',t:'MTc1NDQwODI0Ni4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96a76eff62f0f9ee',t:'MTc1NDQwODg1Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
