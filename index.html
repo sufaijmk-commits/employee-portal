@@ -567,7 +567,6 @@
                 
                 <button type="submit" class="w-full gradient-bg text-white py-3 rounded-lg font-semibold hover:opacity-90 transition">
                     <span id="loginBtnText">Sign In</span>
-                    <div id="loginLoader" class="loading hidden ml-2"></div>
                 </button>
             </form>
             
@@ -662,7 +661,7 @@
                             <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"/>
                         </svg>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-800 mb-2">Record New Sale</h3>
+                    <h3 class="text-xl font-bold text-gray-800">Record New Sale</h3>
                     <p class="text-sm text-gray-500">Complete the form below to record a new sale transaction</p>
                 </div>
                 
@@ -3961,10 +3960,8 @@
             e.preventDefault();
             
             const loginBtn = document.getElementById('loginBtnText');
-            const loader = document.getElementById('loginLoader');
             
             loginBtn.textContent = 'Signing in...';
-            loader.classList.remove('hidden');
             
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
@@ -3975,7 +3972,6 @@
                 currentUserRole = 'admin';
                 await showDashboard();
                 loginBtn.textContent = 'Sign In';
-                loader.classList.add('hidden');
                 return;
             }
             
@@ -3989,13 +3985,11 @@
                 currentUserRole = 'employee';
                 await showEmployeePortal();
                 loginBtn.textContent = 'Sign In';
-                loader.classList.add('hidden');
                 return;
             }
             
             alert('Invalid credentials. Please try again.');
             loginBtn.textContent = 'Sign In';
-            loader.classList.add('hidden');
         });
 
         function logout() {
@@ -5085,5 +5079,5 @@
             document.getElementById(elementId).textContent = dateString;
         }
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96a7dcf1f0a3f9f4',t:'MTc1NDQxMzM1Ni4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96a7e87f5428f9ee',t:'MTc1NDQxMzgyOS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
