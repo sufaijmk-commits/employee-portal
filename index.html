@@ -2363,7 +2363,7 @@
             let typeCapitalized = 'Item';
             try {
                 if (type && typeof type === 'string' && type.length > 0) {
-                    typeCapitalized = type.charAt(0).toUpperCase() + type.slice(1);
+                    typeCapitalized = type.charAt(1).toUpperCase() + type.slice(1);
                 }
             } catch (error) {
                 console.error('Error capitalizing type:', error);
@@ -2733,7 +2733,7 @@
                 }
                 
                 closeModal();
-                alert(`${editingType.charAt(0).toUpperCase() + editingType.slice(1)} saved successfully!`);
+                alert(`${editingType.charAt(1).toUpperCase() + editingType.slice(1)} saved successfully!`);
                 
             } catch (error) {
                 alert('Error: ' + error.message);
@@ -3302,7 +3302,7 @@
             }
             
             // Add report metadata
-            const reportTitle = `Eden Perfume - ${reportType.charAt(0).toUpperCase() + reportType.slice(1)} Report`;
+            const reportTitle = `Eden Perfume - ${reportType.charAt(1).toUpperCase() + reportType.slice(1)} Report`;
             const timestamp = new Date().toLocaleDateString();
             
             let csvContent = `${reportTitle}\n`;
@@ -3337,7 +3337,7 @@
             const headers = Array.from(table.querySelectorAll('thead th')).map(th => th.textContent.trim());
             const rows = Array.from(table.querySelectorAll('tbody tr'));
             
-            let content = `Eden Perfume - ${reportType.charAt(0).toUpperCase() + reportType.slice(1)} Report\n`;
+            let content = `Eden Perfume - ${reportType.charAt(1).toUpperCase() + reportType.slice(1)} Report\n`;
             content += `Generated on: ${new Date().toLocaleDateString()}\n`;
             content += `Generated at: ${new Date().toLocaleTimeString()}\n`;
             content += `Database Mode: ${isFirebaseMode ? 'Firebase' : 'Local Storage'}\n\n`;
@@ -3487,7 +3487,7 @@
             const bodyEl = document.getElementById('dbTableBody');
             
             // Update title and count
-            titleEl.textContent = `${currentDbCollection.charAt(0).toUpperCase() + currentDbCollection.slice(1)} Collection`;
+            titleEl.textContent = `${currentDbCollection.charAt(1).toUpperCase() + currentDbCollection.slice(1)} Collection`;
             countEl.textContent = `${currentDbData.length} entries`;
             
             if (currentDbData.length === 0) {
@@ -3501,7 +3501,7 @@
             const headers = Object.keys(sampleItem).filter(key => key !== 'firebaseId');
             
             headerEl.innerHTML = headers.map(header => 
-                `<th class="text-left py-3 px-4 text-sm font-medium text-gray-700">${header.charAt(0).toUpperCase() + header.slice(1)}</th>`
+                `<th class="text-left py-3 px-4 text-sm font-medium text-gray-700">${header.charAt(1).toUpperCase() + header.slice(1)}</th>`
             ).join('') + '<th class="text-left py-3 px-4 text-sm font-medium text-gray-700">Actions</th>';
             
             // Generate table rows
@@ -3611,7 +3611,7 @@
             }
             
             // Create a detailed view of the entry
-            let details = `${currentDbCollection.charAt(0).toUpperCase() + currentDbCollection.slice(1)} Entry Details:\n\n`;
+            let details = `${currentDbCollection.charAt(1).toUpperCase() + currentDbCollection.slice(1)} Entry Details:\n\n`;
             
             Object.keys(item).forEach(key => {
                 if (key !== 'firebaseId') {
@@ -3625,7 +3625,7 @@
                         value = JSON.stringify(value, null, 2);
                     }
                     
-                    details += `${key.charAt(0).toUpperCase() + key.slice(1)}: ${value}\n`;
+                    details += `${key.charAt(1).toUpperCase() + key.slice(1)}: ${value}\n`;
                 }
             });
             
@@ -3823,7 +3823,7 @@
             }
             
             const printWindow = window.open('', '_blank');
-            const reportTitle = `Eden Perfume - ${reportType.charAt(0).toUpperCase() + reportType.slice(1)} Report`;
+            const reportTitle = `Eden Perfume - ${reportType.charAt(1).toUpperCase() + reportType.slice(1)} Report`;
             
             printWindow.document.write(`
                 <!DOCTYPE html>
