@@ -1347,7 +1347,7 @@
             }
         }
 
-        // Background sync
+        // Background sync with real-time listeners
         function startBackgroundSync() {
             // Load sync queue from localStorage
             const savedQueue = localStorage.getItem('eden_sync_queue');
@@ -1364,6 +1364,238 @@
                     processSyncQueue();
                 }
             }, 30000); // Sync every 30 seconds
+            
+            // Set up real-time listeners for Firebase data changes
+            if (isFirebaseMode) {
+                setupRealtimeListeners();
+            }
+        }
+        
+        // Real-time Firebase listeners
+        function setupRealtimeListeners() {
+            if (!db) return;
+            
+            try {
+                // Listen for employees changes
+                db.collection('employees').onSnapshot((snapshot) => {
+                    console.log('Employees collection changed');
+                    syncFromFirebase('employees', snapshot);
+                }, (error) => {
+                    console.error('Error listening to employees:', error);
+                });
+                
+                // Listen for stores changes
+                db.collection('stores').onSnapshot((snapshot) => {
+                    console.log('Stores collection changed');
+                    syncFromFirebase('stores', snapshot);
+                }, (error) => {
+                    console.error('Error listening to stores:', error);
+                });
+                
+                // Listen for products changes
+                db.collection('products').onSnapshot((snapshot) => {
+                    console.log('Products collection changed');
+                    syncFromFirebase('products', snapshot);
+                }, (error) => {
+                    console.error('Error listening to products:', error);
+                });
+                
+                // Listen for collections changes
+                db.collection('collections').onSnapshot((snapshot) => {
+                    console.log('Collections collection changed');
+                    syncFromFirebase('collections', snapshot);
+                }, (error) => {
+                    console.error('Error listening to collections:', error);
+                });
+                
+                // Listen for sales changes
+                db.collection('sales').onSnapshot((snapshot) => {
+                    console.log('Sales collection changed');
+                    syncFromFirebase('sales', snapshot);
+                }, (error) => {
+                    console.error('Error listening to sales:', error);
+                });
+                
+                console.log('Real-time listeners set up successfully');
+            } catch (error) {
+                console.error('Error setting up real-time listeners:', error);
+            }
+        }
+        
+        // Sync data from Firebase to local storage
+        function syncFromFirebase(collectionName, snapshot) {
+            try {
+                const firebaseData = [];
+                
+                snapshot.forEach((doc) => {
+                    const data = doc.data();
+                    // Use localId if available, otherwise use Firebase doc ID
+                    const localId = data.localId || doc.id;
+                    
+                    firebaseData.push({
+                        ...data,
+                        id: localId,
+                        firebaseId: doc.id,
+                        // Convert Firestore timestamps to ISO strings
+                        createdAt: data.createdAt ? data.createdAt.toDate().toISOString() : new Date().toISOString(),
+                        updatedAt: data.updatedAt ? data.updatedAt.toDate().toISOString() : new Date().toISOString()
+                    });
+                });
+                
+                // Update local data based on collection type
+                switch(collectionName) {
+                    case 'employees':
+                        employees = mergeWithLocal(employees, firebaseData);
+                        break;
+                    case 'stores':
+                        stores = mergeWithLocal(stores, firebaseData);
+                        break;
+                    case 'products':
+                        products = mergeWithLocal(products, firebaseData);
+                        break;
+                    case 'collections':
+                        collections = mergeWithLocal(collections, firebaseData);
+                        break;
+                    case 'sales':
+                        sales = mergeWithLocal(sales, firebaseData);
+                        break;
+                }
+                
+                // Save updated data to localStorage
+                saveLocalData();
+                
+                // Update UI if currently viewing the affected data
+                updateUIAfterSync(collectionName);
+                
+                // Update sync status
+                syncStatus = 'synced';
+                lastSyncTime = new Date().toISOString();
+                updateSyncStatus();
+                
+                console.log(`Synced ${firebaseData.length} items from ${collectionName}`);
+                
+            } catch (error) {
+                console.error(`Error syncing ${collectionName} from Firebase:`, error);
+                syncStatus = 'error';
+                updateSyncStatus();
+            }
+        }
+        
+        // Merge Firebase data with local data, preserving local changes
+        function mergeWithLocal(localArray, firebaseArray) {
+            const merged = [...localArray];
+            
+            firebaseArray.forEach(firebaseItem => {
+                const localIndex = merged.findIndex(localItem => 
+                    localItem.id === firebaseItem.id || 
+                    localItem.firebaseId === firebaseItem.firebaseId
+                );
+                
+                if (localIndex >= 0) {
+                    // Update existing item, but preserve local changes if they're newer
+                    const localItem = merged[localIndex];
+                    const localUpdated = new Date(localItem.updatedAt || localItem.createdAt || 0);
+                    const firebaseUpdated = new Date(firebaseItem.updatedAt || firebaseItem.createdAt || 0);
+                    
+                    // Only update if Firebase version is newer
+                    if (firebaseUpdated > localUpdated) {
+                        merged[localIndex] = { ...localItem, ...firebaseItem };
+                    } else {
+                        // Keep local version but update Firebase ID if missing
+                        if (!localItem.firebaseId && firebaseItem.firebaseId) {
+                            merged[localIndex].firebaseId = firebaseItem.firebaseId;
+                        }
+                    }
+                } else {
+                    // Add new item from Firebase
+                    merged.push(firebaseItem);
+                }
+            });
+            
+            return merged;
+        }
+        
+        // Update UI after sync based on current view
+        function updateUIAfterSync(collectionName) {
+            try {
+                // Update tables if currently viewing admin dashboard
+                if (currentUserRole === 'admin' && !document.getElementById('dashboard').classList.contains('hidden')) {
+                    switch(collectionName) {
+                        case 'employees':
+                            if (!document.getElementById('employees-tab').classList.contains('hidden')) {
+                                loadEmployeesTable();
+                            }
+                            break;
+                        case 'stores':
+                            if (!document.getElementById('stores-tab').classList.contains('hidden')) {
+                                loadStoresTable();
+                            }
+                            break;
+                        case 'products':
+                            if (!document.getElementById('products-tab').classList.contains('hidden')) {
+                                loadProductsTable();
+                            }
+                            break;
+                        case 'collections':
+                            if (!document.getElementById('collections-tab').classList.contains('hidden')) {
+                                loadCollectionsTable();
+                            }
+                            break;
+                        case 'sales':
+                            // Refresh sales report if currently viewing
+                            if (!document.getElementById('sales-tab').classList.contains('hidden')) {
+                                // Auto-refresh current report if one is displayed
+                                const reportTable = document.getElementById('salesReportTable');
+                                if (reportTable && reportTable.children.length > 0 && 
+                                    !reportTable.innerHTML.includes('Select date range')) {
+                                    generateSalesReport();
+                                }
+                            }
+                            break;
+                    }
+                }
+                
+                // Update employee portal if currently viewing
+                if (currentUserRole === 'employee' && !document.getElementById('employeePortal').classList.contains('hidden')) {
+                    if (collectionName === 'sales') {
+                        updateEmployeeStats();
+                        updateTodaysSalesTable();
+                    } else if (collectionName === 'products' || collectionName === 'stores') {
+                        populateProductDropdown();
+                        populateStoreDropdown();
+                    }
+                }
+                
+                // Update dropdowns in forms
+                if (collectionName === 'stores') {
+                    populateStoreDropdown();
+                }
+                if (collectionName === 'products') {
+                    populateProductDropdown();
+                }
+                if (collectionName === 'employees') {
+                    populateEmployeeDropdown();
+                }
+                
+            } catch (error) {
+                console.error('Error updating UI after sync:', error);
+            }
+        }
+        
+        // Enhanced sync status with real-time indicator
+        function updateSyncStatusWithRealtime() {
+            updateSyncStatus();
+            
+            // Add real-time indicator if Firebase is connected
+            if (isFirebaseMode && syncStatus === 'synced') {
+                const statusElements = ['syncStatus', 'employeeSyncStatus', 'adminSyncStatus'];
+                statusElements.forEach(elementId => {
+                    const element = document.getElementById(elementId);
+                    if (element) {
+                        element.innerHTML = '🔄 <span style="color: #10b981;">Real-time Sync</span>';
+                    }
+                });
+            }
         }
 
         // Force sync now
@@ -1639,15 +1871,195 @@
         }
 
         function backupData() {
-            alert('Backup feature coming soon!');
+            try {
+                const backupData = {
+                    timestamp: new Date().toISOString(),
+                    version: '1.0',
+                    data: {
+                        employees: employees,
+                        stores: stores,
+                        products: products,
+                        collections: collections,
+                        sales: sales
+                    },
+                    metadata: {
+                        totalEmployees: employees.length,
+                        totalStores: stores.length,
+                        totalProducts: products.length,
+                        totalCollections: collections.length,
+                        totalSales: sales.length,
+                        syncMode: isFirebaseMode ? 'Firebase' : 'Local',
+                        lastSyncTime: lastSyncTime
+                    }
+                };
+                
+                const backupJson = JSON.stringify(backupData, null, 2);
+                const blob = new Blob([backupJson], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `eden_perfume_backup_${new Date().toISOString().split('T')[0]}.json`;
+                link.style.display = 'none';
+                
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                URL.revokeObjectURL(url);
+                
+                alert(`Backup created successfully!\n\nBackup includes:\n- ${employees.length} employees\n- ${stores.length} stores\n- ${products.length} products\n- ${collections.length} collections\n- ${sales.length} sales records`);
+                
+            } catch (error) {
+                console.error('Backup error:', error);
+                alert('Error creating backup: ' + error.message);
+            }
         }
 
         function downloadAllMasterData() {
-            alert('Download All feature coming soon!');
+            try {
+                // Create comprehensive Excel-like CSV with multiple sheets
+                let csvContent = '';
+                
+                // Employees sheet
+                csvContent += 'EMPLOYEES\n';
+                csvContent += 'Name,Username,Store,Salary Type,Base Salary,Commission Rate\n';
+                employees.forEach(emp => {
+                    const storeName = getStoreName(emp.storeId);
+                    csvContent += `"${emp.name || ''}","${emp.username || ''}","${storeName}","${emp.salaryType || ''}","${emp.baseSalary || 0}","${emp.commissionRate || 0}"\n`;
+                });
+                
+                csvContent += '\n\nSTORES\n';
+                csvContent += 'Name,Location,Manager,Phone\n';
+                stores.forEach(store => {
+                    csvContent += `"${store.name || ''}","${store.location || ''}","${store.manager || ''}","${store.phone || ''}"\n`;
+                });
+                
+                csvContent += '\n\nPRODUCTS\n';
+                csvContent += 'Name,Price,Description\n';
+                products.forEach(product => {
+                    csvContent += `"${product.name || ''}","${product.price || 0}","${product.description || ''}"\n`;
+                });
+                
+                csvContent += '\n\nCOLLECTIONS\n';
+                csvContent += 'Name,Description,Status,Product Count\n';
+                collections.forEach(collection => {
+                    const productCount = collection.productIds ? collection.productIds.length : 0;
+                    csvContent += `"${collection.name || ''}","${collection.description || ''}","${collection.status || ''}","${productCount}"\n`;
+                });
+                
+                csvContent += '\n\nSALES\n';
+                csvContent += 'Date,Time,Employee,Store,Product,Quantity,Amount\n';
+                sales.forEach(sale => {
+                    const employeeName = getEmployeeName(sale.employeeId);
+                    const storeName = getStoreName(sale.storeId);
+                    const productName = getProductName(sale.productId);
+                    csvContent += `"${sale.date || ''}","${sale.time || ''}","${employeeName}","${storeName}","${productName}","${sale.quantity || 0}","${sale.amount || 0}"\n`;
+                });
+                
+                // Add summary
+                csvContent += '\n\nSUMMARY\n';
+                csvContent += 'Category,Count\n';
+                csvContent += `"Total Employees","${employees.length}"\n`;
+                csvContent += `"Total Stores","${stores.length}"\n`;
+                csvContent += `"Total Products","${products.length}"\n`;
+                csvContent += `"Total Collections","${collections.length}"\n`;
+                csvContent += `"Total Sales","${sales.length}"\n`;
+                csvContent += `"Export Date","${new Date().toLocaleDateString()}"\n`;
+                csvContent += `"Export Time","${new Date().toLocaleTimeString()}"\n`;
+                
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `eden_perfume_master_data_${new Date().toISOString().split('T')[0]}.csv`;
+                link.style.display = 'none';
+                
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                URL.revokeObjectURL(url);
+                
+                alert('Master data exported successfully!\n\nThe file contains all employees, stores, products, collections, and sales data in CSV format.');
+                
+            } catch (error) {
+                console.error('Export error:', error);
+                alert('Error exporting data: ' + error.message);
+            }
         }
 
         function restoreData() {
-            alert('Restore feature coming soon!');
+            if (!confirm('This will replace ALL current data with the backup data. Are you sure you want to continue?\n\nCurrent data will be lost!')) {
+                return;
+            }
+            
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.style.display = 'none';
+            
+            input.onchange = function(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const backupData = JSON.parse(e.target.result);
+                        
+                        // Validate backup structure
+                        if (!backupData.data || !backupData.timestamp) {
+                            throw new Error('Invalid backup file format');
+                        }
+                        
+                        // Restore data
+                        employees = backupData.data.employees || [];
+                        stores = backupData.data.stores || [];
+                        products = backupData.data.products || [];
+                        collections = backupData.data.collections || [];
+                        sales = backupData.data.sales || [];
+                        
+                        // Ensure arrays are valid
+                        initializeArrays();
+                        
+                        // Save to localStorage
+                        saveLocalData();
+                        
+                        // If Firebase is connected, sync the restored data
+                        if (isFirebaseMode) {
+                            // Queue all items for sync
+                            employees.forEach(emp => queueForSync('create', 'employee', emp));
+                            stores.forEach(store => queueForSync('create', 'store', store));
+                            products.forEach(product => queueForSync('create', 'product', product));
+                            collections.forEach(collection => queueForSync('create', 'collection', collection));
+                            sales.forEach(sale => queueForSync('create', 'sale', sale));
+                        }
+                        
+                        // Refresh current view
+                        if (currentUserRole === 'admin') {
+                            switchTab('employees'); // Refresh to employees tab
+                        } else if (currentUserRole === 'employee') {
+                            updateEmployeeStats();
+                            updateTodaysSalesTable();
+                        }
+                        
+                        const metadata = backupData.metadata || {};
+                        alert(`Data restored successfully!\n\nRestored:\n- ${metadata.totalEmployees || employees.length} employees\n- ${metadata.totalStores || stores.length} stores\n- ${metadata.totalProducts || products.length} products\n- ${metadata.totalCollections || collections.length} collections\n- ${metadata.totalSales || sales.length} sales records\n\nBackup created: ${new Date(backupData.timestamp).toLocaleString()}`);
+                        
+                    } catch (error) {
+                        console.error('Restore error:', error);
+                        alert('Error restoring backup: ' + error.message + '\n\nPlease ensure you selected a valid Eden Perfume backup file.');
+                    }
+                };
+                
+                reader.readAsText(file);
+            };
+            
+            document.body.appendChild(input);
+            input.click();
+            document.body.removeChild(input);
         }
 
         function clearAllData() {
@@ -2232,15 +2644,366 @@
         }
 
         function printReport(type) {
-            alert('Print functionality coming soon!');
+            try {
+                const reportData = window.currentReportData;
+                const reportType = window.currentReportType;
+                
+                if (!reportData || reportData.length === 0) {
+                    alert('No data to print. Please generate a report first.');
+                    return;
+                }
+                
+                // Create a new window for printing
+                const printWindow = window.open('', '_blank');
+                const printContent = generatePrintContent(reportData, reportType, type);
+                
+                printWindow.document.write(printContent);
+                printWindow.document.close();
+                printWindow.focus();
+                printWindow.print();
+                printWindow.close();
+            } catch (error) {
+                console.error('Print error:', error);
+                alert('Error printing report: ' + error.message);
+            }
         }
 
         function downloadExcel(type) {
-            alert('Excel download coming soon!');
+            try {
+                const reportData = window.currentReportData;
+                const reportType = window.currentReportType;
+                
+                if (!reportData || reportData.length === 0) {
+                    alert('No data to download. Please generate a report first.');
+                    return;
+                }
+                
+                const csvContent = generateCSVContent(reportData, reportType, type);
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+                
+                if (link.download !== undefined) {
+                    const url = URL.createObjectURL(blob);
+                    link.setAttribute('href', url);
+                    link.setAttribute('download', `${type}_report_${new Date().toISOString().split('T')[0]}.csv`);
+                    link.style.visibility = 'hidden';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                } else {
+                    alert('Your browser does not support file downloads. Please copy the data manually.');
+                }
+            } catch (error) {
+                console.error('Excel download error:', error);
+                alert('Error downloading Excel file: ' + error.message);
+            }
         }
 
         function downloadPDF(type) {
-            alert('PDF download coming soon!');
+            try {
+                const reportData = window.currentReportData;
+                const reportType = window.currentReportType;
+                
+                if (!reportData || reportData.length === 0) {
+                    alert('No data to download. Please generate a report first.');
+                    return;
+                }
+                
+                // For PDF, we'll create a formatted text version that can be saved
+                const pdfContent = generatePDFContent(reportData, reportType, type);
+                const blob = new Blob([pdfContent], { type: 'text/plain;charset=utf-8;' });
+                const link = document.createElement('a');
+                
+                if (link.download !== undefined) {
+                    const url = URL.createObjectURL(blob);
+                    link.setAttribute('href', url);
+                    link.setAttribute('download', `${type}_report_${new Date().toISOString().split('T')[0]}.txt`);
+                    link.style.visibility = 'hidden';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                } else {
+                    alert('Your browser does not support file downloads. Please copy the data manually.');
+                }
+            } catch (error) {
+                console.error('PDF download error:', error);
+                alert('Error downloading PDF file: ' + error.message);
+            }
+        }
+        
+        function generatePrintContent(reportData, reportType, type) {
+            const title = type === 'sales' ? 'Sales Report' : 'Salary Report';
+            const date = new Date().toLocaleDateString();
+            
+            let tableHeaders = '';
+            let tableRows = '';
+            
+            if (type === 'sales') {
+                switch(reportType) {
+                    case 'daily':
+                        tableHeaders = '<th>Date</th><th>Transactions</th><th>Total Quantity</th><th>Total Amount</th><th>Avg per Transaction</th>';
+                        tableRows = reportData.map(row => `
+                            <tr>
+                                <td>${new Date(row.date).toLocaleDateString()}</td>
+                                <td>${row.transactions}</td>
+                                <td>${row.totalQuantity}</td>
+                                <td>$${row.totalAmount.toFixed(2)}</td>
+                                <td>$${(row.totalAmount / row.transactions).toFixed(2)}</td>
+                            </tr>
+                        `).join('');
+                        break;
+                    case 'monthly':
+                        tableHeaders = '<th>Month</th><th>Transactions</th><th>Total Quantity</th><th>Total Amount</th><th>Avg per Transaction</th>';
+                        tableRows = reportData.map(row => `
+                            <tr>
+                                <td>${row.month}</td>
+                                <td>${row.transactions}</td>
+                                <td>${row.totalQuantity}</td>
+                                <td>$${row.totalAmount.toFixed(2)}</td>
+                                <td>$${(row.totalAmount / row.transactions).toFixed(2)}</td>
+                            </tr>
+                        `).join('');
+                        break;
+                    case 'store':
+                        tableHeaders = '<th>Store</th><th>Transactions</th><th>Total Quantity</th><th>Total Amount</th><th>Avg per Transaction</th>';
+                        tableRows = reportData.map(row => `
+                            <tr>
+                                <td>${row.store}</td>
+                                <td>${row.transactions}</td>
+                                <td>${row.totalQuantity}</td>
+                                <td>$${row.totalAmount.toFixed(2)}</td>
+                                <td>$${(row.totalAmount / row.transactions).toFixed(2)}</td>
+                            </tr>
+                        `).join('');
+                        break;
+                    case 'staff':
+                        tableHeaders = '<th>Employee</th><th>Store</th><th>Transactions</th><th>Total Quantity</th><th>Total Amount</th>';
+                        tableRows = reportData.map(row => `
+                            <tr>
+                                <td>${row.employee}</td>
+                                <td>${row.store}</td>
+                                <td>${row.transactions}</td>
+                                <td>${row.totalQuantity}</td>
+                                <td>$${row.totalAmount.toFixed(2)}</td>
+                            </tr>
+                        `).join('');
+                        break;
+                    case 'product':
+                        tableHeaders = '<th>Product</th><th>Unit Price</th><th>Quantity Sold</th><th>Total Amount</th><th>Transactions</th>';
+                        tableRows = reportData.map(row => `
+                            <tr>
+                                <td>${row.product}</td>
+                                <td>$${row.price.toFixed(2)}</td>
+                                <td>${row.totalQuantity}</td>
+                                <td>$${row.totalAmount.toFixed(2)}</td>
+                                <td>${row.transactions}</td>
+                            </tr>
+                        `).join('');
+                        break;
+                    default:
+                        tableHeaders = '<th>Date</th><th>Time</th><th>Employee</th><th>Store</th><th>Product</th><th>Quantity</th><th>Amount</th>';
+                        tableRows = reportData.map(row => `
+                            <tr>
+                                <td>${new Date(row.date).toLocaleDateString()}</td>
+                                <td>${row.time}</td>
+                                <td>${row.employee}</td>
+                                <td>${row.store}</td>
+                                <td>${row.product}</td>
+                                <td>${row.quantity}</td>
+                                <td>$${row.amount.toFixed(2)}</td>
+                            </tr>
+                        `).join('');
+                }
+            }
+            
+            return `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>${title}</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; margin: 20px; }
+                        .header { text-align: center; margin-bottom: 30px; }
+                        .header h1 { color: #333; margin-bottom: 5px; }
+                        .header p { color: #666; margin: 0; }
+                        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+                        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                        th { background-color: #f2f2f2; font-weight: bold; }
+                        tr:nth-child(even) { background-color: #f9f9f9; }
+                        .footer { margin-top: 30px; text-align: center; color: #666; font-size: 12px; }
+                        @media print {
+                            body { margin: 0; }
+                            .no-print { display: none; }
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="header">
+                        <h1>Eden Perfume - ${title}</h1>
+                        <p>Generated on ${date}</p>
+                        <p>Report Type: ${reportType.charAt(0).toUpperCase() + reportType.slice(1)}</p>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>${tableHeaders}</tr>
+                        </thead>
+                        <tbody>
+                            ${tableRows}
+                        </tbody>
+                    </table>
+                    <div class="footer">
+                        <p>Eden Perfume Sales Management System</p>
+                    </div>
+                </body>
+                </html>
+            `;
+        }
+        
+        function generateCSVContent(reportData, reportType, type) {
+            let headers = [];
+            let rows = [];
+            
+            if (type === 'sales') {
+                switch(reportType) {
+                    case 'daily':
+                        headers = ['Date', 'Transactions', 'Total Quantity', 'Total Amount', 'Avg per Transaction'];
+                        rows = reportData.map(row => [
+                            new Date(row.date).toLocaleDateString(),
+                            row.transactions,
+                            row.totalQuantity,
+                            row.totalAmount.toFixed(2),
+                            (row.totalAmount / row.transactions).toFixed(2)
+                        ]);
+                        break;
+                    case 'monthly':
+                        headers = ['Month', 'Transactions', 'Total Quantity', 'Total Amount', 'Avg per Transaction'];
+                        rows = reportData.map(row => [
+                            row.month,
+                            row.transactions,
+                            row.totalQuantity,
+                            row.totalAmount.toFixed(2),
+                            (row.totalAmount / row.transactions).toFixed(2)
+                        ]);
+                        break;
+                    case 'store':
+                        headers = ['Store', 'Transactions', 'Total Quantity', 'Total Amount', 'Avg per Transaction'];
+                        rows = reportData.map(row => [
+                            row.store,
+                            row.transactions,
+                            row.totalQuantity,
+                            row.totalAmount.toFixed(2),
+                            (row.totalAmount / row.transactions).toFixed(2)
+                        ]);
+                        break;
+                    case 'staff':
+                        headers = ['Employee', 'Store', 'Transactions', 'Total Quantity', 'Total Amount'];
+                        rows = reportData.map(row => [
+                            row.employee,
+                            row.store,
+                            row.transactions,
+                            row.totalQuantity,
+                            row.totalAmount.toFixed(2)
+                        ]);
+                        break;
+                    case 'product':
+                        headers = ['Product', 'Unit Price', 'Quantity Sold', 'Total Amount', 'Transactions'];
+                        rows = reportData.map(row => [
+                            row.product,
+                            row.price.toFixed(2),
+                            row.totalQuantity,
+                            row.totalAmount.toFixed(2),
+                            row.transactions
+                        ]);
+                        break;
+                    default:
+                        headers = ['Date', 'Time', 'Employee', 'Store', 'Product', 'Quantity', 'Amount'];
+                        rows = reportData.map(row => [
+                            new Date(row.date).toLocaleDateString(),
+                            row.time,
+                            row.employee,
+                            row.store,
+                            row.product,
+                            row.quantity,
+                            row.amount.toFixed(2)
+                        ]);
+                }
+            }
+            
+            // Create CSV content
+            const csvRows = [headers.join(',')];
+            rows.forEach(row => {
+                const escapedRow = row.map(field => {
+                    // Escape fields that contain commas or quotes
+                    if (typeof field === 'string' && (field.includes(',') || field.includes('"'))) {
+                        return `"${field.replace(/"/g, '""')}"`;
+                    }
+                    return field;
+                });
+                csvRows.push(escapedRow.join(','));
+            });
+            
+            return csvRows.join('\n');
+        }
+        
+        function generatePDFContent(reportData, reportType, type) {
+            const title = type === 'sales' ? 'Sales Report' : 'Salary Report';
+            const date = new Date().toLocaleDateString();
+            
+            let content = `EDEN PERFUME - ${title.toUpperCase()}\n`;
+            content += `Generated on: ${date}\n`;
+            content += `Report Type: ${reportType.charAt(0).toUpperCase() + reportType.slice(1)}\n`;
+            content += `${'='.repeat(60)}\n\n`;
+            
+            if (type === 'sales') {
+                switch(reportType) {
+                    case 'daily':
+                        content += 'Date\t\tTransactions\tQuantity\tAmount\t\tAvg/Trans\n';
+                        content += '-'.repeat(60) + '\n';
+                        reportData.forEach(row => {
+                            content += `${new Date(row.date).toLocaleDateString()}\t${row.transactions}\t\t${row.totalQuantity}\t$${row.totalAmount.toFixed(2)}\t\t$${(row.totalAmount / row.transactions).toFixed(2)}\n`;
+                        });
+                        break;
+                    case 'monthly':
+                        content += 'Month\t\t\tTransactions\tQuantity\tAmount\t\tAvg/Trans\n';
+                        content += '-'.repeat(60) + '\n';
+                        reportData.forEach(row => {
+                            content += `${row.month}\t${row.transactions}\t\t${row.totalQuantity}\t$${row.totalAmount.toFixed(2)}\t\t$${(row.totalAmount / row.transactions).toFixed(2)}\n`;
+                        });
+                        break;
+                    case 'store':
+                        content += 'Store\t\t\tTransactions\tQuantity\tAmount\t\tAvg/Trans\n';
+                        content += '-'.repeat(60) + '\n';
+                        reportData.forEach(row => {
+                            content += `${row.store}\t\t${row.transactions}\t\t${row.totalQuantity}\t$${row.totalAmount.toFixed(2)}\t\t$${(row.totalAmount / row.transactions).toFixed(2)}\n`;
+                        });
+                        break;
+                    case 'staff':
+                        content += 'Employee\t\tStore\t\tTransactions\tQuantity\tAmount\n';
+                        content += '-'.repeat(60) + '\n';
+                        reportData.forEach(row => {
+                            content += `${row.employee}\t\t${row.store}\t\t${row.transactions}\t\t${row.totalQuantity}\t$${row.totalAmount.toFixed(2)}\n`;
+                        });
+                        break;
+                    case 'product':
+                        content += 'Product\t\t\tPrice\tQuantity\tAmount\t\tTransactions\n';
+                        content += '-'.repeat(60) + '\n';
+                        reportData.forEach(row => {
+                            content += `${row.product}\t\t$${row.price.toFixed(2)}\t${row.totalQuantity}\t\t$${row.totalAmount.toFixed(2)}\t\t${row.transactions}\n`;
+                        });
+                        break;
+                    default:
+                        content += 'Date\t\tTime\tEmployee\tStore\t\tProduct\t\tQty\tAmount\n';
+                        content += '-'.repeat(80) + '\n';
+                        reportData.forEach(row => {
+                            content += `${new Date(row.date).toLocaleDateString()}\t${row.time}\t${row.employee}\t${row.store}\t\t${row.product}\t\t${row.quantity}\t$${row.amount.toFixed(2)}\n`;
+                        });
+                }
+            }
+            
+            content += '\n' + '='.repeat(60) + '\n';
+            content += 'Eden Perfume Sales Management System\n';
+            
+            return content;
         }
 
         function populateEmployeeDropdown() {
@@ -3223,5 +3986,5 @@
             document.getElementById(elementId).textContent = dateString;
         }
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96a745810410f9d7',t:'MTc1NDQwNzE1My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96a7603407e5f9e7',t:'MTc1NDQwODI0Ni4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
