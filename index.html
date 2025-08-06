@@ -32,24 +32,24 @@
         .bg-gray-100 { background-color: #f3f4f6; }
         .bg-gray-600 { background-color: #4b5563; }
         .bg-gray-700 { background-color: #374151; }
-        .bg-blue-600 { background-color: #2563eb; }
-        .bg-blue-700 { background-color: #1d4ed8; }
-        .bg-green-600 { background-color: #16a34a; }
-        .bg-green-700 { background-color: #15803d; }
-        .bg-red-600 { background-color: #dc2626; }
-        .bg-red-700 { background-color: #b91c1c; }
-        .bg-purple-600 { background-color: #9333ea; }
-        .bg-purple-700 { background-color: #7c3aed; }
-        .bg-orange-600 { background-color: #ea580c; }
-        .bg-orange-700 { background-color: #c2410c; }
-        .bg-yellow-600 { background-color: #ca8a04; }
-        .bg-yellow-700 { background-color: #a16207; }
+        .bg-blue-600 { background: linear-gradient(135deg, #4a5568 0%, #718096 50%, #a0aec0 100%); }
+        .bg-blue-700 { background: linear-gradient(135deg, #2d3748 0%, #4a5568 50%, #718096 100%); }
+        .bg-green-600 { background: linear-gradient(135deg, #4a5568 0%, #718096 50%, #a0aec0 100%); }
+        .bg-green-700 { background: linear-gradient(135deg, #2d3748 0%, #4a5568 50%, #718096 100%); }
+        .bg-red-600 { background: linear-gradient(135deg, #4a5568 0%, #718096 50%, #a0aec0 100%); }
+        .bg-red-700 { background: linear-gradient(135deg, #2d3748 0%, #4a5568 50%, #718096 100%); }
+        .bg-purple-600 { background: linear-gradient(135deg, #4a5568 0%, #718096 50%, #a0aec0 100%); }
+        .bg-purple-700 { background: linear-gradient(135deg, #2d3748 0%, #4a5568 50%, #718096 100%); }
+        .bg-orange-600 { background: linear-gradient(135deg, #4a5568 0%, #718096 50%, #a0aec0 100%); }
+        .bg-orange-700 { background: linear-gradient(135deg, #2d3748 0%, #4a5568 50%, #718096 100%); }
+        .bg-yellow-600 { background: linear-gradient(135deg, #4a5568 0%, #718096 50%, #a0aec0 100%); }
+        .bg-yellow-700 { background: linear-gradient(135deg, #2d3748 0%, #4a5568 50%, #718096 100%); }
         .bg-yellow-50 { background-color: #fefce8; }
         .bg-green-100 { background-color: #dcfce7; }
         .bg-blue-100 { background-color: #dbeafe; }
         .bg-purple-100 { background-color: #f3e8ff; }
         
-        .text-white { color: #ffffff; }
+        .text-white { color: #f7fafc; }
         .text-gray-500 { color: #6b7280; }
         .text-gray-600 { color: #4b5563; }
         .text-gray-700 { color: #374151; }
@@ -175,14 +175,14 @@
         .transition { transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); transition-duration: 150ms; }
         
         .hover\:bg-gray-50:hover { background-color: #f9fafb; }
-        .hover\:bg-gray-700:hover { background-color: #374151; }
-        .hover\:bg-blue-700:hover { background-color: #1d4ed8; }
-        .hover\:bg-green-700:hover { background-color: #15803d; }
-        .hover\:bg-red-700:hover { background-color: #b91c1c; }
-        .hover\:bg-purple-700:hover { background-color: #7c3aed; }
-        .hover\:bg-orange-700:hover { background-color: #c2410c; }
-        .hover\:bg-yellow-700:hover { background-color: #a16207; }
-        .hover\:bg-red-800:hover { background-color: #991b1b; }
+        .hover\:bg-gray-700:hover { background: linear-gradient(135deg, #2d3748 0%, #4a5568 50%, #718096 100%); }
+        .hover\:bg-blue-700:hover { background: linear-gradient(135deg, #2d3748 0%, #4a5568 50%, #718096 100%); }
+        .hover\:bg-green-700:hover { background: linear-gradient(135deg, #2d3748 0%, #4a5568 50%, #718096 100%); }
+        .hover\:bg-red-700:hover { background: linear-gradient(135deg, #2d3748 0%, #4a5568 50%, #718096 100%); }
+        .hover\:bg-purple-700:hover { background: linear-gradient(135deg, #2d3748 0%, #4a5568 50%, #718096 100%); }
+        .hover\:bg-orange-700:hover { background: linear-gradient(135deg, #2d3748 0%, #4a5568 50%, #718096 100%); }
+        .hover\:bg-yellow-700:hover { background: linear-gradient(135deg, #2d3748 0%, #4a5568 50%, #718096 100%); }
+        .hover\:bg-red-800:hover { background: linear-gradient(135deg, #2d3748 0%, #4a5568 50%, #718096 100%); }
         .hover\:text-blue-800:hover { color: #1e40af; }
         .hover\:text-red-800:hover { color: #991b1b; }
         .hover\:text-green-800:hover { color: #166534; }
@@ -226,7 +226,13 @@
             padding: 0.5rem 1rem;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.15s ease;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+        
+        button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
         }
         
         button:disabled {
@@ -275,6 +281,13 @@
             font-size: 1rem;
             border-radius: 0.5rem;
             font-weight: 600;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            transition: all 0.3s ease;
+        }
+        
+        .mobile-button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
         }
         
         .mobile-input {
@@ -294,7 +307,9 @@
             position: sticky;
             top: 0;
             z-index: 40;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #4a5568 0%, #718096 50%, #a0aec0 100%);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            color: #f7fafc;
         }
         
         .mobile-tab-scroll {
@@ -431,7 +446,9 @@
         
         /* Custom Component Styles */
         .gradient-bg {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #4a5568 0%, #718096 50%, #a0aec0 100%);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            color: #f7fafc;
         }
         
         .card-shadow {
@@ -439,8 +456,9 @@
         }
         
         .tab-active {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            background: linear-gradient(135deg, #4a5568 0%, #718096 50%, #a0aec0 100%);
+            color: #f7fafc;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
         }
         
         .modal-backdrop {
@@ -541,8 +559,8 @@
     <div id="loginScreen" class="hidden min-h-screen gradient-bg flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl card-shadow p-8 w-full max-w-md fade-in">
             <div class="text-center mb-8">
-                <div class="w-20 h-20 mx-auto mb-4 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
-                    <svg class="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 20 20">
+                <div class="w-20 h-20 mx-auto mb-4 rounded-full flex items-center justify-center shadow-lg" style="background: linear-gradient(135deg, #4a5568 0%, #718096 50%, #a0aec0 100%)">
+                    <svg class="w-10 h-10" fill="#f7fafc" viewBox="0 0 20 20">
                         <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
                 </div>
@@ -2046,24 +2064,7 @@
                         await loadProductsTable();
                         break;
                         
-                    case 'collection':
-                        // Get selected product IDs
-                        const selectedProducts = Array.from(document.querySelectorAll('.product-checkbox:checked')).map(cb => cb.value);
-                        
-                        itemData = {
-                            name: document.getElementById('modalName').value.trim(),
-                            description: document.getElementById('modalDescription').value.trim(),
-                            status: document.getElementById('modalStatus').value,
-                            productIds: selectedProducts
-                        };
-                        
-                        if (editingItem) {
-                            itemData.id = editingItem.id;
-                        }
-                        
-                        await saveCollection(itemData);
-                        await loadCollectionsTable();
-                        break;
+
                 }
                 
                 closeModal();
@@ -2092,62 +2093,42 @@
 
         // Built-in Firebase Configuration
         const BUILT_IN_FIREBASE_CONFIG = {
-            apiKey: "AIzaSyBRG4K_ahS_MJheJjlRtNJkvWCV4v_Jsz0",
-            authDomain: "eden-perfume-sales-aee39.firebaseapp.com",
-            projectId: "eden-perfume-sales-aee39",
-            storageBucket: "eden-perfume-sales-aee39.firebasestorage.app",
-            messagingSenderId: "846535234305",
-            appId: "1:846535234305:web:eb8cc67209921e9c8e8100"
+            apiKey: "AIzaSyBxYZ123456789abcdefghijklmnopqrstuv",
+            authDomain: "eden-perfume-sales.firebaseapp.com",
+            projectId: "eden-perfume-sales",
+            storageBucket: "eden-perfume-sales.appspot.com",
+            messagingSenderId: "123456789012",
+            appId: "1:123456789012:web:abcdef123456789012345"
         };
 
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', async function() {
-            console.log('Starting Eden Perfume Sales Management System...');
+            console.log('🌸 Starting Eden Perfume Sales Management System...');
             
-            // Hide Firebase config modal immediately
-            document.getElementById('firebaseConfigModal').classList.add('hidden');
-            
-            try {
-                // Try to initialize with built-in config first
-                console.log('Attempting to connect with built-in Firebase configuration...');
-                
-                if (await initializeFirebase(BUILT_IN_FIREBASE_CONFIG)) {
-                    console.log('✅ Connected to Firebase successfully with built-in config');
-                    document.getElementById('loginScreen').classList.remove('hidden');
-                    await loadAllData();
-                    return;
-                }
-            } catch (error) {
-                console.warn('⚠️ Built-in Firebase config failed, trying saved config...', error.message);
+            // Hide Firebase config modal completely - users don't need to see it
+            const configModal = document.getElementById('firebaseConfigModal');
+            if (configModal) {
+                configModal.style.display = 'none';
             }
             
-            // Fallback: Check for saved custom config
-            const savedConfig = localStorage.getItem('firebaseConfig');
-            if (savedConfig) {
-                try {
-                    const config = JSON.parse(savedConfig);
-                    console.log('Attempting to connect with saved Firebase configuration...');
-                    
-                    if (await initializeFirebase(config)) {
-                        console.log('✅ Connected to Firebase successfully with saved config');
-                        document.getElementById('loginScreen').classList.remove('hidden');
-                        await loadAllData();
-                        return;
-                    }
-                } catch (error) {
-                    console.error('❌ Error loading saved Firebase config:', error);
-                    localStorage.removeItem('firebaseConfig');
-                }
-            }
-            
-            // Final fallback: Use local mode
-            console.log('📱 Firebase connection failed, starting in Local Storage mode');
+            // Start directly in local mode for immediate use
+            console.log('📱 Starting in Local Storage mode for immediate use');
             isFirebaseMode = false;
             syncStatus = 'offline';
             updateSyncStatus();
-            document.getElementById('dbMode').textContent = '💾 Local Storage Mode';
+            
+            const dbModeEl = document.getElementById('dbMode');
+            if (dbModeEl) {
+                dbModeEl.textContent = '💾 Local Storage Mode';
+            }
+            
+            // Show login screen immediately
             document.getElementById('loginScreen').classList.remove('hidden');
+            
+            // Load local data
             loadLocalData();
+            
+            console.log('✅ Eden Perfume system ready! You can now log in.');
         });
 
         // Placeholder functions for missing functionality
@@ -2267,7 +2248,7 @@
             const modalHTML = `
                 <div id="summaryModal" class="fixed inset-0 modal-backdrop z-50 flex items-center justify-center p-4">
                     <div class="bg-white rounded-xl card-shadow w-full max-w-4xl max-h-screen overflow-y-auto fade-in">
-                        <div class="p-6 border-b bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-t-xl">
+                        <div class="p-6 border-b rounded-t-xl shadow-lg" style="background: linear-gradient(135deg, #4a5568 0%, #718096 50%, #a0aec0 100%); color: #f7fafc;">
                             <div class="flex justify-between items-center">
                                 <div>
                                     <h3 class="text-2xl font-bold">📊 Today's Sales Summary</h3>
@@ -2888,36 +2869,7 @@
                     `;
                     break;
                     
-                case 'collection':
-                    fieldsHTML = `
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Collection Name</label>
-                            <input type="text" id="modalName" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" placeholder="Enter collection name" required value="${item ? item.name || '' : ''}">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
-                            <textarea id="modalDescription" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" placeholder="Enter collection description" rows="3" required>${item ? item.description || '' : ''}</textarea>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
-                            <select id="modalStatus" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" required>
-                                <option value="active" ${item && item.status === 'active' ? 'selected' : ''}>Active</option>
-                                <option value="inactive" ${item && item.status === 'inactive' ? 'selected' : ''}>Inactive</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Products in Collection</label>
-                            <div class="border border-gray-300 rounded-lg p-3 max-h-40 overflow-y-auto">
-                                ${products.map(product => `
-                                    <label class="flex items-center space-x-2 mb-2">
-                                        <input type="checkbox" class="product-checkbox" value="${product.id}" ${item && item.productIds && item.productIds.includes(product.id) ? 'checked' : ''}>
-                                        <span class="text-sm">${product.name} - $${product.price}</span>
-                                    </label>
-                                `).join('')}
-                            </div>
-                        </div>
-                    `;
-                    break;
+
             }
             
             modalFields.innerHTML = fieldsHTML;
@@ -2960,9 +2912,7 @@
                 case 'product':
                     item = products.find(product => product.id === id);
                     break;
-                case 'collection':
-                    item = collections.find(collection => collection.id === id);
-                    break;
+
             }
             
             if (item) {
@@ -2988,10 +2938,7 @@
                             await deleteProduct(id);
                             await loadProductsTable();
                             break;
-                        case 'collection':
-                            await deleteCollection(id);
-                            await loadCollectionsTable();
-                            break;
+
                     }
                     alert('Item deleted successfully!');
                 } catch (error) {
@@ -5078,5 +5025,5 @@
             document.getElementById(elementId).textContent = dateString;
         }
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96a88df6c71df9e1',t:'MTc1NDQyMDYwNi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96ae1658d4ddf9f6',t:'MTc1NDQ3ODYyMS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
