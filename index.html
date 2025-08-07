@@ -31,24 +31,24 @@
         .bg-gray-100 { background-color: #f3f4f6; }
         .bg-gray-600 { background-color: #4b5563; }
         .bg-gray-700 { background-color: #374151; }
-        .bg-blue-600 { background: linear-gradient(135deg, #4a5568 0%, #718096 50%, #a0aec0 100%); }
-        .bg-blue-700 { background: linear-gradient(135deg, #2d3748 0%, #4a5568 50%, #718096 100%); }
-        .bg-green-600 { background: linear-gradient(135deg, #4a5568 0%, #718096 50%, #a0aec0 100%); }
-        .bg-green-700 { background: linear-gradient(135deg, #2d3748 0%, #4a5568 50%, #718096 100%); }
-        .bg-red-600 { background: linear-gradient(135deg, #4a5568 0%, #718096 50%, #a0aec0 100%); }
-        .bg-red-700 { background: linear-gradient(135deg, #2d3748 0%, #4a5568 50%, #718096 100%); }
-        .bg-purple-600 { background: linear-gradient(135deg, #4a5568 0%, #718096 50%, #a0aec0 100%); }
-        .bg-purple-700 { background: linear-gradient(135deg, #2d3748 0%, #4a5568 50%, #718096 100%); }
-        .bg-orange-600 { background: linear-gradient(135deg, #4a5568 0%, #718096 50%, #a0aec0 100%); }
-        .bg-orange-700 { background: linear-gradient(135deg, #2d3748 0%, #4a5568 50%, #718096 100%); }
-        .bg-yellow-600 { background: linear-gradient(135deg, #4a5568 0%, #718096 50%, #a0aec0 100%); }
-        .bg-yellow-700 { background: linear-gradient(135deg, #2d3748 0%, #4a5568 50%, #718096 100%); }
+        .bg-blue-600 { background-color: #2563eb; }
+        .bg-blue-700 { background-color: #1d4ed8; }
+        .bg-green-600 { background-color: #16a34a; }
+        .bg-green-700 { background-color: #15803d; }
+        .bg-red-600 { background-color: #dc2626; }
+        .bg-red-700 { background-color: #b91c1c; }
+        .bg-purple-600 { background-color: #9333ea; }
+        .bg-purple-700 { background-color: #7c3aed; }
+        .bg-orange-600 { background-color: #ea580c; }
+        .bg-orange-700 { background-color: #c2410c; }
+        .bg-yellow-600 { background-color: #ca8a04; }
+        .bg-yellow-700 { background-color: #a16207; }
         .bg-yellow-50 { background-color: #fefce8; }
         .bg-green-100 { background-color: #dcfce7; }
         .bg-blue-100 { background-color: #dbeafe; }
         .bg-purple-100 { background-color: #f3e8ff; }
         
-        .text-white { color: #f7fafc; }
+        .text-white { color: #ffffff; }
         .text-gray-500 { color: #6b7280; }
         .text-gray-600 { color: #4b5563; }
         .text-gray-700 { color: #374151; }
@@ -174,14 +174,14 @@
         .transition { transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); transition-duration: 150ms; }
         
         .hover\:bg-gray-50:hover { background-color: #f9fafb; }
-        .hover\:bg-gray-700:hover { background: linear-gradient(135deg, #2d3748 0%, #4a5568 50%, #718096 100%); }
-        .hover\:bg-blue-700:hover { background: linear-gradient(135deg, #2d3748 0%, #4a5568 50%, #718096 100%); }
-        .hover\:bg-green-700:hover { background: linear-gradient(135deg, #2d3748 0%, #4a5568 50%, #718096 100%); }
-        .hover\:bg-red-700:hover { background: linear-gradient(135deg, #2d3748 0%, #4a5568 50%, #718096 100%); }
-        .hover\:bg-purple-700:hover { background: linear-gradient(135deg, #2d3748 0%, #4a5568 50%, #718096 100%); }
-        .hover\:bg-orange-700:hover { background: linear-gradient(135deg, #2d3748 0%, #4a5568 50%, #718096 100%); }
-        .hover\:bg-yellow-700:hover { background: linear-gradient(135deg, #2d3748 0%, #4a5568 50%, #718096 100%); }
-        .hover\:bg-red-800:hover { background: linear-gradient(135deg, #2d3748 0%, #4a5568 50%, #718096 100%); }
+        .hover\:bg-gray-700:hover { background-color: #374151; }
+        .hover\:bg-blue-700:hover { background-color: #1d4ed8; }
+        .hover\:bg-green-700:hover { background-color: #15803d; }
+        .hover\:bg-red-700:hover { background-color: #b91c1c; }
+        .hover\:bg-purple-700:hover { background-color: #7c3aed; }
+        .hover\:bg-orange-700:hover { background-color: #c2410c; }
+        .hover\:bg-yellow-700:hover { background-color: #a16207; }
+        .hover\:bg-red-800:hover { background-color: #991b1b; }
         .hover\:text-blue-800:hover { color: #1e40af; }
         .hover\:text-red-800:hover { color: #991b1b; }
         .hover\:text-green-800:hover { color: #166534; }
@@ -225,13 +225,7 @@
             padding: 0.5rem 1rem;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-        }
-        
-        button:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+            transition: all 0.15s ease;
         }
         
         button:disabled {
@@ -280,13 +274,6 @@
             font-size: 1rem;
             border-radius: 0.5rem;
             font-weight: 600;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-            transition: all 0.3s ease;
-        }
-        
-        .mobile-button:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
         }
         
         .mobile-input {
@@ -306,9 +293,7 @@
             position: sticky;
             top: 0;
             z-index: 40;
-            background: linear-gradient(135deg, #4a5568 0%, #718096 50%, #a0aec0 100%);
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-            color: #f7fafc;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
         
         .mobile-tab-scroll {
@@ -445,9 +430,7 @@
         
         /* Custom Component Styles */
         .gradient-bg {
-            background: linear-gradient(135deg, #4a5568 0%, #718096 50%, #a0aec0 100%);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-            color: #f7fafc;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
         
         .card-shadow {
@@ -455,9 +438,8 @@
         }
         
         .tab-active {
-            background: linear-gradient(135deg, #4a5568 0%, #718096 50%, #a0aec0 100%);
-            color: #f7fafc;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
         }
         
         .modal-backdrop {
@@ -488,32 +470,34 @@
             100% { transform: rotate(360deg); }
         }
     </style>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script>
-// When user configures Firebase, replace the above block with actual config
-</script>
-<script>
-// ✅ Firebase Configuration (update manually before going live)
-const firebaseConfig = {
-  apiKey: "AIzaSyBRG4K_ahS_MJheJjlRtNJkvWCV4v_Jsz0",
-  authDomain: "eden-perfume-sales-aee39.firebaseapp.com",
-  databaseURL: "https://eden-perfume-sales-aee39-default-rtdb.firebaseio.com",
-  projectId: "eden-perfume-sales-aee39",
-  storageBucket: "eden-perfume-sales-aee39.firebasestorage.app",
-  messagingSenderId: "846535234305",
-  appId: "1:846535234305:web:eb8cc67209921e9c8e8100",
-  measurementId: "G-0BB0S5YPSS"
-};
+<style>
+.admin-header-gradient {
+    background: linear-gradient(135deg, #6c7a91, #aab6c9);
+}
 
-// Example Firebase usage placeholder
-// firebase.initializeApp(firebaseConfig);
-// const db = firebase.database();
-</script>
-</head>
+.glassy-button {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    color: white;
+    padding: 10px 20px;
+    font-weight: 600;
+    backdrop-filter: blur(6px);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+}
+
+.glassy-button:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+</style></head>
 <body class="bg-gray-50 min-h-screen">
 <!-- Firebase Configuration Modal -->
 <div class="fixed inset-0 modal-backdrop z-50 flex items-center justify-center p-4" id="firebaseConfigModal">
 <div class="bg-white rounded-xl card-shadow w-full max-w-2xl fade-in">
+<div class="p-6 border-b">
+<h3 class="text-xl font-semibold">🔥 Firebase Configuration Required</h3>
+<p class="text-gray-600 mt-2">Please enter your Firebase configuration to connect to your database.</p>
+</div>
 <div class="p-6">
 <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
 <h4 class="font-semibold text-yellow-800 mb-2">📋 How to set up Firebase for Eden Perfume:</h4>
@@ -572,8 +556,8 @@ const firebaseConfig = {
 <div class="hidden min-h-screen gradient-bg flex items-center justify-center p-4" id="loginScreen">
 <div class="bg-white rounded-2xl card-shadow p-8 w-full max-w-md fade-in">
 <div class="text-center mb-8">
-<div class="w-20 h-20 mx-auto mb-4 rounded-full flex items-center justify-center shadow-lg" style="background: linear-gradient(135deg, #4a5568 0%, #718096 50%, #a0aec0 100%)">
-<svg class="w-10 h-10" fill="#f7fafc" viewbox="0 0 20 20">
+<div class="w-20 h-20 mx-auto mb-4 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
+<svg class="w-10 h-10 text-white" fill="currentColor" viewbox="0 0 20 20">
 <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
 </svg>
 </div>
@@ -738,7 +722,7 @@ const firebaseConfig = {
 </div>
 <!-- Admin Dashboard -->
 <div class="hidden min-h-screen bg-gray-50" id="dashboard">
-<nav class="mobile-nav gradient-bg text-white">
+<nav class="mobile-nav text-white admin-header-gradient">
 <div class="mobile-container">
 <!-- Mobile Header -->
 <div class="flex justify-between items-center mb-3">
@@ -753,7 +737,7 @@ const firebaseConfig = {
 <p class="text-sm opacity-80">Management Dashboard</p>
 </div>
 </div>
-<button class="bg-white bg-opacity-20 mobile-button text-sm touch-target" onclick="logout()">
+<button class="bg-white bg-opacity-20 mobile-button text-sm touch-target glassy-button" onclick="logout()">
                         Logout
                     </button>
 </div>
@@ -764,26 +748,25 @@ const firebaseConfig = {
 </div>
 <!-- Mobile Action Buttons - Scrollable -->
 <div class="mobile-tab-scroll">
-<div class="flex space-x-2 pb-2" style="min-width: max-content;"><button class="bg-purple-600 mobile-button hover:bg-purple-700 transition text-sm whitespace-nowrap" onclick="viewTodaysSummary()">
-                            📊 Summary
-                        </button><button class="bg-red-600 text-white mobile-button hover:bg-red-700 transition text-sm" onclick="requestPassword('Clear All')">
-        🗑️ Clear All
-    </button>
-<button class="bg-blue-600 mobile-button hover:bg-blue-700 transition text-sm whitespace-nowrap" onclick="refreshData()">
+<div class="flex space-x-2 pb-2" style="min-width: max-content;">
+<button class="bg-blue-600 mobile-button hover:bg-blue-700 transition text-sm whitespace-nowrap glassy-button" onclick="refreshData()">
                             🔄 Refresh
                         </button>
-<button class="bg-orange-600 mobile-button hover:bg-orange-700 transition text-sm whitespace-nowrap" onclick="forceSyncNow()">
+<button class="bg-orange-600 mobile-button hover:bg-orange-700 transition text-sm whitespace-nowrap glassy-button" onclick="forceSyncNow()">
                             🔄 Sync
                         </button>
-<button class="bg-red-600 mobile-button hover:bg-red-700 transition text-sm whitespace-nowrap" onclick="resetFirebaseConfig()">
+<button class="bg-red-600 mobile-button hover:bg-red-700 transition text-sm whitespace-nowrap glassy-button" onclick="resetFirebaseConfig()">
                             🔥 Firebase
                         </button>
-<button class="bg-green-600 mobile-button hover:bg-green-700 transition text-sm whitespace-nowrap" onclick="downloadAllMasterData()">
+<button class="bg-purple-600 mobile-button hover:bg-purple-700 transition text-sm whitespace-nowrap glassy-button" onclick="viewTodaysSummary()">
+                            📊 Summary
+                        </button>
+<button class="bg-yellow-600 mobile-button hover:bg-yellow-700 transition text-sm whitespace-nowrap glassy-button" onclick="backupData()">
+                            💾 Backup
+                        </button>
+<button class="bg-green-600 mobile-button hover:bg-green-700 transition text-sm whitespace-nowrap glassy-button" onclick="downloadAllMasterData()">
                             📥 Download
                         </button>
-<button class="bg-yellow-600 mobile-button hover:bg-yellow-700 transition text-sm whitespace-nowrap" id="priceToggleBtn" onclick="showPriceMatrix()">
-        💸 PRICE
-    </button>
 </div>
 </div>
 </div>
@@ -801,10 +784,10 @@ const firebaseConfig = {
 <button class="tab-btn px-4 py-3 font-medium whitespace-nowrap border-b-2 border-transparent hover:border-purple-500 transition text-sm touch-target" data-tab="products" onclick="switchTab('products')">
                         🧴 Products
                     </button>
-<button class="tab-btn px-4 py-3 font-medium whitespace-nowrap border-b-2 border-transparent hover:border-purple-500 transition text-sm touch-target" data-tab="collections" onclick="switchTab('collections')" style="display:none;">
+<button class="tab-btn px-4 py-3 font-medium whitespace-nowrap border-b-2 border-transparent hover:border-purple-500 transition text-sm touch-target" data-tab="collections" onclick="switchTab('collections')">
                         📦 Collections
                     </button>
-<button class="tab-btn px-4 py-3 font-medium whitespace-nowrap border-b-2 border-transparent hover:border-purple-500 transition text-sm touch-target" data-tab="database" onclick="switchTab('database')" style="display:none;">
+<button class="tab-btn px-4 py-3 font-medium whitespace-nowrap border-b-2 border-transparent hover:border-purple-500 transition text-sm touch-target" data-tab="database" onclick="switchTab('database')">
                         🗄️ Database
                     </button>
 <button class="tab-btn px-4 py-3 font-medium whitespace-nowrap border-b-2 border-transparent hover:border-purple-500 transition text-sm touch-target" data-tab="sales" onclick="switchTab('sales')">
@@ -822,12 +805,16 @@ const firebaseConfig = {
 <div class="tab-content" id="employees-tab">
 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-3">
 <h2 class="text-xl font-bold">Employee Management</h2>
-<div class="flex justify-between items-center w-full gap-2">
-<div class="flex gap-2">
-</div>
-<button class="gradient-bg text-white px-4 py-2 rounded-lg font-semibold hover:opacity-90 transition" onclick="openModal('employee')">
-      ➕ Add Employee
-  </button>
+<div class="mobile-action-buttons sm:flex-row sm:space-x-2 sm:space-y-0 w-full sm:w-auto">
+<button class="bg-orange-600 text-white mobile-button hover:bg-orange-700 transition text-sm" onclick="restoreFromBackup()">
+                            📤 Restore
+                        </button>
+<button class="bg-red-600 text-white mobile-button hover:bg-red-700 transition text-sm" onclick="clearAllData()">
+                            🗑️ Clear All
+                        </button>
+<button class="gradient-bg text-white mobile-button hover:opacity-90 transition" onclick="openModal('employee')">
+                            ➕ Add Employee
+                        </button>
 </div>
 </div>
 <div class="bg-white mobile-card overflow-hidden">
@@ -1138,13 +1125,17 @@ const firebaseConfig = {
 </div>
 <div class="p-4">
 <form id="modalForm">
-<div class="space-y-4" id="modalFields"><button class="bg-gray-700 hover:bg-gray-800 text-white px-3 py-1 rounded mb-2" onclick="toggleStorePriceGrid()" type="button">PRICES</button>
+<div class="space-y-4" id="modalFields">
 <!-- Dynamic fields will be inserted here -->
-<div class="grid grid-cols-2 gap-4 mt-2" id="storePriceContainer" style="display:none;"></div></div>
+</div>
 <div class="mobile-action-buttons sm:flex-row sm:space-x-3 sm:space-y-0 mt-6">
 <button class="flex-1 mobile-button border border-gray-300 hover:bg-gray-50 transition bg-white text-gray-700" onclick="closeModal()" type="button">
                             Cancel
                         </button>
+<button class="flex-1 gradient-bg text-white mobile-button hover:opacity-90 transition" type="submit">
+<span id="saveBtnText">Save</span>
+<div class="loading hidden ml-2" id="saveLoader"></div>
+</button>
 </div>
 </form>
 </div>
@@ -2078,42 +2069,62 @@ const firebaseConfig = {
 
         // Built-in Firebase Configuration
         const BUILT_IN_FIREBASE_CONFIG = {
-            apiKey: "AIzaSyBRG4K_ahS_MJheJjlRtNJkvWCV4v_Jsz0",
-            authDomain: "eden-perfume-sales-aee39.firebaseapp.com",
-            projectId: "eden-perfume-sales-aee39",
-            storageBucket: "eden-perfume-sales-aee39.appspot.com",
-            messagingSenderId: "846535234305",
-            appId: "1:846535234305:web:eb8cc67209921e9c8e8100"
+            apiKey: "AIzaSyBKCepIbr_6-cGTIy6vYQW92q2i2Vb_yIg",
+            authDomain: "eden--sales-system.firebaseapp.com",
+            projectId: "eden--sales-system",
+            storageBucket: "eden--sales-system.firebasestorage.app",
+            messagingSenderId: "181509465042",
+            appId: "1:181509465042:web:f99dcad2cf69cb85449e0b"
         };
 
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', async function() {
-            console.log('🌸 Starting Eden Perfume Sales Management System...');
+            console.log('Starting Eden Perfume Sales Management System...');
             
-            // Hide Firebase config modal completely - users don't need to see it
-            const configModal = document.getElementById('firebaseConfigModal');
-            if (configModal) {
-                configModal.style.display = 'none';
+            // Hide Firebase config modal immediately
+            document.getElementById('firebaseConfigModal').classList.add('hidden');
+            
+            try {
+                // Try to initialize with built-in config first
+                console.log('Attempting to connect with built-in Firebase configuration...');
+                
+                if (await initializeFirebase(BUILT_IN_FIREBASE_CONFIG)) {
+                    console.log('✅ Connected to Firebase successfully with built-in config');
+                    document.getElementById('loginScreen').classList.remove('hidden');
+                    await loadAllData();
+                    return;
+                }
+            } catch (error) {
+                console.warn('⚠️ Built-in Firebase config failed, trying saved config...', error.message);
             }
             
-            // Start directly in local mode for immediate use
-            console.log('📱 Starting in Local Storage mode for immediate use');
+            // Fallback: Check for saved custom config
+            const savedConfig = localStorage.getItem('firebaseConfig');
+            if (savedConfig) {
+                try {
+                    const config = JSON.parse(savedConfig);
+                    console.log('Attempting to connect with saved Firebase configuration...');
+                    
+                    if (await initializeFirebase(config)) {
+                        console.log('✅ Connected to Firebase successfully with saved config');
+                        document.getElementById('loginScreen').classList.remove('hidden');
+                        await loadAllData();
+                        return;
+                    }
+                } catch (error) {
+                    console.error('❌ Error loading saved Firebase config:', error);
+                    localStorage.removeItem('firebaseConfig');
+                }
+            }
+            
+            // Final fallback: Use local mode
+            console.log('📱 Firebase connection failed, starting in Local Storage mode');
             isFirebaseMode = false;
             syncStatus = 'offline';
             updateSyncStatus();
-            
-            const dbModeEl = document.getElementById('dbMode');
-            if (dbModeEl) {
-                dbModeEl.textContent = '💾 Local Storage Mode';
-            }
-            
-            // Show login screen immediately
+            document.getElementById('dbMode').textContent = '💾 Local Storage Mode';
             document.getElementById('loginScreen').classList.remove('hidden');
-            
-            // Load local data
             loadLocalData();
-            
-            console.log('✅ Eden Perfume system ready! You can now log in.');
         });
 
         // Placeholder functions for missing functionality
@@ -2233,7 +2244,7 @@ const firebaseConfig = {
             const modalHTML = `
                 <div id="summaryModal" class="fixed inset-0 modal-backdrop z-50 flex items-center justify-center p-4">
                     <div class="bg-white rounded-xl card-shadow w-full max-w-4xl max-h-screen overflow-y-auto fade-in">
-                        <div class="p-6 border-b rounded-t-xl shadow-lg" style="background: linear-gradient(135deg, #4a5568 0%, #718096 50%, #a0aec0 100%); color: #f7fafc;">
+                        <div class="p-6 border-b bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-t-xl">
                             <div class="flex justify-between items-center">
                                 <div>
                                     <h3 class="text-2xl font-bold">📊 Today's Sales Summary</h3>
@@ -5044,712 +5055,5 @@ const firebaseConfig = {
             document.getElementById(elementId).textContent = dateString;
         }
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96af9d7e14b3f9d3',t:'MTc1NDQ5NDY0My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script>
-function generateStorePriceFields() {
-    const stores = JSON.parse(localStorage.getItem('stores')) || [];
-    const container = document.createElement('div');
-    container.className = 'space-y-2';
-
-    stores.forEach(store => {
-        const label = document.createElement('label');
-        label.className = 'block text-sm font-medium text-gray-700';
-        label.textContent = `Price for ${store.name}`;
-
-        const input = document.createElement('input');
-        input.type = 'number';
-        input.step = '0.01';
-        input.min = '0';
-        input.className = 'w-full px-3 py-2 border border-gray-300 rounded-lg';
-        input.name = `priceByStore__${store.id}`;
-
-        container.appendChild(label);
-        container.appendChild(input);
-    });
-
-    return container;
-}
-
-const originalProductModal = openModal;
-openModal = function(type, item = null) {
-    originalProductModal(type, item);
-    if (type === 'product') {
-        setTimeout(() => {
-            const modalFields = document.getElementById('modalFields');
-            if (!modalFields.querySelector('[name^="priceByStore__"]')) {
-                const storePriceSection = generateStorePriceFields();
-                modalFields.appendChild(storePriceSection);
-            }
-        }, 300);
-    }
-};
-</script><script>
-function requestPassword(action) {
-  const password = prompt("Enter password to proceed:");
-  if (password === "eden@123") {
-    switch (action) {
-      case 'Restore':
-        restoreFromBackup();
-        break;
-      case 'Clear All':
-        clearAllData();
-        break;
-      case 'Firebase Config':
-        openFirebaseConfigModal();
-        break;
-    }
-  } else {
-    alert("Incorrect password!");
-  }
-}
-</script><script>
-function toggleStorePrices() {
-    const container = document.getElementById('storePriceContainer');
-    if (container.style.display === 'none') {
-        container.innerHTML = '';
-        const stores = JSON.parse(localStorage.getItem('stores')) || [];
-        stores.forEach(store => {
-            const label = document.createElement('label');
-            label.className = 'block text-sm font-medium text-gray-700 mt-2';
-            label.textContent = store.name;
-
-            const input = document.createElement('input');
-            input.type = 'number';
-            input.step = '0.01';
-            input.min = '0';
-            input.name = `priceByStore__${store.id}`;
-            input.className = 'w-full px-3 py-2 border border-gray-300 rounded-lg';
-
-            container.appendChild(label);
-            container.appendChild(input);
-        });
-        container.style.display = 'block';
-    } else {
-        container.style.display = 'none';
-    }
-}
-</script><script>
-function toggleStorePriceGrid() {
-    const container = document.getElementById('storePriceContainer');
-    if (container.style.display === 'none') {
-        container.innerHTML = '';
-        const stores = JSON.parse(localStorage.getItem('stores')) || [];
-        stores.forEach(store => {
-            const storeName = document.createElement('div');
-            storeName.className = 'text-sm font-medium text-gray-700 py-2';
-            storeName.textContent = store.name;
-
-            const input = document.createElement('input');
-            input.type = 'number';
-            input.step = '0.01';
-            input.min = '0';
-            input.name = `priceByStore__${store.id}`;
-            input.className = 'w-full px-3 py-2 border border-gray-300 rounded-lg';
-
-            container.appendChild(storeName);
-            container.appendChild(input);
-        });
-        container.style.display = 'grid';
-    } else {
-        container.style.display = 'none';
-    }
-}
-</script><script>
-function toggleStorePriceGrid() {
-    const container = document.getElementById('storePriceContainer');
-    if (!container) return;
-    if (container.style.display === 'none') {
-        container.innerHTML = '';
-        const stores = JSON.parse(localStorage.getItem('stores')) || [];
-        stores.forEach(store => {
-            const storeName = document.createElement('div');
-            storeName.className = 'text-sm font-medium text-gray-700 py-2';
-            storeName.textContent = store.name;
-
-            const input = document.createElement('input');
-            input.type = 'number';
-            input.step = '0.01';
-            input.min = '0';
-            input.name = `priceByStore__${store.id}`;
-            input.className = 'w-full px-3 py-2 border border-gray-300 rounded-lg';
-
-            container.appendChild(storeName);
-            container.appendChild(input);
-        });
-        container.style.display = 'grid';
-    } else {
-        container.style.display = 'none';
-    }
-}
-</script><script>
-function toggleStorePriceGrid() {
-    const container = document.getElementById('storePriceContainer');
-    if (!container) return;
-    if (container.style.display === 'none') {
-        container.innerHTML = '';
-        const stores = JSON.parse(localStorage.getItem('stores')) || [];
-        stores.forEach(store => {
-            const storeName = document.createElement('div');
-            storeName.className = 'text-sm font-medium text-gray-700 py-2';
-            storeName.textContent = store.name;
-
-            const input = document.createElement('input');
-            input.type = 'number';
-            input.step = '0.01';
-            input.min = '0';
-            input.name = `priceByStore__${store.id}`;
-            input.className = 'w-full px-3 py-2 border border-gray-300 rounded-lg';
-
-            container.appendChild(storeName);
-            container.appendChild(input);
-        });
-        container.style.display = 'grid';
-    } else {
-        container.style.display = 'none';
-    }
-}
-</script>
-<div class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 hidden" id="priceMatrixModal">
-<div class="bg-white rounded-lg w-[90%] max-w-4xl p-4 shadow-lg">
-<div class="flex justify-between items-center mb-4">
-<h2 class="text-xl font-bold text-gray-800">Store/Product Price Matrix</h2>
-<button class="text-gray-600 hover:text-red-600 text-2xl" onclick="closePriceMatrix()">×</button>
-</div>
-<div class="overflow-x-auto" id="priceMatrixTable">
-<!-- Matrix table generated here -->
-</div>
-<div class="flex justify-end mt-4">
-</div>
-</div>
-</div>
-<script>
-function setupAutoFillInSales() {
-    const productSelect = document.getElementById('saleProductSelect');
-    const storeSelect = document.getElementById('saleStoreSelect');
-    const priceInput = document.getElementById('salePriceInput');
-
-    function updatePrice() {
-        const productId = productSelect?.value;
-        const storeId = storeSelect?.value;
-        if (!productId || !storeId) return;
-        const products = JSON.parse(localStorage.getItem('products')) || [];
-        const product = products.find(p => p.id === productId);
-        if (product && product.priceByStore && product.priceByStore[storeId]) {
-            priceInput.value = product.priceByStore[storeId];
-        }
-    }
-
-    if (productSelect && storeSelect && priceInput) {
-        productSelect.addEventListener('change', updatePrice);
-        storeSelect.addEventListener('change', updatePrice);
-    }
-}
-
-document.addEventListener('DOMContentLoaded', setupAutoFillInSales);
-</script><script>
-document.getElementById('openPricesMatrix').addEventListener('click', openPriceMatrix);
-</script><script>
-document.getElementById('openPricesMatrix').addEventListener('click', openPriceMatrix);
-</script><script>
-function openPriceMatrix() {
-  alert("Prices button clicked - show price matrix here.");
-}
-
-document.getElementById('openPricesMatrix')?.addEventListener('click', openPriceMatrix);
-</script><script>
-    document.getElementById("openPricesMatrix")?.addEventListener("click", function () {
-        alert("✅ PRICES button clicked and functional!");
-    });
-    </script>
-<script>
-// Example: Get real products and stores from the existing platform data (if available)
-const sampleProducts = window.products?.map(p => p.name) || ["Product A", "Product B", "Product C"];
-const sampleStores = window.stores?.map(s => s.name) || ["Store 1", "Store 2", "Store 3"];
-let priceData = {};
-
-function openPricesModal() {
-    document.getElementById("pricesModal").style.display = "block";
-    renderMatrix();
-}
-
-function closePricesModal() {
-    document.getElementById("pricesModal").style.display = "none";
-}
-
-function renderMatrix() {
-    const header = document.getElementById("priceHeader");
-    const body = document.getElementById("priceBody");
-    header.innerHTML = "<th>Product / Store</th>";
-    body.innerHTML = "";
-
-    sampleStores.forEach(store => {
-        header.innerHTML += `<th>${store}</th>`;
-    });
-
-    sampleProducts.forEach(prod => {
-        let row = `<tr><td><b>${prod}</b></td>`;
-        sampleStores.forEach(store => {
-            const key = store + "_" + prod;
-            const value = priceData[key] || "";
-            row += `<td><input type='number' id='${key}' value='${value}' placeholder='DH' style='width:80px;' /></td>`;
-        });
-        row += "</tr>";
-        body.innerHTML += row;
-    });
-}
-
-function savePriceMatrix() {
-    sampleProducts.forEach(prod => {
-        sampleStores.forEach(store => {
-            const key = store + "_" + prod;
-            const input = document.getElementById(key);
-            if (input) {
-                priceData[key] = input.value;
-            }
-        });
-    });
-    alert("✅ Price data saved locally.");
-}
-
-function exportToExcel() {
-    let csvContent = "data:text/csv;charset=utf-8,";
-    csvContent += "Product / Store," + sampleStores.join(",") + "\n";
-
-    sampleProducts.forEach(prod => {
-        let row = prod;
-        sampleStores.forEach(store => {
-            const key = store + "_" + prod;
-            row += "," + (priceData[key] || "");
-        });
-        csvContent += row + "\n";
-    });
-
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", "product_store_prices.csv");
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-}
-
-document.getElementById("openPricesMatrix").addEventListener("click", openPricesModal);
-</script>
-<div id="pricesModal">
-<div id="pricesModalContent">
-<table id="priceTable">
-<thead><tr id="priceHeader"></tr></thead>
-<tbody id="priceBody"></tbody>
-</table>
-<div id="priceActions">
-</div>
-</div>
-</div>
-<script>
-const sampleProducts = window.products?.map(p => p.name) || ["Product A", "Product B"];
-const sampleStores = window.stores?.map(s => s.name) || ["Store 1", "Store 2"];
-let priceData = {};
-
-document.getElementById("openPricesMatrix")?.addEventListener("click", () => {
-  document.getElementById("pricesModal").style.display = "block";
-  renderMatrix();
-});
-
-function closePriceMatrix() {
-  document.getElementById("pricesModal").style.display = "none";
-}
-
-function renderMatrix() {
-  const header = document.getElementById("priceHeader");
-  const body = document.getElementById("priceBody");
-  header.innerHTML = "<th>Product / Store</th>";
-  body.innerHTML = "";
-
-  sampleStores.forEach(store => {
-    header.innerHTML += `<th>${store}</th>`;
-  });
-
-  sampleProducts.forEach(prod => {
-    let row = `<tr><td><b>${prod}</b></td>`;
-    sampleStores.forEach(store => {
-      const key = store + "_" + prod;
-      const value = priceData[key] || "";
-      row += `<td><input type='number' id='${key}' value='${value}' placeholder='DH' /></td>`;
-    });
-    row += "</tr>";
-    body.innerHTML += row;
-  });
-}
-
-function savePriceMatrix() {
-  sampleProducts.forEach(prod => {
-    sampleStores.forEach(store => {
-      const key = store + "_" + prod;
-      const input = document.getElementById(key);
-      if (input) priceData[key] = input.value;
-    });
-  });
-  alert("✅ Prices saved locally.");
-}
-
-function exportToExcel() {
-  let csv = "Product / Store," + sampleStores.join(",") + "\n";
-  sampleProducts.forEach(prod => {
-    let row = prod;
-    sampleStores.forEach(store => {
-      const key = store + "_" + prod;
-      row += "," + (priceData[key] || "");
-    });
-    csv += row + "\n";
-  });
-
-  const link = document.createElement("a");
-  link.href = "data:text/csv;charset=utf-8," + encodeURIComponent(csv);
-  link.download = "prices_matrix.csv";
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-}
-
-document.getElementById("closePriceMatrix")?.addEventListener("click", closePriceMatrix);
-document.getElementById("savePriceMatrix")?.addEventListener("click", savePriceMatrix);
-document.getElementById("exportPriceMatrix")?.addEventListener("click", exportToExcel);
-</script>
-<div class="buttons">
-</div><div class="config-box">
-<h3>Firebase Configuration (Default)</h3>
-<textarea id="firebaseConfig">
-// Replace with your config before going live
-const firebaseConfig = {
-  apiKey: "AIzaSyBRG4K_ahS_MJheJjlRtNJkvWCV4v_Jsz0",
-  authDomain: "eden-perfume-sales-aee39.firebaseapp.com",
-  databaseURL: "https://eden-perfume-sales-aee39-default-rtdb.firebaseio.com",
-  projectId: "eden-perfume-sales-aee39",
-  storageBucket: "eden-perfume-sales-aee39.firebasestorage.app",
-  messagingSenderId: "846535234305",
-  appId: "1:846535234305:web:eb8cc67209921e9c8e8100",
-  measurementId: "G-0BB0S5YPSS"
-};
-    </textarea>
-</div>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-<script>
-  // TODO: Replace with your Firebase config
-  const firebaseConfig = {
-  apiKey: "AIzaSyBRG4K_ahS_MJheJjlRtNJkvWCV4v_Jsz0",
-  authDomain: "eden-perfume-sales-aee39.firebaseapp.com",
-  databaseURL: "https://eden-perfume-sales-aee39-default-rtdb.firebaseio.com",
-  projectId: "eden-perfume-sales-aee39",
-  storageBucket: "eden-perfume-sales-aee39.firebasestorage.app",
-  messagingSenderId: "846535234305",
-  appId: "1:846535234305:web:eb8cc67209921e9c8e8100",
-  measurementId: "G-0BB0S5YPSS"
-};
-
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.database();
-
-  const stores = ["Store 1", "Store 2", "Store 3", "Store 4", "Store 5"];
-  const products = ["Product 1", "Product 2", "Product 3", "Product 4", "Product 5"];
-
-  function renderPriceMatrix() {
-    const header = document.getElementById('priceMatrixHeader');
-    const body = document.getElementById('priceMatrixBody');
-    header.innerHTML = '<th class="bg-gray-600 text-white px-3 py-2 text-left sticky left-0 z-10">Product Name</th>';
-    body.innerHTML = '';
-
-    stores.forEach(store => {
-      const th = document.createElement('th');
-      th.className = 'bg-gray-600 text-white px-3 py-2 text-center';
-      th.textContent = store;
-      header.appendChild(th);
-    });
-
-    products.forEach(product => {
-      const tr = document.createElement('tr');
-      tr.className = 'border-b hover:bg-gray-50';
-
-      const tdProduct = document.createElement('td');
-      tdProduct.textContent = product;
-      tdProduct.className = 'bg-gray-700 text-white px-3 py-2 sticky left-0 z-10';
-      tr.appendChild(tdProduct);
-
-      stores.forEach(store => {
-        const td = document.createElement('td');
-        td.className = 'p-2 text-center';
-
-        const input = document.createElement('input');
-        input.type = 'number';
-        input.className = 'price-input w-12 px-1 py-0.5 border border-gray-300 rounded text-center text-xs';
-        input.placeholder = '0';
-        input.min = '0';
-        input.step = '0.01';
-        input.dataset.product = product;
-        input.dataset.store = store;
-
-        td.appendChild(input);
-        tr.appendChild(td);
-      });
-
-      body.appendChild(tr);
-    });
-  }
-
-  function savePrices() {
-    const inputs = document.querySelectorAll('.price-input');
-    const updates = {};
-
-    inputs.forEach(input => {
-      const store = input.dataset.store;
-      const product = input.dataset.product;
-      const value = parseFloat(input.value) || 0;
-      updates[`prices/${store}/${product}`] = value;
-    });
-
-    db.ref().update(updates)
-      .then(() => {
-        alert("✅ Prices saved to Firebase successfully!");
-      })
-      .catch((error) => {
-        alert("❌ Failed to save prices: " + error.message);
-      });
-  }
-
-  const originalSwitchTab = window.switchTab;
-  window.switchTab = function(tabId) {
-    originalSwitchTab(tabId);
-    if (tabId === 'price-assignment') renderPriceMatrix();
-  };
-</script>
-<script>
-async function loadStoresAndProducts(callback) {
-    const dbRef = firebase.database().ref();
-    const [storesSnap, productsSnap] = await Promise.all([
-        dbRef.child("stores").once("value"),
-        dbRef.child("products").once("value")
-    ]);
-
-    const stores = [];
-    const products = [];
-
-    storesSnap.forEach(child => stores.push({ id: child.key, ...child.val() }));
-    productsSnap.forEach(child => products.push({ id: child.key, ...child.val() }));
-
-    callback(stores, products);
-}
-
-function renderPriceMatrixDynamic(stores, products) {
-    const header = document.getElementById('priceMatrixHeader');
-    const body = document.getElementById('priceMatrixBody');
-    header.innerHTML = '<th class="bg-gray-600 text-white px-3 py-2 text-left sticky left-0 z-10">Product Name</th>';
-    body.innerHTML = '';
-
-    stores.forEach(store => {
-        const th = document.createElement('th');
-        th.className = 'bg-gray-600 text-white px-3 py-2 text-center';
-        th.textContent = store.name || store.id;
-        header.appendChild(th);
-    });
-
-    products.forEach(product => {
-        const tr = document.createElement('tr');
-        tr.className = 'border-b hover:bg-gray-50';
-
-        const tdProduct = document.createElement('td');
-        tdProduct.textContent = product.name || product.id;
-        tdProduct.className = 'bg-gray-700 text-white px-3 py-2 sticky left-0 z-10';
-        tr.appendChild(tdProduct);
-
-        stores.forEach(store => {
-            const td = document.createElement('td');
-            td.className = 'p-2 text-center';
-
-            const input = document.createElement('input');
-            input.type = 'number';
-            input.className = 'price-input w-12 px-1 py-0.5 border border-gray-300 rounded text-center text-xs';
-            input.placeholder = '0';
-            input.min = '0';
-            input.step = '0.01';
-            input.dataset.product = product.id;
-            input.dataset.store = store.id;
-
-            firebase.database().ref(`prices/${store.id}/${product.id}`).once("value").then(snapshot => {
-                if (snapshot.exists()) input.value = snapshot.val();
-            });
-
-            td.appendChild(input);
-            tr.appendChild(td);
-        });
-
-        body.appendChild(tr);
-    });
-}
-
-document.getElementById("priceToggleBtn").addEventListener("click", () => {
-    const section = document.getElementById("price-assignment-tab");
-    section.style.display = section.style.display === "none" ? "block" : "none";
-    if (section.style.display === "block") {
-        loadStoresAndProducts(renderPriceMatrixDynamic);
-    }
-});
-
-async function getPrice(storeId, productId) {
-    const snap = await firebase.database().ref(`prices/${storeId}/${productId}`).once("value");
-    return snap.exists() ? parseFloat(snap.val()) : 0;
-}
-
-// Auto-fill price on sales entry page
-document.addEventListener("DOMContentLoaded", () => {
-    const storeSelect = document.getElementById("saleStore");
-    const productSelect = document.getElementById("saleProduct");
-    const quantityInput = document.getElementById("saleQuantity");
-    const totalDisplay = document.getElementById("totalAmount");
-
-    async function updatePriceTotal() {
-        const storeId = storeSelect.value;
-        const productId = productSelect.value;
-        const qty = parseInt(quantityInput.value) || 0;
-
-        if (storeId && productId) {
-            const price = await getPrice(storeId, productId);
-            totalDisplay.innerText = (qty * price).toFixed(2) + " DH";
-        } else {
-            totalDisplay.innerText = "0.00 DH";
-        }
-    }
-
-    if (storeSelect && productSelect && quantityInput) {
-        storeSelect.addEventListener("change", updatePriceTotal);
-        productSelect.addEventListener("change", updatePriceTotal);
-        quantityInput.addEventListener("input", updatePriceTotal);
-    }
-});
-</script>
-<script>
-async function loadStoresAndProducts(callback) {
-    const dbRef = firebase.database().ref();
-    const [storesSnap, productsSnap] = await Promise.all([
-        dbRef.child("stores").once("value"),
-        dbRef.child("products").once("value")
-    ]);
-
-    const stores = [];
-    const products = [];
-
-    storesSnap.forEach(child => stores.push({ id: child.key, ...child.val() }));
-    productsSnap.forEach(child => products.push({ id: child.key, ...child.val() }));
-
-    callback(stores, products);
-}
-
-function renderPriceMatrixDynamic(stores, products) {
-    const header = document.getElementById('priceMatrixHeader');
-    const body = document.getElementById('priceMatrixBody');
-    if (!header || !body) return;
-
-    header.innerHTML = '<th class="bg-gray-600 text-white px-3 py-2 text-left sticky left-0 z-10">Product Name</th>';
-    body.innerHTML = '';
-
-    stores.forEach(store => {
-        const th = document.createElement('th');
-        th.className = 'bg-gray-600 text-white px-3 py-2 text-center';
-        th.textContent = store.name || store.id;
-        header.appendChild(th);
-    });
-
-    products.forEach(product => {
-        const tr = document.createElement('tr');
-        tr.className = 'border-b hover:bg-gray-50';
-
-        const tdProduct = document.createElement('td');
-        tdProduct.textContent = product.name || product.id;
-        tdProduct.className = 'bg-gray-700 text-white px-3 py-2 sticky left-0 z-10';
-        tr.appendChild(tdProduct);
-
-        stores.forEach(store => {
-            const td = document.createElement('td');
-            td.className = 'p-2 text-center';
-
-            const input = document.createElement('input');
-            input.type = 'number';
-            input.className = 'price-input w-12 px-1 py-0.5 border border-gray-300 rounded text-center text-xs';
-            input.placeholder = '0';
-            input.min = '0';
-            input.step = '0.01';
-            input.dataset.product = product.id;
-            input.dataset.store = store.id;
-
-            firebase.database().ref(`prices/${store.id}/${product.id}`).once("value").then(snapshot => {
-                if (snapshot.exists()) input.value = snapshot.val();
-            });
-
-            td.appendChild(input);
-            tr.appendChild(td);
-        });
-
-        body.appendChild(tr);
-    });
-}
-
-// Only show matrix once when PRICE clicked
-let matrixShown = false;
-function showPriceMatrix() {
-    const section = document.getElementById("price-assignment-tab");
-    if (section && !matrixShown) {
-        section.style.display = "block";
-        loadStoresAndProducts(renderPriceMatrixDynamic);
-        matrixShown = true;
-    }
-}
-
-// Auto-fill price on sales entry page
-document.addEventListener("DOMContentLoaded", () => {
-    const storeSelect = document.getElementById("saleStore");
-    const productSelect = document.getElementById("saleProduct");
-    const quantityInput = document.getElementById("saleQuantity");
-    const totalDisplay = document.getElementById("totalAmount");
-
-    async function updatePriceTotal() {
-        const storeId = storeSelect?.value;
-        const productId = productSelect?.value;
-        const qty = parseInt(quantityInput?.value) || 0;
-
-        if (storeId && productId) {
-            const snap = await firebase.database().ref(`prices/${storeId}/${productId}`).once("value");
-            const price = snap.exists() ? parseFloat(snap.val()) : 0;
-            if (totalDisplay) totalDisplay.innerText = (qty * price).toFixed(2) + " DH";
-        } else if (totalDisplay) {
-            totalDisplay.innerText = "0.00 DH";
-        }
-    }
-
-    if (storeSelect && productSelect && quantityInput) {
-        storeSelect.addEventListener("change", updatePriceTotal);
-        productSelect.addEventListener("change", updatePriceTotal);
-        quantityInput.addEventListener("input", updatePriceTotal);
-    }
-});
-</script>
-<!-- Firebase App (the core Firebase SDK) -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-<script>
-  // TODO: Replace the following with your app's Firebase project configuration
-  const firebaseConfig = {
-  apiKey: "AIzaSyBRG4K_ahS_MJheJjlRtNJkvWCV4v_Jsz0",
-  authDomain: "eden-perfume-sales-aee39.firebaseapp.com",
-  databaseURL: "https://eden-perfume-sales-aee39-default-rtdb.firebaseio.com",
-  projectId: "eden-perfume-sales-aee39",
-  storageBucket: "eden-perfume-sales-aee39.firebasestorage.app",
-  messagingSenderId: "846535234305",
-  appId: "1:846535234305:web:eb8cc67209921e9c8e8100",
-  measurementId: "G-0BB0S5YPSS"
-};
-
-  // Initialize Firebase
-  firebase.initializeApp(firebaseConfig);
-</script>
-</body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96a88df6c71df9e1',t:'MTc1NDQyMDYwNi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
-
-
