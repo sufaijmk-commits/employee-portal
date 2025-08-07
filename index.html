@@ -1,15 +1,16 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Eden Perfume - Sales Management System</title>
-<link href="data:image/svg+xml,&lt;svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'&gt;&lt;text y='.9em' font-size='90'&gt;🌸&lt;/text&gt;&lt;/svg&gt;" rel="icon"/>
-<!-- Firebase SDK with better error handling -->
-<script onerror="handleFirebaseLoadError('app')" src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-<script onerror="handleFirebaseLoadError('firestore')" src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-<style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eden Perfume - Sales Management System</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌸</text></svg>">
+    
+    <!-- Firebase SDK with better error handling -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js" onerror="handleFirebaseLoadError('app')"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js" onerror="handleFirebaseLoadError('firestore')"></script>
+    
+    <style>
         /* Manual Tailwind CSS Configuration */
         /* Reset and Base Styles */
         * {
@@ -470,678 +471,700 @@
             100% { transform: rotate(360deg); }
         }
     </style>
-<style>
-.admin-header-gradient {
-    background: linear-gradient(135deg, #6c7a91, #aab6c9);
-}
-
-.glassy-button {
-    background-color: rgba(255, 255, 255, 0.1);
-    border-radius: 12px;
-    color: white;
-    padding: 10px 20px;
-    font-weight: 600;
-    backdrop-filter: blur(6px);
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    transition: all 0.3s ease;
-}
-
-.glassy-button:hover {
-    background-color: rgba(255, 255, 255, 0.2);
-}
-</style></head>
+</head>
 <body class="bg-gray-50 min-h-screen">
-<!-- Firebase Configuration Modal -->
-<div class="fixed inset-0 modal-backdrop z-50 flex items-center justify-center p-4" id="firebaseConfigModal">
-<div class="bg-white rounded-xl card-shadow w-full max-w-2xl fade-in">
-<div class="p-6 border-b">
-<h3 class="text-xl font-semibold">🔥 Firebase Configuration Required</h3>
-<p class="text-gray-600 mt-2">Please enter your Firebase configuration to connect to your database.</p>
-</div>
-<div class="p-6">
-<div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
-<h4 class="font-semibold text-yellow-800 mb-2">📋 How to set up Firebase for Eden Perfume:</h4>
-<ol class="text-sm text-yellow-700 space-y-1">
-<li><strong>1. Create Firebase Project:</strong> Go to <a class="text-blue-600 underline" href="https://console.firebase.google.com" target="_blank">Firebase Console</a> → Create Project</li>
-<li><strong>2. Enable Firestore:</strong> Go to Firestore Database → Create database → Start in test mode</li>
-<li><strong>3. Get Web App Config:</strong> Project Settings → Your apps → Add web app → Copy config values</li>
-<li><strong>4. Set Security Rules:</strong> Firestore → Rules → Use: <code class="bg-gray-200 px-1 rounded">allow read, write: if true;</code></li>
-<li><strong>5. Enter Config Below:</strong> Paste the values from your Firebase config object</li>
-</ol>
-<div class="mt-3 p-2 bg-blue-50 rounded text-xs">
-<strong>💡 Tip:</strong> For production, update Firestore security rules to restrict access appropriately.
+    <!-- Firebase Configuration Modal -->
+    <div id="firebaseConfigModal" class="fixed inset-0 modal-backdrop z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl card-shadow w-full max-w-2xl fade-in">
+            <div class="p-6 border-b">
+                <h3 class="text-xl font-semibold">🔥 Firebase Configuration Required</h3>
+                <p class="text-gray-600 mt-2">Please enter your Firebase configuration to connect to your database.</p>
+            </div>
+            <div class="p-6">
+                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+                    <h4 class="font-semibold text-yellow-800 mb-2">📋 How to set up Firebase for Eden Perfume:</h4>
+                    <ol class="text-sm text-yellow-700 space-y-1">
+                        <li><strong>1. Create Firebase Project:</strong> Go to <a href="https://console.firebase.google.com" target="_blank" class="text-blue-600 underline">Firebase Console</a> → Create Project</li>
+                        <li><strong>2. Enable Firestore:</strong> Go to Firestore Database → Create database → Start in test mode</li>
+                        <li><strong>3. Get Web App Config:</strong> Project Settings → Your apps → Add web app → Copy config values</li>
+                        <li><strong>4. Set Security Rules:</strong> Firestore → Rules → Use: <code class="bg-gray-200 px-1 rounded">allow read, write: if true;</code></li>
+                        <li><strong>5. Enter Config Below:</strong> Paste the values from your Firebase config object</li>
+                    </ol>
+                    <div class="mt-3 p-2 bg-blue-50 rounded text-xs">
+                        <strong>💡 Tip:</strong> For production, update Firestore security rules to restrict access appropriately.
                     </div>
-</div>
-<form class="space-y-4" id="firebaseConfigForm">
-<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-<div>
-<label class="block text-sm font-medium text-gray-700 mb-2">API Key</label>
-<input class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" id="apiKey" placeholder="AIza..." required="" type="text"/>
-</div>
-<div>
-<label class="block text-sm font-medium text-gray-700 mb-2">Auth Domain</label>
-<input class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" id="authDomain" placeholder="your-project.firebaseapp.com" required="" type="text"/>
-</div>
-<div>
-<label class="block text-sm font-medium text-gray-700 mb-2">Project ID</label>
-<input class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" id="projectId" placeholder="your-project-id" required="" type="text"/>
-</div>
-<div>
-<label class="block text-sm font-medium text-gray-700 mb-2">Storage Bucket</label>
-<input class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" id="storageBucket" placeholder="your-project.appspot.com" required="" type="text"/>
-</div>
-<div>
-<label class="block text-sm font-medium text-gray-700 mb-2">Messaging Sender ID</label>
-<input class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" id="messagingSenderId" placeholder="123456789" required="" type="text"/>
-</div>
-<div>
-<label class="block text-sm font-medium text-gray-700 mb-2">App ID</label>
-<input class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" id="appId" placeholder="1:123:web:abc" required="" type="text"/>
-</div>
-</div>
-<div class="flex space-x-3 mt-6">
-<button class="flex-1 bg-gray-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-gray-700 transition" onclick="loadDemoConfig()" type="button">
+                </div>
+                
+                <form id="firebaseConfigForm" class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">API Key</label>
+                            <input type="text" id="apiKey" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" placeholder="AIza..." required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Auth Domain</label>
+                            <input type="text" id="authDomain" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" placeholder="your-project.firebaseapp.com" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Project ID</label>
+                            <input type="text" id="projectId" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" placeholder="your-project-id" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Storage Bucket</label>
+                            <input type="text" id="storageBucket" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" placeholder="your-project.appspot.com" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Messaging Sender ID</label>
+                            <input type="text" id="messagingSenderId" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" placeholder="123456789" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">App ID</label>
+                            <input type="text" id="appId" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" placeholder="1:123:web:abc" required>
+                        </div>
+                    </div>
+                    
+                    <div class="flex space-x-3 mt-6">
+                        <button type="button" onclick="loadDemoConfig()" class="flex-1 bg-gray-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-gray-700 transition">
                             Use Demo Mode (Local Storage)
                         </button>
-<button class="flex-1 gradient-bg text-white px-4 py-2 rounded-lg font-semibold hover:opacity-90 transition" type="submit">
-<span id="connectBtnText">Connect to Firebase</span>
-<div class="loading hidden ml-2" id="connectLoader"></div>
-</button>
-</div>
-</form>
-</div>
-</div>
-</div>
-<!-- Login Screen -->
-<div class="hidden min-h-screen gradient-bg flex items-center justify-center p-4" id="loginScreen">
-<div class="bg-white rounded-2xl card-shadow p-8 w-full max-w-md fade-in">
-<div class="text-center mb-8">
-<div class="w-20 h-20 mx-auto mb-4 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
-<svg class="w-10 h-10 text-white" fill="currentColor" viewbox="0 0 20 20">
-<path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-</svg>
-</div>
-<h1 class="text-3xl font-bold text-gray-800 mb-2">EDEN PERFUME</h1>
-<p class="text-gray-600">Sales Management System</p>
-<div class="mt-2 text-sm" id="dbStatus">
-<div class="text-green-600" id="dbMode"></div>
-<div class="text-xs mt-1" id="syncStatus"></div>
-</div>
-</div>
-<form class="space-y-6" id="loginForm">
-<div>
-<label class="block text-sm font-medium text-gray-700 mb-2">Username</label>
-<input class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" id="username" placeholder="Enter username" type="text"/>
-</div>
-<div>
-<label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
-<input class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" id="password" placeholder="Enter password" type="password"/>
-</div>
-<button class="w-full gradient-bg text-white py-3 rounded-lg font-semibold hover:opacity-90 transition" type="submit">
-<span id="loginBtnText">Sign In</span>
-</button>
-</form>
-<div class="mt-8 p-4 bg-gray-50 rounded-lg text-center">
-<p class="text-xs text-gray-500">Developed by <strong class="text-purple-600">Sufaij</strong></p>
-</div>
-</div>
-</div>
-<!-- Employee Portal -->
-<div class="hidden min-h-screen bg-gray-50" id="employeePortal">
-<nav class="mobile-nav gradient-bg text-white">
-<!-- Mobile Header -->
-<div class="mobile-container">
-<div class="flex justify-between items-center mb-3">
-<div class="flex items-center space-x-3">
-<div class="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
-<svg class="w-6 h-6" fill="currentColor" viewbox="0 0 20 20">
-<path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"></path>
-</svg>
-</div>
-<div>
-<h2 class="font-semibold text-lg" id="employeeName">Employee</h2>
-<p class="text-sm opacity-80" id="employeeStore">Store</p>
-</div>
-</div>
-<button class="bg-white bg-opacity-20 mobile-button text-sm touch-target" onclick="logout()">
+                        <button type="submit" class="flex-1 gradient-bg text-white px-4 py-2 rounded-lg font-semibold hover:opacity-90 transition">
+                            <span id="connectBtnText">Connect to Firebase</span>
+                            <div id="connectLoader" class="loading hidden ml-2"></div>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login Screen -->
+    <div id="loginScreen" class="hidden min-h-screen gradient-bg flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl card-shadow p-8 w-full max-w-md fade-in">
+            <div class="text-center mb-8">
+                <div class="w-20 h-20 mx-auto mb-4 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
+                    <svg class="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                </div>
+                <h1 class="text-3xl font-bold text-gray-800 mb-2">EDEN PERFUME</h1>
+                <p class="text-gray-600">Sales Management System</p>
+                <div class="mt-2 text-sm" id="dbStatus">
+                    <div id="dbMode" class="text-green-600"></div>
+                    <div id="syncStatus" class="text-xs mt-1"></div>
+                </div>
+            </div>
+            
+            <form id="loginForm" class="space-y-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Username</label>
+                    <input type="text" id="username" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="Enter username">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                    <input type="password" id="password" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="Enter password">
+                </div>
+                
+                <button type="submit" class="w-full gradient-bg text-white py-3 rounded-lg font-semibold hover:opacity-90 transition">
+                    <span id="loginBtnText">Sign In</span>
+                </button>
+            </form>
+            
+            <div class="mt-8 p-4 bg-gray-50 rounded-lg text-center">
+                <p class="text-xs text-gray-500">Developed by <strong class="text-purple-600">Sufaij</strong></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Employee Portal -->
+    <div id="employeePortal" class="hidden min-h-screen bg-gray-50">
+        <nav class="mobile-nav gradient-bg text-white">
+            <!-- Mobile Header -->
+            <div class="mobile-container">
+                <div class="flex justify-between items-center mb-3">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h2 class="font-semibold text-lg" id="employeeName">Employee</h2>
+                            <p class="text-sm opacity-80" id="employeeStore">Store</p>
+                        </div>
+                    </div>
+                    <button onclick="logout()" class="bg-white bg-opacity-20 mobile-button text-sm touch-target">
                         Logout
                     </button>
-</div>
-<!-- Mobile Status Bar -->
-<div class="flex justify-between items-center text-sm mb-3">
-<div class="opacity-80" id="employeeCurrentDate"></div>
-<div class="text-xs opacity-70" id="employeeSyncStatus">📱 Local Mode</div>
-</div>
-<!-- Simple Status Bar -->
-<div class="text-center text-sm opacity-80">
+                </div>
+                
+                <!-- Mobile Status Bar -->
+                <div class="flex justify-between items-center text-sm mb-3">
+                    <div class="opacity-80" id="employeeCurrentDate"></div>
+                    <div class="text-xs opacity-70" id="employeeSyncStatus">📱 Local Mode</div>
+                </div>
+                
+                <!-- Simple Status Bar -->
+                <div class="text-center text-sm opacity-80">
                     Ready to record sales
                 </div>
-</div>
-</nav>
-<div class="mobile-container">
-<!-- Compact Horizontal Stats -->
-<div class="bg-white mobile-card p-3 mb-4">
-<div class="grid grid-cols-3 gap-2 text-center">
-<!-- Total Sales -->
-<div class="bg-green-50 rounded-lg p-2">
-<div class="flex items-center justify-center mb-1">
-<div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-1">
-<span class="text-green-600 text-xs">💰</span>
-</div>
-<span class="text-xs font-medium text-green-800">SALES</span>
-</div>
-<div class="text-lg font-bold text-green-600" id="totalSalesToday">0.00 DH</div>
-<p class="text-xs text-green-600">Revenue</p>
-</div>
-<!-- Quantity Sold -->
-<div class="bg-blue-50 rounded-lg p-2">
-<div class="flex items-center justify-center mb-1">
-<div class="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center mr-1">
-<span class="text-blue-600 text-xs">🧴</span>
-</div>
-<span class="text-xs font-medium text-blue-800">QTY</span>
-</div>
-<div class="text-lg font-bold text-blue-600" id="bottlesSold">0</div>
-<p class="text-xs text-blue-600">Bottles</p>
-</div>
-<!-- Today's Salary -->
-<div class="bg-purple-50 rounded-lg p-2">
-<div class="flex items-center justify-center mb-1">
-<div class="w-6 h-6 bg-purple-100 rounded-full flex items-center justify-center mr-1">
-<span class="text-purple-600 text-xs">💵</span>
-</div>
-<span class="text-xs font-medium text-purple-800">SALARY</span>
-</div>
-<div class="text-lg font-bold text-purple-600" id="estimatedSalary">0.00 DH</div>
-<p class="text-xs text-purple-600">Today</p>
-</div>
-</div>
-</div>
-<!-- Compact Sale Entry -->
-<div class="bg-white mobile-card p-3 mb-4">
-<h3 class="text-lg font-bold text-gray-800 mb-3 text-center">Record New Sale</h3>
-<form class="space-y-3" id="addSaleForm">
-<!-- Store Selection -->
-<div>
-<label class="block text-sm font-medium text-gray-700 mb-1">Store</label>
-<select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:border-blue-500" id="saleStore" required="">
-<option value="">Select store</option>
-</select>
-</div>
-<!-- Product Selection -->
-<div>
-<label class="block text-sm font-medium text-gray-700 mb-1">Product</label>
-<select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:border-blue-500" id="saleProduct" required="">
-<option value="">Choose product</option>
-</select>
-</div>
-<!-- Quantity Input -->
-<div>
-<label class="block text-sm font-medium text-gray-700 mb-1">Quantity</label>
-<div class="flex items-center space-x-2">
-<button class="w-8 h-8 bg-red-500 text-white rounded text-lg font-bold hover:bg-red-600" onclick="adjustQuantity(-1)" type="button">-</button>
-<input class="flex-1 text-center text-lg font-bold border border-gray-300 rounded py-2" id="saleQuantity" min="1" required="" type="number" value="1"/>
-<button class="w-8 h-8 bg-green-500 text-white rounded text-lg font-bold hover:bg-green-600" onclick="adjustQuantity(1)" type="button">+</button>
-</div>
-</div>
-<!-- Total Display -->
-<div class="bg-gray-50 border rounded-lg p-3 text-center">
-<p class="text-sm text-gray-600">Total Amount</p>
-<p class="text-2xl font-bold text-blue-600" id="totalAmount">0.00 DH</p>
-</div>
-<!-- Save Button -->
-<button class="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700" type="submit">
+            </div>
+        </nav>
+
+        <div class="mobile-container">
+            <!-- Compact Horizontal Stats -->
+            <div class="bg-white mobile-card p-3 mb-4">
+                <div class="grid grid-cols-3 gap-2 text-center">
+                    <!-- Total Sales -->
+                    <div class="bg-green-50 rounded-lg p-2">
+                        <div class="flex items-center justify-center mb-1">
+                            <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-1">
+                                <span class="text-green-600 text-xs">💰</span>
+                            </div>
+                            <span class="text-xs font-medium text-green-800">SALES</span>
+                        </div>
+                        <div class="text-lg font-bold text-green-600" id="totalSalesToday">0.00 DH</div>
+                        <p class="text-xs text-green-600">Revenue</p>
+                    </div>
+
+                    <!-- Quantity Sold -->
+                    <div class="bg-blue-50 rounded-lg p-2">
+                        <div class="flex items-center justify-center mb-1">
+                            <div class="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center mr-1">
+                                <span class="text-blue-600 text-xs">🧴</span>
+                            </div>
+                            <span class="text-xs font-medium text-blue-800">QTY</span>
+                        </div>
+                        <div class="text-lg font-bold text-blue-600" id="bottlesSold">0</div>
+                        <p class="text-xs text-blue-600">Bottles</p>
+                    </div>
+
+                    <!-- Today's Salary -->
+                    <div class="bg-purple-50 rounded-lg p-2">
+                        <div class="flex items-center justify-center mb-1">
+                            <div class="w-6 h-6 bg-purple-100 rounded-full flex items-center justify-center mr-1">
+                                <span class="text-purple-600 text-xs">💵</span>
+                            </div>
+                            <span class="text-xs font-medium text-purple-800">SALARY</span>
+                        </div>
+                        <div class="text-lg font-bold text-purple-600" id="estimatedSalary">0.00 DH</div>
+                        <p class="text-xs text-purple-600">Today</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Compact Sale Entry -->
+            <div class="bg-white mobile-card p-3 mb-4">
+                <h3 class="text-lg font-bold text-gray-800 mb-3 text-center">Record New Sale</h3>
+                
+                <form id="addSaleForm" class="space-y-3">
+                    <!-- Store Selection -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Store</label>
+                        <select id="saleStore" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:border-blue-500" required>
+                            <option value="">Select store</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Product Selection -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Product</label>
+                        <select id="saleProduct" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:border-blue-500" required>
+                            <option value="">Choose product</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Quantity Input -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Quantity</label>
+                        <div class="flex items-center space-x-2">
+                            <button type="button" onclick="adjustQuantity(-1)" class="w-8 h-8 bg-red-500 text-white rounded text-lg font-bold hover:bg-red-600">-</button>
+                            <input type="number" id="saleQuantity" min="1" value="1" class="flex-1 text-center text-lg font-bold border border-gray-300 rounded py-2" required>
+                            <button type="button" onclick="adjustQuantity(1)" class="w-8 h-8 bg-green-500 text-white rounded text-lg font-bold hover:bg-green-600">+</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Total Display -->
+                    <div class="bg-gray-50 border rounded-lg p-3 text-center">
+                        <p class="text-sm text-gray-600">Total Amount</p>
+                        <p class="text-2xl font-bold text-blue-600" id="totalAmount">0.00 DH</p>
+                    </div>
+                    
+                    <!-- Save Button -->
+                    <button type="submit" class="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700">
                         Record Sale
                     </button>
-</form>
-</div>
-<!-- Today's Sales -->
-<div class="bg-white mobile-card p-4">
-<h3 class="text-lg font-semibold mb-4 text-center">📊 Today's Sales - <span id="currentDate"></span></h3>
-<div class="mobile-table-container">
-<table class="mobile-table w-full">
-<thead>
-<tr class="border-b">
-<th class="text-left py-2 px-2 text-sm">Time</th>
-<th class="text-left py-2 px-2 text-sm hide-mobile">Store</th>
-<th class="text-left py-2 px-2 text-sm">Product</th>
-<th class="text-left py-2 px-2 text-sm">Qty</th>
-<th class="text-left py-2 px-2 text-sm">Amount</th>
-<th class="text-left py-2 px-2 text-sm">Actions</th>
-</tr>
-</thead>
-<tbody id="todaysSalesTable">
-<tr>
-<td class="text-center py-8 text-gray-500 text-sm" colspan="6">No sales recorded today</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-</div>
-</div>
-<!-- Admin Dashboard -->
-<div class="hidden min-h-screen bg-gray-50" id="dashboard">
-<nav class="mobile-nav text-white admin-header-gradient">
-<div class="mobile-container">
-<!-- Mobile Header -->
-<div class="flex justify-between items-center mb-3">
-<div class="flex items-center space-x-3">
-<div class="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
-<svg class="w-6 h-6" fill="currentColor" viewbox="0 0 20 20">
-<path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-</svg>
-</div>
-<div>
-<h2 class="font-semibold text-lg">Eden Perfume Admin</h2>
-<p class="text-sm opacity-80">Management Dashboard</p>
-</div>
-</div>
-<button class="bg-white bg-opacity-20 mobile-button text-sm touch-target glassy-button" onclick="logout()">
+                </form>
+            </div>
+
+            <!-- Today's Sales -->
+            <div class="bg-white mobile-card p-4">
+                <h3 class="text-lg font-semibold mb-4 text-center">📊 Today's Sales - <span id="currentDate"></span></h3>
+                <div class="mobile-table-container">
+                    <table class="mobile-table w-full">
+                        <thead>
+                            <tr class="border-b">
+                                <th class="text-left py-2 px-2 text-sm">Time</th>
+                                <th class="text-left py-2 px-2 text-sm hide-mobile">Store</th>
+                                <th class="text-left py-2 px-2 text-sm">Product</th>
+                                <th class="text-left py-2 px-2 text-sm">Qty</th>
+                                <th class="text-left py-2 px-2 text-sm">Amount</th>
+                                <th class="text-left py-2 px-2 text-sm">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="todaysSalesTable">
+                            <tr>
+                                <td colspan="6" class="text-center py-8 text-gray-500 text-sm">No sales recorded today</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Dashboard -->
+    <div id="dashboard" class="hidden min-h-screen bg-gray-50">
+        <nav class="mobile-nav gradient-bg text-white">
+            <div class="mobile-container">
+                <!-- Mobile Header -->
+                <div class="flex justify-between items-center mb-3">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h2 class="font-semibold text-lg">Eden Perfume Admin</h2>
+                            <p class="text-sm opacity-80">Management Dashboard</p>
+                        </div>
+                    </div>
+                    <button onclick="logout()" class="bg-white bg-opacity-20 mobile-button text-sm touch-target">
                         Logout
                     </button>
-</div>
-<!-- Mobile Status Bar -->
-<div class="flex justify-between items-center text-sm mb-3">
-<div class="opacity-80" id="adminCurrentDate"></div>
-<div class="text-xs opacity-70" id="adminSyncStatus">📱 Local Mode</div>
-</div>
-<!-- Mobile Action Buttons - Scrollable -->
-<div class="mobile-tab-scroll">
-<div class="flex space-x-2 pb-2" style="min-width: max-content;">
-<button class="bg-blue-600 mobile-button hover:bg-blue-700 transition text-sm whitespace-nowrap glassy-button" onclick="refreshData()">
+                </div>
+                
+                <!-- Mobile Status Bar -->
+                <div class="flex justify-between items-center text-sm mb-3">
+                    <div class="opacity-80" id="adminCurrentDate"></div>
+                    <div class="text-xs opacity-70" id="adminSyncStatus">📱 Local Mode</div>
+                </div>
+                
+                <!-- Mobile Action Buttons - Scrollable -->
+                <div class="mobile-tab-scroll">
+                    <div class="flex space-x-2 pb-2" style="min-width: max-content;">
+                        <button onclick="refreshData()" class="bg-blue-600 mobile-button hover:bg-blue-700 transition text-sm whitespace-nowrap">
                             🔄 Refresh
                         </button>
-<button class="bg-orange-600 mobile-button hover:bg-orange-700 transition text-sm whitespace-nowrap glassy-button" onclick="forceSyncNow()">
+                        <button onclick="forceSyncNow()" class="bg-orange-600 mobile-button hover:bg-orange-700 transition text-sm whitespace-nowrap">
                             🔄 Sync
                         </button>
-<button class="bg-red-600 mobile-button hover:bg-red-700 transition text-sm whitespace-nowrap glassy-button" onclick="resetFirebaseConfig()">
+                        <button onclick="resetFirebaseConfig()" class="bg-red-600 mobile-button hover:bg-red-700 transition text-sm whitespace-nowrap">
                             🔥 Firebase
                         </button>
-<button class="bg-purple-600 mobile-button hover:bg-purple-700 transition text-sm whitespace-nowrap glassy-button" onclick="viewTodaysSummary()">
+                        <button onclick="viewTodaysSummary()" class="bg-purple-600 mobile-button hover:bg-purple-700 transition text-sm whitespace-nowrap">
                             📊 Summary
                         </button>
-<button class="bg-yellow-600 mobile-button hover:bg-yellow-700 transition text-sm whitespace-nowrap glassy-button" onclick="backupData()">
+                        <button onclick="backupData()" class="bg-yellow-600 mobile-button hover:bg-yellow-700 transition text-sm whitespace-nowrap">
                             💾 Backup
                         </button>
-<button class="bg-green-600 mobile-button hover:bg-green-700 transition text-sm whitespace-nowrap glassy-button" onclick="downloadAllMasterData()">
+                        <button onclick="downloadAllMasterData()" class="bg-green-600 mobile-button hover:bg-green-700 transition text-sm whitespace-nowrap">
                             📥 Download
                         </button>
-</div>
-</div>
-</div>
-</nav>
-<!-- Tab Navigation -->
-<div class="bg-white border-b">
-<div class="mobile-tab-scroll">
-<div class="flex space-x-0" style="min-width: max-content;">
-<button class="tab-btn px-4 py-3 font-medium whitespace-nowrap border-b-2 border-transparent hover:border-purple-500 transition text-sm touch-target" data-tab="employees" onclick="switchTab('employees')">
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Tab Navigation -->
+        <div class="bg-white border-b">
+            <div class="mobile-tab-scroll">
+                <div class="flex space-x-0" style="min-width: max-content;">
+                    <button onclick="switchTab('employees')" class="tab-btn px-4 py-3 font-medium whitespace-nowrap border-b-2 border-transparent hover:border-purple-500 transition text-sm touch-target" data-tab="employees">
                         👥 Employees
                     </button>
-<button class="tab-btn px-4 py-3 font-medium whitespace-nowrap border-b-2 border-transparent hover:border-purple-500 transition text-sm touch-target" data-tab="stores" onclick="switchTab('stores')">
+                    <button onclick="switchTab('stores')" class="tab-btn px-4 py-3 font-medium whitespace-nowrap border-b-2 border-transparent hover:border-purple-500 transition text-sm touch-target" data-tab="stores">
                         🏪 Stores
                     </button>
-<button class="tab-btn px-4 py-3 font-medium whitespace-nowrap border-b-2 border-transparent hover:border-purple-500 transition text-sm touch-target" data-tab="products" onclick="switchTab('products')">
+                    <button onclick="switchTab('products')" class="tab-btn px-4 py-3 font-medium whitespace-nowrap border-b-2 border-transparent hover:border-purple-500 transition text-sm touch-target" data-tab="products">
                         🧴 Products
                     </button>
-<button class="tab-btn px-4 py-3 font-medium whitespace-nowrap border-b-2 border-transparent hover:border-purple-500 transition text-sm touch-target" data-tab="collections" onclick="switchTab('collections')">
+                    <button onclick="switchTab('collections')" class="tab-btn px-4 py-3 font-medium whitespace-nowrap border-b-2 border-transparent hover:border-purple-500 transition text-sm touch-target" data-tab="collections">
                         📦 Collections
                     </button>
-<button class="tab-btn px-4 py-3 font-medium whitespace-nowrap border-b-2 border-transparent hover:border-purple-500 transition text-sm touch-target" data-tab="database" onclick="switchTab('database')">
+                    <button onclick="switchTab('database')" class="tab-btn px-4 py-3 font-medium whitespace-nowrap border-b-2 border-transparent hover:border-purple-500 transition text-sm touch-target" data-tab="database">
                         🗄️ Database
                     </button>
-<button class="tab-btn px-4 py-3 font-medium whitespace-nowrap border-b-2 border-transparent hover:border-purple-500 transition text-sm touch-target" data-tab="sales" onclick="switchTab('sales')">
+                    <button onclick="switchTab('sales')" class="tab-btn px-4 py-3 font-medium whitespace-nowrap border-b-2 border-transparent hover:border-purple-500 transition text-sm touch-target" data-tab="sales">
                         📊 Sales
                     </button>
-<button class="tab-btn px-4 py-3 font-medium whitespace-nowrap border-b-2 border-transparent hover:border-purple-500 transition text-sm touch-target" data-tab="salary" onclick="switchTab('salary')">
+                    <button onclick="switchTab('salary')" class="tab-btn px-4 py-3 font-medium whitespace-nowrap border-b-2 border-transparent hover:border-purple-500 transition text-sm touch-target" data-tab="salary">
                         💰 Salary
                     </button>
-</div>
-</div>
-</div>
-<!-- Tab Content -->
-<div class="mobile-container">
-<!-- Employees Tab -->
-<div class="tab-content" id="employees-tab">
-<div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-3">
-<h2 class="text-xl font-bold">Employee Management</h2>
-<div class="mobile-action-buttons sm:flex-row sm:space-x-2 sm:space-y-0 w-full sm:w-auto">
-<button class="bg-orange-600 text-white mobile-button hover:bg-orange-700 transition text-sm" onclick="restoreFromBackup()">
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab Content -->
+        <div class="mobile-container">
+            <!-- Employees Tab -->
+            <div id="employees-tab" class="tab-content">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-3">
+                    <h2 class="text-xl font-bold">Employee Management</h2>
+                    <div class="mobile-action-buttons sm:flex-row sm:space-x-2 sm:space-y-0 w-full sm:w-auto">
+                        <button onclick="restoreFromBackup()" class="bg-orange-600 text-white mobile-button hover:bg-orange-700 transition text-sm">
                             📤 Restore
                         </button>
-<button class="bg-red-600 text-white mobile-button hover:bg-red-700 transition text-sm" onclick="clearAllData()">
+                        <button onclick="clearAllData()" class="bg-red-600 text-white mobile-button hover:bg-red-700 transition text-sm">
                             🗑️ Clear All
                         </button>
-<button class="gradient-bg text-white mobile-button hover:opacity-90 transition" onclick="openModal('employee')">
+                        <button onclick="openModal('employee')" class="gradient-bg text-white mobile-button hover:opacity-90 transition">
                             ➕ Add Employee
                         </button>
-</div>
-</div>
-<div class="bg-white mobile-card overflow-hidden">
-<div class="mobile-table-container">
-<table class="mobile-table w-full">
-<thead class="bg-gray-50">
-<tr>
-<th class="text-left py-3 px-3 text-sm">Name</th>
-<th class="text-left py-3 px-3 text-sm hide-mobile">Username</th>
-<th class="text-left py-3 px-3 text-sm">Store</th>
-<th class="text-left py-3 px-3 text-sm hide-mobile">Salary Type</th>
-<th class="text-left py-3 px-3 text-sm">Salary</th>
-<th class="text-left py-3 px-3 text-sm">Actions</th>
-</tr>
-</thead>
-<tbody id="employeesTable">
-<tr>
-<td class="text-center py-8 text-gray-500 text-sm" colspan="6">
+                    </div>
+                </div>
+                <div class="bg-white mobile-card overflow-hidden">
+                    <div class="mobile-table-container">
+                        <table class="mobile-table w-full">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="text-left py-3 px-3 text-sm">Name</th>
+                                    <th class="text-left py-3 px-3 text-sm hide-mobile">Username</th>
+                                    <th class="text-left py-3 px-3 text-sm">Store</th>
+                                    <th class="text-left py-3 px-3 text-sm hide-mobile">Salary Type</th>
+                                    <th class="text-left py-3 px-3 text-sm">Salary</th>
+                                    <th class="text-left py-3 px-3 text-sm">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="employeesTable">
+                                <tr>
+                                    <td colspan="6" class="text-center py-8 text-gray-500 text-sm">
                                         No employees found. Click "Add Employee" to create your first employee.
                                     </td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-</div>
-<!-- Stores Tab -->
-<div class="tab-content hidden" id="stores-tab">
-<div class="flex justify-between items-center mb-6">
-<h2 class="text-2xl font-bold">Store Management</h2>
-<button class="gradient-bg text-white px-4 py-2 rounded-lg font-semibold hover:opacity-90 transition" onclick="openModal('store')">
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stores Tab -->
+            <div id="stores-tab" class="tab-content hidden">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold">Store Management</h2>
+                    <button onclick="openModal('store')" class="gradient-bg text-white px-4 py-2 rounded-lg font-semibold hover:opacity-90 transition">
                         ➕ Add Store
                     </button>
-</div>
-<div class="bg-white rounded-xl card-shadow overflow-hidden">
-<table class="w-full">
-<thead class="bg-gray-50">
-<tr>
-<th class="text-left py-4 px-6">Store Name</th>
-<th class="text-left py-4 px-6">Location</th>
-<th class="text-left py-4 px-6">Manager</th>
-<th class="text-left py-4 px-6">Phone</th>
-<th class="text-left py-4 px-6">Actions</th>
-</tr>
-</thead>
-<tbody id="storesTable">
-<tr>
-<td class="text-center py-8 text-gray-500" colspan="5">
+                </div>
+                <div class="bg-white rounded-xl card-shadow overflow-hidden">
+                    <table class="w-full">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="text-left py-4 px-6">Store Name</th>
+                                <th class="text-left py-4 px-6">Location</th>
+                                <th class="text-left py-4 px-6">Manager</th>
+                                <th class="text-left py-4 px-6">Phone</th>
+                                <th class="text-left py-4 px-6">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="storesTable">
+                            <tr>
+                                <td colspan="5" class="text-center py-8 text-gray-500">
                                     No stores found. Click "Add Store" to create your first store.
                                 </td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-<!-- Products Tab -->
-<div class="tab-content hidden" id="products-tab">
-<div class="flex justify-between items-center mb-6">
-<h2 class="text-2xl font-bold">Product Management</h2>
-<button class="gradient-bg text-white px-4 py-2 rounded-lg font-semibold hover:opacity-90 transition" onclick="openModal('product')">
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Products Tab -->
+            <div id="products-tab" class="tab-content hidden">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold">Product Management</h2>
+                    <button onclick="openModal('product')" class="gradient-bg text-white px-4 py-2 rounded-lg font-semibold hover:opacity-90 transition">
                         ➕ Add Product
                     </button>
-</div>
-<div class="bg-white rounded-xl card-shadow overflow-hidden">
-<table class="w-full">
-<thead class="bg-gray-50">
-<tr>
-<th class="text-left py-4 px-6">Product Name</th>
-<th class="text-left py-4 px-6">Price</th>
-<th class="text-left py-4 px-6">Actions</th>
-</tr>
-</thead>
-<tbody id="productsTable">
-<tr>
-<td class="text-center py-8 text-gray-500" colspan="3">
+                </div>
+                <div class="bg-white rounded-xl card-shadow overflow-hidden">
+                    <table class="w-full">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="text-left py-4 px-6">Product Name</th>
+                                <th class="text-left py-4 px-6">Price</th>
+                                <th class="text-left py-4 px-6">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="productsTable">
+                            <tr>
+                                <td colspan="3" class="text-center py-8 text-gray-500">
                                     No products found. Click "Add Product" to create your first product.
                                 </td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-<!-- Collections Tab -->
-<div class="tab-content hidden" id="collections-tab">
-<div class="flex justify-between items-center mb-6">
-<h2 class="text-2xl font-bold">Collection Management</h2>
-<button class="gradient-bg text-white px-4 py-2 rounded-lg font-semibold hover:opacity-90 transition" onclick="openModal('collection')">
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Collections Tab -->
+            <div id="collections-tab" class="tab-content hidden">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold">Collection Management</h2>
+                    <button onclick="openModal('collection')" class="gradient-bg text-white px-4 py-2 rounded-lg font-semibold hover:opacity-90 transition">
                         ➕ Add Collection
                     </button>
-</div>
-<div class="bg-white rounded-xl card-shadow overflow-hidden">
-<table class="w-full">
-<thead class="bg-gray-50">
-<tr>
-<th class="text-left py-4 px-6">Collection Name</th>
-<th class="text-left py-4 px-6">Description</th>
-<th class="text-left py-4 px-6">Products Count</th>
-<th class="text-left py-4 px-6">Status</th>
-<th class="text-left py-4 px-6">Actions</th>
-</tr>
-</thead>
-<tbody id="collectionsTable">
-<tr>
-<td class="text-center py-8 text-gray-500" colspan="5">
+                </div>
+                <div class="bg-white rounded-xl card-shadow overflow-hidden">
+                    <table class="w-full">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="text-left py-4 px-6">Collection Name</th>
+                                <th class="text-left py-4 px-6">Description</th>
+                                <th class="text-left py-4 px-6">Products Count</th>
+                                <th class="text-left py-4 px-6">Status</th>
+                                <th class="text-left py-4 px-6">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="collectionsTable">
+                            <tr>
+                                <td colspan="5" class="text-center py-8 text-gray-500">
                                     No collections found. Click "Add Collection" to create your first collection.
                                 </td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-<!-- Database Manager Tab -->
-<div class="tab-content hidden" id="database-tab">
-<div class="mb-6">
-<h2 class="text-2xl font-bold mb-4">Database Collection Manager</h2>
-<p class="text-gray-600 mb-6">Directly manage your database collections. Add, edit, or delete data entries in real-time.</p>
-<!-- Collection Selector -->
-<div class="bg-white rounded-xl card-shadow p-6 mb-6">
-<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-<div>
-<label class="block text-sm font-medium text-gray-700 mb-2">Select Collection</label>
-<select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" id="dbCollectionSelect" onchange="loadDatabaseCollection()">
-<option value="">Choose a collection...</option>
-<option value="employees">Employees</option>
-<option value="stores">Stores</option>
-<option value="products">Products</option>
-<option value="collections">Collections</option>
-<option value="sales">Sales</option>
-</select>
-</div>
-<div>
-<label class="block text-sm font-medium text-gray-700 mb-2">Database Status</label>
-<div class="px-3 py-2 bg-gray-50 rounded-lg">
-<span class="text-sm" id="dbConnectionStatus">📱 Local Mode</span>
-</div>
-</div>
-<div>
-<label class="block text-sm font-medium text-gray-700 mb-2">Actions</label>
-<div class="flex space-x-2">
-<button class="bg-green-600 text-white px-3 py-2 rounded-lg hover:bg-green-700 transition text-sm" onclick="addDatabaseEntry()">
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Database Manager Tab -->
+            <div id="database-tab" class="tab-content hidden">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold mb-4">Database Collection Manager</h2>
+                    <p class="text-gray-600 mb-6">Directly manage your database collections. Add, edit, or delete data entries in real-time.</p>
+                    
+                    <!-- Collection Selector -->
+                    <div class="bg-white rounded-xl card-shadow p-6 mb-6">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Select Collection</label>
+                                <select id="dbCollectionSelect" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" onchange="loadDatabaseCollection()">
+                                    <option value="">Choose a collection...</option>
+                                    <option value="employees">Employees</option>
+                                    <option value="stores">Stores</option>
+                                    <option value="products">Products</option>
+                                    <option value="collections">Collections</option>
+                                    <option value="sales">Sales</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Database Status</label>
+                                <div class="px-3 py-2 bg-gray-50 rounded-lg">
+                                    <span id="dbConnectionStatus" class="text-sm">📱 Local Mode</span>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Actions</label>
+                                <div class="flex space-x-2">
+                                    <button onclick="addDatabaseEntry()" class="bg-green-600 text-white px-3 py-2 rounded-lg hover:bg-green-700 transition text-sm">
                                         ➕ Add Entry
                                     </button>
-<button class="bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 transition text-sm" onclick="refreshDatabaseView()">
+                                    <button onclick="refreshDatabaseView()" class="bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 transition text-sm">
                                         🔄 Refresh
                                     </button>
-</div>
-</div>
-</div>
-</div>
-</div>
-<!-- Database Table View -->
-<div class="bg-white rounded-xl card-shadow overflow-hidden">
-<div class="p-4 bg-gray-50 border-b">
-<h3 class="text-lg font-semibold" id="dbTableTitle">Select a collection to view data</h3>
-<p class="text-sm text-gray-600 mt-1" id="dbTableCount">0 entries</p>
-</div>
-<div class="overflow-x-auto">
-<table class="w-full">
-<thead class="bg-gray-100">
-<tr id="dbTableHeader">
-<th class="text-left py-3 px-4 text-sm font-medium text-gray-700">Select a collection</th>
-</tr>
-</thead>
-<tbody id="dbTableBody">
-<tr>
-<td class="text-center py-8 text-gray-500">Select a collection from the dropdown above</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-</div>
-<!-- Sales Reports Tab -->
-<div class="tab-content hidden" id="sales-tab">
-<div class="mb-6">
-<h2 class="text-2xl font-bold mb-4">Sales Reports</h2>
-<!-- Report Controls -->
-<div class="bg-white rounded-xl card-shadow p-6 mb-6">
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-<div>
-<label class="block text-sm font-medium text-gray-700 mb-2">Start Date</label>
-<input class="w-full px-3 py-2 border border-gray-300 rounded-lg" id="reportStartDate" type="date"/>
-</div>
-<div>
-<label class="block text-sm font-medium text-gray-700 mb-2">End Date</label>
-<input class="w-full px-3 py-2 border border-gray-300 rounded-lg" id="reportEndDate" type="date"/>
-</div>
-<div>
-<label class="block text-sm font-medium text-gray-700 mb-2">Report Type</label>
-<select class="w-full px-3 py-2 border border-gray-300 rounded-lg" id="reportType">
-<option value="all">All Sales</option>
-<option value="daily">Daily Report</option>
-<option value="monthly">Monthly Report</option>
-<option value="store">Store Wise</option>
-<option value="staff">Staff Wise</option>
-<option value="product">Product Wise</option>
-</select>
-</div>
-<div>
-<label class="block text-sm font-medium text-gray-700 mb-2">Filter By</label>
-<select class="w-full px-3 py-2 border border-gray-300 rounded-lg" id="reportFilter">
-<option value="">All</option>
-</select>
-</div>
-</div>
-<div class="flex flex-wrap gap-2">
-<button class="gradient-bg text-white px-4 py-2 rounded-lg font-semibold hover:opacity-90 transition" onclick="generateSalesReport()">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Database Table View -->
+                <div class="bg-white rounded-xl card-shadow overflow-hidden">
+                    <div class="p-4 bg-gray-50 border-b">
+                        <h3 id="dbTableTitle" class="text-lg font-semibold">Select a collection to view data</h3>
+                        <p id="dbTableCount" class="text-sm text-gray-600 mt-1">0 entries</p>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead class="bg-gray-100">
+                                <tr id="dbTableHeader">
+                                    <th class="text-left py-3 px-4 text-sm font-medium text-gray-700">Select a collection</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dbTableBody">
+                                <tr>
+                                    <td class="text-center py-8 text-gray-500">Select a collection from the dropdown above</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sales Reports Tab -->
+            <div id="sales-tab" class="tab-content hidden">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold mb-4">Sales Reports</h2>
+                    
+                    <!-- Report Controls -->
+                    <div class="bg-white rounded-xl card-shadow p-6 mb-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Start Date</label>
+                                <input type="date" id="reportStartDate" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">End Date</label>
+                                <input type="date" id="reportEndDate" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Report Type</label>
+                                <select id="reportType" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                                    <option value="all">All Sales</option>
+                                    <option value="daily">Daily Report</option>
+                                    <option value="monthly">Monthly Report</option>
+                                    <option value="store">Store Wise</option>
+                                    <option value="staff">Staff Wise</option>
+                                    <option value="product">Product Wise</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Filter By</label>
+                                <select id="reportFilter" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                                    <option value="">All</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="flex flex-wrap gap-2">
+                            <button onclick="generateSalesReport()" class="gradient-bg text-white px-4 py-2 rounded-lg font-semibold hover:opacity-90 transition">
                                 📊 Generate Report
                             </button>
-<button class="bg-gray-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-gray-700 transition" onclick="printReport('sales')">
+                            <button onclick="printReport('sales')" class="bg-gray-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-gray-700 transition">
                                 🖨️ Print
                             </button>
-<button class="bg-green-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-green-700 transition" onclick="downloadExcel('sales')">
+                            <button onclick="downloadExcel('sales')" class="bg-green-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-green-700 transition">
                                 📊 Excel
                             </button>
-<button class="bg-red-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-red-700 transition" onclick="downloadPDF('sales')">
+                            <button onclick="downloadPDF('sales')" class="bg-red-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-red-700 transition">
                                 📄 PDF
                             </button>
-</div>
-</div>
-</div>
-<div class="bg-white rounded-xl card-shadow overflow-hidden">
-<table class="w-full">
-<thead class="bg-gray-50">
-<tr id="salesReportHeader">
-<th class="text-left py-4 px-6">Date</th>
-<th class="text-left py-4 px-6">Employee</th>
-<th class="text-left py-4 px-6">Store</th>
-<th class="text-left py-4 px-6">Product</th>
-<th class="text-left py-4 px-6">Quantity</th>
-<th class="text-left py-4 px-6">Amount</th>
-</tr>
-</thead>
-<tbody id="salesReportTable">
-<tr>
-<td class="text-center py-8 text-gray-500" colspan="6">Select date range and report type to generate report</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-<!-- Salary Reports Tab -->
-<div class="tab-content hidden" id="salary-tab">
-<div class="mb-6">
-<h2 class="text-2xl font-bold mb-4">Salary Reports</h2>
-<!-- Salary Report Controls -->
-<div class="bg-white rounded-xl card-shadow p-6 mb-6">
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
-<div>
-<label class="block text-sm font-medium text-gray-700 mb-2">Start Date</label>
-<input class="w-full px-3 py-2 border border-gray-300 rounded-lg" id="salaryStartDate" type="date"/>
-</div>
-<div>
-<label class="block text-sm font-medium text-gray-700 mb-2">End Date</label>
-<input class="w-full px-3 py-2 border border-gray-300 rounded-lg" id="salaryEndDate" type="date"/>
-</div>
-<div>
-<label class="block text-sm font-medium text-gray-700 mb-2">Employee</label>
-<select class="w-full px-3 py-2 border border-gray-300 rounded-lg" id="salaryEmployee">
-<option value="">All Employees</option>
-</select>
-</div>
-</div>
-<div class="flex flex-wrap gap-2">
-<button class="gradient-bg text-white px-4 py-2 rounded-lg font-semibold hover:opacity-90 transition" onclick="generateSalaryReport()">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-xl card-shadow overflow-hidden">
+                    <table class="w-full">
+                        <thead class="bg-gray-50">
+                            <tr id="salesReportHeader">
+                                <th class="text-left py-4 px-6">Date</th>
+                                <th class="text-left py-4 px-6">Employee</th>
+                                <th class="text-left py-4 px-6">Store</th>
+                                <th class="text-left py-4 px-6">Product</th>
+                                <th class="text-left py-4 px-6">Quantity</th>
+                                <th class="text-left py-4 px-6">Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody id="salesReportTable">
+                            <tr>
+                                <td colspan="6" class="text-center py-8 text-gray-500">Select date range and report type to generate report</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Salary Reports Tab -->
+            <div id="salary-tab" class="tab-content hidden">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold mb-4">Salary Reports</h2>
+                    
+                    <!-- Salary Report Controls -->
+                    <div class="bg-white rounded-xl card-shadow p-6 mb-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Start Date</label>
+                                <input type="date" id="salaryStartDate" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">End Date</label>
+                                <input type="date" id="salaryEndDate" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Employee</label>
+                                <select id="salaryEmployee" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                                    <option value="">All Employees</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="flex flex-wrap gap-2">
+                            <button onclick="generateSalaryReport()" class="gradient-bg text-white px-4 py-2 rounded-lg font-semibold hover:opacity-90 transition">
                                 💰 Generate Report
                             </button>
-<button class="bg-gray-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-gray-700 transition" onclick="printReport('salary')">
+                            <button onclick="printReport('salary')" class="bg-gray-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-gray-700 transition">
                                 🖨️ Print
                             </button>
-<button class="bg-green-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-green-700 transition" onclick="downloadExcel('salary')">
+                            <button onclick="downloadExcel('salary')" class="bg-green-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-green-700 transition">
                                 📊 Excel
                             </button>
-<button class="bg-red-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-red-700 transition" onclick="downloadPDF('salary')">
+                            <button onclick="downloadPDF('salary')" class="bg-red-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-red-700 transition">
                                 📄 PDF
                             </button>
-</div>
-</div>
-</div>
-<div class="bg-white rounded-xl card-shadow overflow-hidden">
-<table class="w-full">
-<thead class="bg-gray-50">
-<tr>
-<th class="text-left py-4 px-6">Employee</th>
-<th class="text-left py-4 px-6">Salary Type</th>
-<th class="text-left py-4 px-6">Base Salary</th>
-<th class="text-left py-4 px-6">Bonus/Commission</th>
-<th class="text-left py-4 px-6">Total Sales</th>
-<th class="text-left py-4 px-6">Days/Qty</th>
-<th class="text-left py-4 px-6">Total Salary</th>
-</tr>
-</thead>
-<tbody id="salaryReportTable">
-<tr>
-<td class="text-center py-8 text-gray-500" colspan="7">Select date range to generate report</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-</div>
-</div>
-<!-- Modal -->
-<div class="hidden fixed inset-0 modal-backdrop z-50 flex items-center justify-center p-4" id="modal">
-<div class="bg-white rounded-xl card-shadow mobile-modal w-full fade-in">
-<div class="p-4 border-b">
-<h3 class="text-lg font-semibold" id="modalTitle">Add Item</h3>
-</div>
-<div class="p-4">
-<form id="modalForm">
-<div class="space-y-4" id="modalFields">
-<!-- Dynamic fields will be inserted here -->
-</div>
-<div class="mobile-action-buttons sm:flex-row sm:space-x-3 sm:space-y-0 mt-6">
-<button class="flex-1 mobile-button border border-gray-300 hover:bg-gray-50 transition bg-white text-gray-700" onclick="closeModal()" type="button">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-xl card-shadow overflow-hidden">
+                    <table class="w-full">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="text-left py-4 px-6">Employee</th>
+                                <th class="text-left py-4 px-6">Salary Type</th>
+                                <th class="text-left py-4 px-6">Base Salary</th>
+                                <th class="text-left py-4 px-6">Bonus/Commission</th>
+                                <th class="text-left py-4 px-6">Total Sales</th>
+                                <th class="text-left py-4 px-6">Days/Qty</th>
+                                <th class="text-left py-4 px-6">Total Salary</th>
+                            </tr>
+                        </thead>
+                        <tbody id="salaryReportTable">
+                            <tr>
+                                <td colspan="7" class="text-center py-8 text-gray-500">Select date range to generate report</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div id="modal" class="hidden fixed inset-0 modal-backdrop z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl card-shadow mobile-modal w-full fade-in">
+            <div class="p-4 border-b">
+                <h3 id="modalTitle" class="text-lg font-semibold">Add Item</h3>
+            </div>
+            <div class="p-4">
+                <form id="modalForm">
+                    <div id="modalFields" class="space-y-4">
+                        <!-- Dynamic fields will be inserted here -->
+                    </div>
+                    <div class="mobile-action-buttons sm:flex-row sm:space-x-3 sm:space-y-0 mt-6">
+                        <button type="button" onclick="closeModal()" class="flex-1 mobile-button border border-gray-300 hover:bg-gray-50 transition bg-white text-gray-700">
                             Cancel
                         </button>
-<button class="flex-1 gradient-bg text-white mobile-button hover:opacity-90 transition" type="submit">
-<span id="saveBtnText">Save</span>
-<div class="loading hidden ml-2" id="saveLoader"></div>
-</button>
-</div>
-</form>
-</div>
-</div>
-</div>
-<script>
+                        <button type="submit" class="flex-1 gradient-bg text-white mobile-button hover:opacity-90 transition">
+                            <span id="saveBtnText">Save</span>
+                            <div id="saveLoader" class="loading hidden ml-2"></div>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
         // Firebase loading error handler
         function handleFirebaseLoadError(component) {
             console.warn(`Firebase ${component} failed to load - falling back to local mode`);
@@ -2071,7 +2094,7 @@
         const BUILT_IN_FIREBASE_CONFIG = {
             apiKey: "AIzaSyBKCepIbr_6-cGTIy6vYQW92q2i2Vb_yIg",
             authDomain: "eden--sales-system.firebaseapp.com",
-            projectId: "eden--sales-system",
+            projectId: "eden--sales-system,
             storageBucket: "eden--sales-system.firebasestorage.app",
             messagingSenderId: "181509465042",
             appId: "1:181509465042:web:f99dcad2cf69cb85449e0b"
@@ -2557,7 +2580,11 @@
                             `).join('')}
                         </tbody>
                     </table>
-                </body>
+                
+<footer class="bg-gray-100 text-center text-sm text-gray-600 py-4 mt-10">
+    © 2025 Eden Perfume. All rights reserved.
+</footer>
+</body>
                 </html>
             `;
         }
@@ -3710,7 +3737,11 @@
                     <div class="footer">
                         <p>Eden Perfume Sales Management System</p>
                     </div>
-                </body>
+                
+<footer class="bg-gray-100 text-center text-sm text-gray-600 py-4 mt-10">
+    © 2025 Eden Perfume. All rights reserved.
+</footer>
+</body>
                 </html>
             `;
         }
@@ -5055,5 +5086,9 @@
             document.getElementById(elementId).textContent = dateString;
         }
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96a88df6c71df9e1',t:'MTc1NDQyMDYwNi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96a88df6c71df9e1',t:'MTc1NDQyMDYwNi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
+<footer class="bg-gray-100 text-center text-sm text-gray-600 py-4 mt-10">
+    © 2025 Eden Perfume. All rights reserved.
+</footer>
+</body>
 </html>
