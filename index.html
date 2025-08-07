@@ -7,8 +7,6 @@
 <title>Eden Perfume - Sales Management System</title>
 <link href="data:image/svg+xml,&lt;svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'&gt;&lt;text y='.9em' font-size='90'&gt;🌸&lt;/text&gt;&lt;/svg&gt;" rel="icon"/>
 <!-- Firebase SDK with better error handling -->
-<script onerror="handleFirebaseLoadError('app')" src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-<script onerror="handleFirebaseLoadError('firestore')" src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 <style>
         /* Manual Tailwind CSS Configuration */
         /* Reset and Base Styles */
@@ -489,26 +487,39 @@
         }
     </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-
+<script>
+// Firebase default config structure
+// When user configures Firebase, replace the above block with actual config
+</script>
 <script>
 // ✅ Firebase Configuration (update manually before going live)
-
-
 // Example Firebase usage placeholder
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
+// firebase.initializeApp(firebaseConfig);
+// const db = firebase.database();
 </script>
+
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-database.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-auth.js"></script>
+
 <script>
-const firebaseConfig = {
-  apiKey: "AIzaSyBRG4K_ahS_MJheJjlRtNJkvWCV4v_Jsz0",
-  authDomain: "eden-perfume-sales-aee39.firebaseapp.com",
-  databaseURL: "https://eden-perfume-sales-aee39-default-rtdb.firebaseio.com",
-  projectId: "eden-perfume-sales-aee39",
-  storageBucket: "eden-perfume-sales-aee39.appspot.com",
-  messagingSenderId: "846535234305",
-  appId: "1:846535234305:web:eb8cc67209921e9c8e8100"
-};
+  const firebaseConfig = {
+    apiKey: "AIzaSyBQ-bccY3c6PZ9JfgABlO74CJ8LNgEy-2s",
+    authDomain: "eden-sales-c2ad1.firebaseapp.com",
+    databaseURL: "https://eden-sales-2025-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "eden-sales-c2ad1",
+    storageBucket: "eden-sales-c2ad1.appspot.com",
+    messagingSenderId: "442558168049",
+    appId: "1:442558168049:web:a18c1c4fd802f3e0240cf7"
+  };
+
+  // Initialize Firebase
+  const app = firebase.initializeApp(firebaseConfig);
+  const database = firebase.database();
+  const auth = firebase.auth();
 </script>
+
 </head>
 <body class="bg-gray-50 min-h-screen">
 <!-- Login Screen -->
@@ -718,9 +729,7 @@ const firebaseConfig = {
 <button class="bg-orange-600 mobile-button hover:bg-orange-700 transition text-sm whitespace-nowrap" onclick="forceSyncNow()">
                             🔄 Sync
                         </button>
-<button class="bg-red-600 mobile-button hover:bg-red-700 transition text-sm whitespace-nowrap" onclick="resetFirebaseConfig()">
-                            🔥 Firebase
-                        </button>
+
 <button class="bg-green-600 mobile-button hover:bg-green-700 transition text-sm whitespace-nowrap" onclick="downloadAllMasterData()">
                             📥 Download
                         </button>
@@ -2021,13 +2030,14 @@ const firebaseConfig = {
 
         // Built-in Firebase Configuration
         const BUILT_IN_FIREBASE_CONFIG = {
+     const BUILT_IN_FIREBASE_CONFIG = {
             apiKey: "AIzaSyBRG4K_ahS_MJheJjlRtNJkvWCV4v_Jsz0",
             authDomain: "eden-perfume-sales-aee39.firebaseapp.com",
             projectId: "eden-perfume-sales-aee39",
-            storageBucket: "eden-perfume-sales-aee39.appspot.com",
+            storageBucket: "eden-perfume-sales-aee39.firebasestorage.app",
             messagingSenderId: "846535234305",
             appId: "1:846535234305:web:eb8cc67209921e9c8e8100"
-        };
+          };
 
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', async function() {
@@ -2413,7 +2423,30 @@ const firebaseConfig = {
                         .section-title { font-size: 18px; font-weight: bold; margin: 30px 0 10px 0; color: #333; }
                         @media print { body { margin: 0; } }
                     </style>
-                </head>
+                
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-database.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-auth.js"></script>
+
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyBRG4K_ahS_MJheJjlRtNJkvWCV4v_Jsz0",
+            authDomain: "eden-perfume-sales-aee39.firebaseapp.com",
+            projectId: "eden-perfume-sales-aee39",
+            storageBucket: "eden-perfume-sales-aee39.firebasestorage.app",
+            messagingSenderId: "846535234305",
+            appId: "1:846535234305:web:eb8cc67209921e9c8e8100"
+        };
+
+
+  // Initialize Firebase
+  const app = firebase.initializeApp(firebaseConfig);
+  const database = firebase.database();
+  const auth = firebase.auth();
+</script>
+
+</head>
                 <body>
                     <div class="header">
                         <h1>Eden Perfume - Daily Sales Summary</h1>
@@ -3624,7 +3657,30 @@ const firebaseConfig = {
                             .no-print { display: none; }
                         }
                     </style>
-                </head>
+                
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-database.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-auth.js"></script>
+
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyBQ-bccY3c6PZ9JfgABlO74CJ8LNgEy-2s",
+    authDomain: "eden-sales-c2ad1.firebaseapp.com",
+    databaseURL: "https://eden-sales-2025-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "eden-sales-c2ad1",
+    storageBucket: "eden-sales-c2ad1.appspot.com",
+    messagingSenderId: "442558168049",
+    appId: "1:442558168049:web:a18c1c4fd802f3e0240cf7"
+  };
+
+  // Initialize Firebase
+  const app = firebase.initializeApp(firebaseConfig);
+  const database = firebase.database();
+  const auth = firebase.auth();
+</script>
+
+</head>
                 <body>
                     <div class="header">
                         <h1>Eden Perfume - ${title}</h1>
@@ -5362,15 +5418,10 @@ document.getElementById("exportPriceMatrix")?.addEventListener("click", exportTo
 <h3>Firebase Configuration (Default)</h3>
 <textarea id="firebaseConfig">
 // Replace with your config before going live
-
-    </textarea>
+</textarea>
 </div>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 <script>
   // TODO: Replace with your Firebase config
-  
-
   firebase.initializeApp(firebaseConfig);
   const db = firebase.database();
 
@@ -5656,12 +5707,8 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 </script>
 <!-- Firebase App (the core Firebase SDK) -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <script>
   // TODO: Replace the following with your app's Firebase project configuration
-  
-
   // Initialize Firebase
   firebase.initializeApp(firebaseConfig);
 </script>
